@@ -1,0 +1,107 @@
+"""Python enums mirroring the PostgreSQL ENUM types (values match exactly)."""
+
+from __future__ import annotations
+
+import enum
+
+from sqlalchemy import Enum as SAEnum
+
+
+class SequenceType(str, enum.Enum):
+    DNA = "dna"
+    RNA = "rna"
+    PROTEIN = "protein"
+    CRISPR = "crispr"
+    VIRUS = "virus"
+    GENOME = "genome"
+    PEPTIDE = "peptide"
+
+
+class Molecule(str, enum.Enum):
+    DNA = "dna"
+    RNA = "rna"
+    PROTEIN = "protein"
+
+
+class DnaMoleculeType(str, enum.Enum):
+    GENE = "gene"
+    CDS = "cds"
+    GENOMIC = "genomic"
+    MRNA = "mrna"
+    EXON = "exon"
+    REGULATORY = "regulatory"
+    OTHER = "other"
+
+
+class Strand(str, enum.Enum):
+    PLUS = "+"
+    MINUS = "-"
+    UNKNOWN = "unknown"
+
+
+class RnaClass(str, enum.Enum):
+    MRNA = "mrna"
+    TRNA = "trna"
+    RRNA = "rrna"
+    LNCRNA = "lncrna"
+    MIRNA = "mirna"
+    SNRNA = "snrna"
+    OTHER = "other"
+
+
+class CasSystem(str, enum.Enum):
+    CAS9 = "cas9"
+    CAS12A = "cas12a"
+    CAS13 = "cas13"
+    BASE_EDITOR = "base_editor"
+    OTHER = "other"
+
+
+class GenomeType(str, enum.Enum):
+    DSDNA = "dsDNA"
+    SSDNA = "ssDNA"
+    DSRNA = "dsRNA"
+    SSRNA_PLUS = "ssRNA+"
+    SSRNA_MINUS = "ssRNA-"
+    SSRNA_RT = "ssRNA-RT"
+    DSDNA_RT = "dsDNA-RT"
+    OTHER = "other"
+
+
+class OrganismGroup(str, enum.Enum):
+    ANIMAL = "animal"
+    PLANT = "plant"
+    FUNGUS = "fungus"
+    BACTERIA = "bacteria"
+    ARCHAEA = "archaea"
+    VIRUS = "virus"
+    PROTOZOAN = "protozoan"
+
+
+class AssemblyLevel(str, enum.Enum):
+    COMPLETE = "complete"
+    CHROMOSOME = "chromosome"
+    SCAFFOLD = "scaffold"
+    CONTIG = "contig"
+
+
+def pg_enum(python_enum: type[enum.Enum], name: str) -> SAEnum:
+    """Bind a Python enum to an existing PostgreSQL ENUM type (never recreated)."""
+    return SAEnum(
+        python_enum,
+        name=name,
+        native_enum=True,
+        create_type=False,
+        values_callable=lambda e: [member.value for member in e],
+    )
+
+
+SEQUENCE_TYPE_ENUM = pg_enum(SequenceType, "sequence_type")
+MOLECULE_ENUM = pg_enum(Molecule, "molecule")
+DNA_MOLECULE_TYPE_ENUM = pg_enum(DnaMoleculeType, "dna_molecule_type")
+STRAND_ENUM = pg_enum(Strand, "strand")
+RNA_CLASS_ENUM = pg_enum(RnaClass, "rna_class")
+CAS_SYSTEM_ENUM = pg_enum(CasSystem, "cas_system")
+GENOME_TYPE_ENUM = pg_enum(GenomeType, "genome_type")
+ORGANISM_GROUP_ENUM = pg_enum(OrganismGroup, "organism_group")
+ASSEMBLY_LEVEL_ENUM = pg_enum(AssemblyLevel, "assembly_level")

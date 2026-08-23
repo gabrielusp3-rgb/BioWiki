@@ -1,0 +1,1 @@
+"""BIOWIKI backend application package."""

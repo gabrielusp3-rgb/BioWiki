@@ -1,0 +1,59 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Skeleton, StatCard } from "@/components/ui";
+import { fadeInUp, staggerContainer } from "@/lib/animations";
+import { isApiConfigured } from "@/lib/api";
+import { CRISPR_PAGE_STATS } from "@/lib/crispr";
+import { getStatistics } from "@/services/statisticsService";
+
+export function CRISPRStatistics() {
+  const [items, setItems] = useState(isApiConfigured ? null : CRISPR_PAGE_STATS);
+
+  useEffect(() => {
+    if (!isApiConfigured) return;
+    const controller = new AbortController();
+    getStatistics(controller.signal)
+      .then((stats) => {
+        if (!stats || controller.signal.aborted) return;
+        const crispr = stats.categories.find((c) => c.key === "crispr")?.count ?? 0;
+        setItems([
+          { id: "crispr", value: crispr, label: "Guide RNAs" },
+          { id: "organisms", value: stats.organisms, label: "Organisms" },
+          CRISPR_PAGE_STATS[2],
+          CRISPR_PAGE_STATS[3],
+        ]);
+      })
+      .catch(() => {
+        if (!controller.signal.aborted) setItems(CRISPR_PAGE_STATS);
+      });
+    return () => controller.abort();
+  }, []);
+
+  return (
+    <motion.div
+      variants={staggerContainer(0.08, 0.04)}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.3 }}
+      className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+    >
+      {(items ?? CRISPR_PAGE_STATS).map((stat, i) => (
+        <motion.div key={stat.id} variants={fadeInUp}>
+          {items === null ? (
+            <Skeleton height={140} />
+          ) : (
+            <StatCard
+              value={stat.value}
+              suffix={stat.suffix}
+              label={stat.label}
+              category="crispr"
+              index={i + 1}
+            />
+          )}
+        </motion.div>
+      ))}
+    </motion.div>
+  );
+}

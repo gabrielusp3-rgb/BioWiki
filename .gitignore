@@ -1,0 +1,47 @@
+# Environment, secrets, virtualenvs, build artifacts, dumps.
+# Keep credentials in untracked .env files — never commit them.
+
+.env
+.env.*
+!.env.example
+!**/.env.example
+
+.venv/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+
+*.dump
+*.sql
+*.sql.gz
+*.sqlite
+*.log
+*.pem
+
+# Local ingest progress (scientific records live in PostgreSQL, not here).
+backend/data/
+
+# Machine-local recovery helpers (absolute paths; not part of the product).
+restore_*.py
+ngrok.yml
+ngrok.yaml
+
+.idea/
+.vscode/
+*.swp
+
+.DS_Store
+Thumbs.db
+desktop.ini

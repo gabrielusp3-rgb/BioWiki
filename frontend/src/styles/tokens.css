@@ -1,0 +1,66 @@
+/**
+ * BIOWIKI — Design token custom properties.
+ * These CSS variables are the runtime source of truth consumed by globals.css
+ * and by components that need raw values (e.g. inline glow colours).
+ */
+
+:root {
+  /* Backgrounds */
+  --bg-primary: #050505;
+  --bg-secondary: #0a0a0a;
+  --bg-tertiary: #101010;
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: #8a8a8a;
+  --text-muted: #5a5a5a;
+
+  /* Glass */
+  --glass-surface: rgba(255, 255, 255, 0.03);
+  --glass-surface-strong: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-divider: rgba(255, 255, 255, 0.08);
+  --glass-blur: 20px;
+  --glass-saturate: 180%;
+
+  /* Categories */
+  --category-dna: #00f2ff;
+  --category-rna: #ff00ff;
+  --category-protein: #39ff14;
+  --category-crispr: #ffff00;
+  --category-virus: #ff4444;
+  --category-genome: #7c5cff;
+
+  /* States */
+  --state-success: #39ff14;
+  --state-warning: #ffff00;
+  --state-danger: #ff4444;
+  --state-info: #00f2ff;
+
+  /* Shadows & glow */
+  --shadow-glass: 0 20px 80px rgba(0, 0, 0, 0.8);
+  --shadow-glass-soft: 0 10px 40px rgba(0, 0, 0, 0.6);
+  --shadow-panel: 0 30px 120px rgba(0, 0, 0, 0.85);
+  --glow-dna: 0 0 24px rgba(0, 242, 255, 0.25);
+
+  /* Typography — --font-space-grotesk / --font-inter are injected by next/font */
+  --font-display: var(--font-space-grotesk), "Segoe UI", system-ui, sans-serif;
+  --font-body: var(--font-inter), "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
+
+  /* Spacing base */
+  --space-unit: 4px;
+
+  /* Radius — Brutal Premium never rounds corners */
+  --radius: 0px;
+
+  /* Z-index scale */
+  --z-background: -1;
+  --z-navbar: 200;
+  --z-sidebar: 250;
+  --z-overlay: 900;
+  --z-modal: 1000;
+  --z-toast: 1100;
+
+  color-scheme: dark;
+}
