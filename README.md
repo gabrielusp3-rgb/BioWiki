@@ -14,11 +14,11 @@ Open the public site in a browser. No install, no terminal, no clone.
 
 | | |
 | --- | --- |
-| Live demo | Not published from this workspace (no Vercel or Render credentials here). After **Publish** below, the site URL is `https://<project>.vercel.app`. |
-| API | `https://<api-host>/api/v1` |
-| OpenAPI | `https://<api-host>/docs` |
+| Live demo | https://biowiki-nine.vercel.app |
+| API | https://biowiki-api.vercel.app/api/v1 |
+| OpenAPI | https://biowiki-api.vercel.app/docs |
 
-A visitor can search, open a record, follow a publication, and download FASTA, CSV, JSON, or GenBank. Production must use a managed PostgreSQL database populated with real accessions (`BOOTSTRAP_SEED=auto` imports the curated seed when the catalogue is empty).
+A visitor can search, open a record, follow a publication, and download FASTA, CSV, JSON, or GenBank. Production uses managed PostgreSQL (Neon) with real accessions from NCBI/UniProt.
 
 Localhost is not the product.
 
@@ -26,30 +26,17 @@ Localhost is not the product.
 
 ## Publish
 
-Public hosting is two services plus a database. Custom domains are optional.
+The public site is already running (see **Use BioWiki**). Custom domains are optional.
 
-### 1. API and PostgreSQL (Render)
+Current production:
 
-1. Open [Render](https://render.com) and connect `gabrielusp3-rgb/BioWiki`.
-2. Use the Blueprint file `render.yaml` (PostgreSQL 17 + Docker API).
-3. Set `CORS_ORIGINS` to the Vercel origin, for example `https://<project>.vercel.app`.
-4. Confirm `BOOTSTRAP_SEED=auto` so an empty database loads curated real accessions from NCBI/UniProt (network required on first boot).
-5. Note the API hostname. Health: `GET https://<api-host>/api/v1/health`.
+- Frontend: Vercel (`frontend/` as the project root)
+- API: Vercel FastAPI (`backend/`)
+- Database: Neon PostgreSQL, connected as `DATABASE_URL` / `DATABASE_URL_UNPOOLED`
 
-Managed `DATABASE_URL` values such as `postgres://…?sslmode=require` are accepted.
+To reproduce on another account: import the GitHub repository twice on Vercel (frontend root `frontend`, API root `backend`), provision Neon, connect it to the API project, set `BIOWIKI_ENV=production`, `NEXT_PUBLIC_API_URL`, and `NEXT_PUBLIC_SITE_URL`, then ingest curated accessions with `python -m scripts.seed_initial --no-search`. Disable Vercel Deployment Protection so visitors are not asked to log in.
 
-### 2. Frontend (Vercel)
-
-1. Open [Vercel](https://vercel.com) and import the same GitHub repository.
-2. Set **Root Directory** to `frontend`.
-3. Environment variables:
-
-   - `NEXT_PUBLIC_API_URL` = `https://<api-host>/api/v1`
-   - `NEXT_PUBLIC_SITE_URL` = `https://<project>.vercel.app`
-
-4. Deploy. Production must not use localhost, `127.0.0.1`, or a private IP.
-
-Until those two hosts exist, there is no public BioWiki URL. Do not treat a local browser session as the live demo.
+`render.yaml` remains a Docker + managed Postgres alternative. Production must not use localhost, `127.0.0.1`, or a private IP.
 
 ---
 

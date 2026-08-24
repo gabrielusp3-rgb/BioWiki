@@ -228,7 +228,7 @@ async def seed_sequences(run_searches: bool) -> None:
             _show(f"rna search ({term[:24]}…)", await ncbi.ingest(term=term, limit=limit))
 
     print("\n[3/6] Proteins — curated UniProtKB entries")
-    _show("uniprot curated", await uniprot.ingest(PROTEIN_ACCESSIONS))
+    _show("uniprot curated", await uniprot.ingest(PROTEIN_ACCESSIONS, batch_size=1))
 
     print("\n[4/6] CRISPR — real CRISPR loci (NCBI)")
     if run_searches:
@@ -241,7 +241,7 @@ async def seed_sequences(run_searches: bool) -> None:
         print("  (skipped — term searches disabled)")
 
     print("\n[5/6] Viruses — complete genomes (NCBI RefSeq/GenBank)")
-    _show("virus curated", await ncbi.ingest(VIRUS_ACCESSIONS, seq_type="virus"))
+    _show("virus curated", await ncbi.ingest(VIRUS_ACCESSIONS, seq_type="virus", batch_size=1))
 
     print("\n[6/6] Genome assemblies — NCBI Datasets")
     _show("assemblies", await datasets.ingest(GENOME_ACCESSIONS))

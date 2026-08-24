@@ -2,6 +2,12 @@
 
 from __future__ import annotations
 
+import os
+import subprocess
+import sys
+from contextlib import asynccontextmanager
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -12,6 +18,25 @@ from starlette.responses import Response
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.rate_limit import RateLimitMiddleware
+
+BACKEND_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _migrate_if_hosted() -> None:
+    if os.environ.get("PYTEST_CURRENT_TEST") or "pytest" in sys.modules:
+        return
+    if not os.environ.get("VERCEL"):
+        return
+    subprocess.check_call(
+        [sys.executable, "-m", "alembic", "upgrade", "head"],
+        cwd=str(BACKEND_ROOT),
+    )
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    _migrate_if_hosted()
+    yield
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -53,6 +78,7 @@ def create_app() -> FastAPI:
         description=DESCRIPTION,
         version=settings.api_version,
         openapi_tags=TAGS_METADATA,
+        lifespan=lifespan,
         contact={"name": "BIOWIKI", "url": "https://github.com/gabrielusp3-rgb/BioWiki"},
         license_info={
             "name": "MIT",

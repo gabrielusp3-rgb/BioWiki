@@ -27,3 +27,20 @@ def test_sslmode_require_maps_to_asyncpg_ssl() -> None:
 def test_empty_stays_empty() -> None:
     assert normalize_database_url("") == ""
     assert normalize_database_url("   ") == ""
+
+
+def test_unpooled_url_is_preferred(monkeypatch) -> None:
+    from app.core.config import Settings
+
+    monkeypatch.setenv(
+        "DATABASE_URL",
+        "postgres://u:p@ep-pooler.example/db?sslmode=require",
+    )
+    monkeypatch.setenv(
+        "DATABASE_URL_UNPOOLED",
+        "postgres://u:p@ep-direct.example/db?sslmode=require",
+    )
+    settings = Settings()
+    assert "ep-direct.example" in settings.database_url
+    assert "ep-pooler.example" not in settings.database_url
+    assert settings.database_url.startswith("postgresql+asyncpg://")

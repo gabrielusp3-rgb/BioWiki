@@ -46,6 +46,9 @@ frontend/playwright/.cache/
 .idea/
 .vscode/
 *.swp
+.vercel/
+.agents/
+skills-lock.json
 
 .DS_Store
 Thumbs.db

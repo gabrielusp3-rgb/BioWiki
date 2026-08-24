@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.core.database_url import normalize_database_url
@@ -26,6 +26,7 @@ class Settings(BaseSettings):
         default="postgresql+asyncpg://biowiki:biowiki@localhost:5432/biowiki",
         alias="DATABASE_URL",
     )
+    database_url_unpooled: str = Field(default="", alias="DATABASE_URL_UNPOOLED")
     database_ssl: bool = Field(default=False, alias="DATABASE_SSL")
     sql_echo: bool = Field(default=False, alias="SQL_ECHO")
     db_pool_size: int = Field(default=10, alias="DB_POOL_SIZE")
@@ -35,12 +36,20 @@ class Settings(BaseSettings):
     cors_origins: str = Field(default="http://localhost:3000", alias="CORS_ORIGINS")
     cors_origin_regex: str = Field(default="", alias="CORS_ORIGIN_REGEX")
 
-    @field_validator("database_url", mode="before")
+    @field_validator("database_url", "database_url_unpooled", mode="before")
     @classmethod
     def _normalize_database_url(cls, value: object) -> object:
         if isinstance(value, str):
             return normalize_database_url(value)
         return value
+
+    @model_validator(mode="after")
+    def _prefer_direct_postgres(self) -> Settings:
+        # Neon/Vercel inject a pooled DATABASE_URL (PgBouncer). asyncpg needs
+        # the direct host, provided as DATABASE_URL_UNPOOLED.
+        if self.database_url_unpooled:
+            self.database_url = self.database_url_unpooled
+        return self
 
     rate_limit_enabled: bool = Field(default=True, alias="RATE_LIMIT_ENABLED")
     rate_limit_requests: int = Field(default=120, alias="RATE_LIMIT_REQUESTS")
