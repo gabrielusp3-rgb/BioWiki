@@ -5,14 +5,16 @@ import uuid
 from sqlalchemy import (
     BigInteger,
     CheckConstraint,
+    Computed,
     DateTime,
     ForeignKey,
+    Index,
     Numeric,
     String,
     Text,
     UniqueConstraint,
 )
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, TSVECTOR
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -28,6 +30,15 @@ class Sequence(UUIDPrimaryKeyMixin, TimestampMixin, Base):
             "source_id", "accession", "version", name="sequences_source_accession_version"
         ),
         CheckConstraint("length >= 0", name="ck_sequences_length_non_negative"),
+        Index("ix_sequences_organism_type", "organism_id", "seq_type"),
+        Index("ix_sequences_type_length", "seq_type", "length"),
+        Index("ix_sequences_search_vector", "search_vector", postgresql_using="gin"),
+        Index(
+            "ix_sequences_name_trgm",
+            "name",
+            postgresql_using="gin",
+            postgresql_ops={"name": "gin_trgm_ops"},
+        ),
     )
 
     seq_type: Mapped[SequenceType] = mapped_column(SEQUENCE_TYPE_ENUM, nullable=False)
@@ -59,6 +70,20 @@ class Sequence(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     chromosome: Mapped[str | None] = mapped_column(String(32))
     source_url: Mapped[str | None] = mapped_column(String(500))
     annotations: Mapped[dict | None] = mapped_column(JSONB)
+    # Stored generated tsvector — matches the live PostgreSQL expression exactly.
+    # Populated by the database on INSERT/UPDATE; never written by the ORM.
+    search_vector: Mapped[str | None] = mapped_column(
+        TSVECTOR,
+        Computed(
+            "to_tsvector('english'::regconfig, (((((((COALESCE(name, ''::character varying))::text "
+            "|| ' '::text) || (COALESCE(accession, ''::character varying))::text) || ' '::text) "
+            "|| (COALESCE(gene_name, ''::character varying))::text) || ' '::text) "
+            "|| COALESCE(description, ''::text)))",
+            persisted=True,
+        ),
+        nullable=True,
+        deferred=True,
+    )
 
     organism = relationship("Organism", lazy="selectin")
     source = relationship("DataSource", lazy="selectin")

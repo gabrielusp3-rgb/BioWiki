@@ -6,6 +6,7 @@ from sqlalchemy import (
     BigInteger,
     CheckConstraint,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -25,6 +26,18 @@ class Publication(UUIDPrimaryKeyMixin, TimestampMixin, Base):
         CheckConstraint(
             "year IS NULL OR (year >= 1800 AND year <= 2100)",
             name="ck_publications_year_range",
+        ),
+        Index(
+            "ix_publications_title_trgm",
+            "title",
+            postgresql_using="gin",
+            postgresql_ops={"title": "gin_trgm_ops"},
+        ),
+        Index(
+            "ix_publications_abstract_trgm",
+            "abstract",
+            postgresql_using="gin",
+            postgresql_ops={"abstract": "gin_trgm_ops"},
         ),
     )
 

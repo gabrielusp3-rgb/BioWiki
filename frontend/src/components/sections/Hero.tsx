@@ -62,13 +62,11 @@ export function Hero() {
             variants={fadeInUp}
             className="max-w-xl text-balance text-base leading-relaxed text-content-secondary"
           >
-            A next-generation scientific repository unifying DNA, RNA, proteins,
-            CRISPR guides, genomes and viral sequences from internationally
-            recognised public databases — engineered for researchers, laboratories
-            and bioinformaticians.
+            DNA, RNA, proteins, CRISPR guides, genomes and viral sequences from
+            public archives, stored locally and served as they were imported.
           </motion.p>
 
-          {/* CTAs — premium liquid glass command bar */}
+          {/* Actions */}
           <motion.div variants={fadeInUp} className="flex flex-col gap-4 pt-2">
             <div className="glass hairline flex w-fit max-w-full flex-wrap items-center gap-3 p-3">
               <Link href="/search">

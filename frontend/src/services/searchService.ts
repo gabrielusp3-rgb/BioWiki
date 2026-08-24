@@ -19,7 +19,7 @@ import type {
  *   limit      → page size
  *   cursor     → keyset pagination cursor
  */
-function toParams(query: string, filters: SearchFilters, limit: number, cursor?: string) {
+export function toParams(query: string, filters: SearchFilters, limit: number, cursor?: string) {
   return {
     q: query,
     types: filters.types.length ? filters.types.join(",") : undefined,

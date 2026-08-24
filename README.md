@@ -62,7 +62,7 @@ Connectors used by the CLI (not by public HTTP routes):
 | [ENA](https://www.ebi.ac.uk/ena/) | Nucleotide records (EMBL-EBI) |
 | [Rfam](https://rfam.org/) | RNA family members (resolved via NCBI for sequence text) |
 
-The site footer also mentions DDBJ as a public sequence archive. There is **no DDBJ connector**.
+The in-app `/license` page lists DDBJ as a related INSDC archive. There is **no DDBJ connector**.
 
 ---
 
@@ -102,12 +102,13 @@ assets/branding/     Official lockup (icon + wordmark)
 ## Requirements
 
 - PostgreSQL (this project is run against 17)
-- Python 3 (developed on 3.14; see `backend/requirements.txt`)
-- Node.js (developed on 24; see `frontend/package.json`)
+- Python 3.13 (Docker and CI; local development also runs on 3.14 — see `backend/requirements.txt`)
+- Node.js 24 (see `.nvmrc` and `frontend/package.json` `engines`)
+- Docker Compose (optional; `docker compose up --build` from the repository root)
 
-There is no Docker setup in this repository.
+There is a Compose file at the repository root. Local PostgreSQL + uvicorn + `npm run dev` remains supported.
 
-The repository does not ship a PostgreSQL dump or Alembic migrations. The SQLAlchemy models in `backend/app/models/` describe the tables. The live database also has a `sequences.search_vector` column used by `/search` (not declared on the ORM class). A clone needs an empty `biowiki` database whose schema matches that running instance, then CLI ingest. The Git tree does not contain the sequence corpus.
+The repository does not ship a PostgreSQL dump. Schema for a clean database is applied with Alembic (`alembic upgrade head` from `backend/`). The SQLAlchemy models in `backend/app/models/` describe the tables, including the generated `sequences.search_vector` column used by `/search`. A clone needs an empty `biowiki` database, that migration, then CLI ingest. The Git tree does not contain the sequence corpus.
 
 ### What you need vs what is optional
 
@@ -119,11 +120,33 @@ The repository does not ship a PostgreSQL dump or Alembic migrations. The SQLAlc
 
 ---
 
-## Running locally
+## Running with Docker
+
+From the repository root (Docker Desktop or Engine with the Compose plugin):
+
+```bash
+docker compose up --build
+```
+
+- UI: http://localhost:3000
+- API: http://localhost:8000/api/v1
+- OpenAPI: http://localhost:8000/docs
+
+Compose starts PostgreSQL 17, applies Alembic migrations, then the API and the Next.js UI. The database is empty until you ingest records. The browser calls the API at `http://localhost:8000/api/v1` (that URL is baked into the frontend image at build time).
+
+Optional root `.env` values are documented in `.env.example`. Compose does not publish PostgreSQL on host port 5432, so it can sit beside a local Postgres install.
+
+Stop local `uvicorn` / `next dev` first if ports 8000 or 3000 are already taken.
+
+## Running locally without Docker
 
 ### 1. PostgreSQL
 
-Create a database named `biowiki` and a role the API can use. Point `DATABASE_URL` at it (asyncpg URL).
+Create a database named `biowiki` and a role the API can use. Point `DATABASE_URL` at it (asyncpg URL). From `backend/`, apply the schema:
+
+```bash
+python -m alembic upgrade head
+```
 
 ### 2. Backend
 
@@ -168,12 +191,12 @@ python -m app.pipeline.cli --help
 ```bash
 cd frontend
 cp .env.example .env.local   # Windows: copy .env.example .env.local
-npm install
+npm ci
 npm run dev
 ```
 
 UI: http://localhost:3000  
-Copy `frontend/.env.example` to `.env.local` so `NEXT_PUBLIC_API_URL` is `http://localhost:8000/api/v1`. Without that file the UI skips API calls and shows empty, honest states.
+Copy `frontend/.env.example` to `.env.local` so `NEXT_PUBLIC_API_URL` is `http://localhost:8000/api/v1`. Local `next dev` also falls back to that URL when the variable is unset. Production builds should set it (Compose bakes it in via build args).
 
 ---
 
@@ -215,14 +238,47 @@ Interactive schema: `/docs`.
 
 ## Testing
 
-There is a backend suite only (no frontend test runner).
+### Backend
 
 ```bash
 cd backend
 python -m pytest tests
 ```
 
-Tests expect a reachable API at `http://127.0.0.1:8000` for HTTP cases, and a live `biowiki` database for integrity checks. They do not write production rows.
+Tests marked `live` need a reachable API at `http://127.0.0.1:8000` and the populated catalogue (counts, accessions, FTS hits). They do not write production rows.
+
+```bash
+python -m pytest -m "not live"
+```
+
+runs schema, Alembic, security, connector, and ASGI checks. CI uses that filter against an empty migrated database.
+
+### Frontend
+
+```bash
+cd frontend
+npm run lint
+npm run typecheck
+npm test          # Vitest
+npm run build
+npx playwright test
+```
+
+Playwright expects the UI on port 3000 (it will start `npm run dev` unless that server is already running). Reduced motion is enabled so the splash video does not block the suite.
+
+## CI
+
+GitHub Actions (`.github/workflows/ci.yml`) runs Python 3.13 with Postgres 17 (migrate + `pytest -m "not live"`), Node 24 (`npm ci`, lint, typecheck, Vitest, production build), Playwright against an empty migrated database, and a Compose job that builds the images, starts the stack, and checks API/UI health.
+
+---
+
+## Security notes (dependencies)
+
+The UI is pinned to **Next.js 15.5.23** (Maintenance LTS on the 15.5 line). Direct `postcss` is 8.5.26; npm `overrides` force that version so Next’s nested PostCSS copy is not left on 8.4.x ([GHSA-qx2v-qp2m-jg93](https://github.com/advisories/GHSA-qx2v-qp2m-jg93), [GHSA-6g55-p6wh-862q](https://github.com/advisories/GHSA-6g55-p6wh-862q)).
+
+`npm audit` still reports **sharp** 0.34.5 (optional dependency of Next) as high: [GHSA-f88m-g3jw-g9cj](https://github.com/advisories/GHSA-f88m-g3jw-g9cj) (libvips issues in sharp before 0.35.0). npm’s suggested upgrade is Next **16.3.2**, a major line change. An unofficial `sharp` 0.35 override is known to break Next’s standalone tracing on 15.x / 16.2. BioWiki does not process untrusted user uploads; the lockup uses `next/image` with `unoptimized`. Next 16 was not taken solely to clear the advisory.
+
+Next.js has announced a scheduled security release on **26 August 2026** (`15.5.24` / `16.3.3`). That patch is not on npm at the time of this release (confirmed: `npm view next@15.5.24` returns 404). Upgrade when it is published.
 
 ---
 
@@ -259,18 +315,21 @@ Public statements from the sources (verify on their sites before redistributing 
 | [Rfam](https://docs.rfam.org/en/latest/) | Rfam data: CC0 |
 | ENA / PubMed | Consult [ENA](https://www.ebi.ac.uk/ena/browser/about) and [NLM](https://www.ncbi.nlm.nih.gov/home/about/policies/) terms for the specific record |
 
-The in-app `/license` page lists public archives for attribution; DDBJ is listed there without a BioWiki connector.
+The in-app `/license` page lists public archives for attribution; DDBJ is listed there as a related INSDC archive, not as a BioWiki connector.
 
 ---
 
 ## Limitations
 
-- PostgreSQL is required; this repository does not include a data dump or a complete schema migration
+- PostgreSQL is required; this repository does not include a data dump
 - Imports need network access to external APIs and are operator-driven
 - The HTTP API does not ingest data
-- No Docker / Kubernetes configuration
+- Docker Compose is the optional path; local Postgres + uvicorn + Next.js remains valid. Compose is exercised in GitHub Actions when a local Docker daemon is not available
 - Optional API keys; an empty `API_KEYS` list leaves the local API open
-- The in-process rate limiter is per server process
+- The rate limiter is in-process (per API process), not a distributed store
+- A Compose/CI database has schema only until CLI ingest
+- `live` pytest tests are skipped in CI because they assert on a populated catalogue
+- Next.js 15.5.24 (announced for 26 August 2026) is not yet on npm; see **Security notes**
 
 ---
 

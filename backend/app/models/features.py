@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import Boolean, ForeignKey, Numeric, String, Text
+from sqlalchemy import Boolean, ForeignKey, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -79,6 +79,9 @@ class ProteinDomain(UUIDPrimaryKeyMixin, Base):
 
 class ProteinPdbRef(UUIDPrimaryKeyMixin, Base):
     __tablename__ = "protein_pdb_refs"
+    __table_args__ = (
+        UniqueConstraint("sequence_id", "pdb_id", name="protein_pdb_refs_unique"),
+    )
 
     sequence_id: Mapped[uuid.UUID] = mapped_column(
         PGUUID(as_uuid=True),

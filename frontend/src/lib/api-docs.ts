@@ -3,7 +3,8 @@
  * Paths and limits must match backend/app/api/v1. Local default base is /api/v1.
  */
 
-export const API_BASE = "http://localhost:8000/api/v1";
+export const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
 
 export type HttpMethod = "GET";
 

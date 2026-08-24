@@ -1,0 +1,79 @@
+# Local catalogue stack: Postgres, FastAPI, Next.js.
+# From the repository root:
+#   docker compose up --build
+# Then open http://localhost:3000 (UI) and http://localhost:8000/docs (API).
+#
+# A fresh compose database has the schema only. Scientific records are not in Git.
+# Import them with the CLI after the API is up, or point DATABASE_URL at an
+# existing catalogue.
+
+name: biowiki
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-biowiki}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-biowiki}
+      POSTGRES_DB: ${POSTGRES_DB:-biowiki}
+    volumes:
+      - biowiki_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-biowiki} -d ${POSTGRES_DB:-biowiki}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    # Not published on 5432 by default — that port is often already used by a
+    # local PostgreSQL. Uncomment to inspect the compose database from the host:
+    # ports:
+    #   - "5433:5432"
+
+  api:
+    build:
+      context: ./backend
+    environment:
+      # Names match Settings Field aliases in app/core/config.py
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-biowiki}:${POSTGRES_PASSWORD:-biowiki}@postgres:5432/${POSTGRES_DB:-biowiki}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      BIOWIKI_ENV: ${BIOWIKI_ENV:-development}
+      RATE_LIMIT_ENABLED: ${RATE_LIMIT_ENABLED:-true}
+      RATE_LIMIT_REQUESTS: ${RATE_LIMIT_REQUESTS:-120}
+      RATE_LIMIT_WINDOW_SECONDS: ${RATE_LIMIT_WINDOW_SECONDS:-60}
+      API_KEYS: ${API_KEYS:-}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health')",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 45s
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000/api/v1}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      HOSTNAME: 0.0.0.0
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  biowiki_pg:

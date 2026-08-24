@@ -38,6 +38,11 @@ restore_*.py
 ngrok.yml
 ngrok.yaml
 
+playwright-report/
+test-results/
+blob-report/
+frontend/playwright/.cache/
+
 .idea/
 .vscode/
 *.swp

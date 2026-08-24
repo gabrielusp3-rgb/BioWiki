@@ -16,6 +16,8 @@ from starlette.responses import JSONResponse, Response
 # Liveness only. /ready hits PostgreSQL, so it stays rate-limited.
 _EXEMPT_SUFFIXES = ("/health",)
 _EXEMPT_PATHS = {"/", "/docs", "/redoc", "/openapi.json"}
+# In-process map; bound so a scan of distinct IPs cannot grow without limit.
+_MAX_CLIENTS = 8192
 
 
 class RateLimitMiddleware(BaseHTTPMiddleware):
@@ -46,6 +48,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     def allow(self, key: str) -> bool:
         """Record one hit. Returns False when the window is exhausted."""
         now = monotonic()
+        if key not in self._hits and len(self._hits) >= _MAX_CLIENTS:
+            self._hits.pop(next(iter(self._hits)))
         bucket = self._hits[key]
         cutoff = now - self.window_seconds
         while bucket and bucket[0] < cutoff:

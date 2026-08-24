@@ -18,7 +18,6 @@ export const VIRUS_SOURCE_OPTIONS: { value: string; label: string }[] = [
   { value: "ncbi_refseq", label: "NCBI RefSeq" },
   { value: "ncbi_genbank", label: "NCBI GenBank" },
   { value: "ena", label: "ENA" },
-  { value: "ddbj", label: "DDBJ" },
 ];
 
 const grouping = new Intl.NumberFormat("en-US");

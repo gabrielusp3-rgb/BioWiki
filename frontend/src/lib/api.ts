@@ -5,7 +5,9 @@
  * requests are skipped and callers receive empty, honest results — the UI never
  * fabricates data to fill the gap.
  */
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
+export const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL ??
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000/api/v1");
 
 export const isApiConfigured = Boolean(API_BASE_URL);
 
@@ -23,7 +25,7 @@ interface GetOptions {
   signal?: AbortSignal;
 }
 
-function buildQuery(params: GetOptions["params"]): string {
+export function buildQuery(params: GetOptions["params"]): string {
   if (!params) return "";
   const search = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {

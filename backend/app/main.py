@@ -53,7 +53,7 @@ def create_app() -> FastAPI:
         description=DESCRIPTION,
         version=settings.api_version,
         openapi_tags=TAGS_METADATA,
-        contact={"name": "BIOWIKI", "url": "https://biowiki.org/"},
+        contact={"name": "BIOWIKI", "url": "https://github.com/gabrielusp3-rgb/BioWiki"},
         license_info={
             "name": "MIT",
             "url": "https://opensource.org/licenses/MIT",

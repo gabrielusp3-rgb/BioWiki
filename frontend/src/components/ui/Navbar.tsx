@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button } from "@/components/ui/Button";
 import { MenuIcon, SearchIcon } from "@/components/ui/Icons";
 
@@ -51,12 +52,8 @@ export function Navbar({
       )}
     >
       <nav className="mx-auto flex h-16 w-full max-w-[1680px] items-center justify-between gap-6 px-5 sm:px-8 lg:px-12">
-        <Link href="/" className="group flex items-center">
-          <img
-            src="/brand-logo.png"
-            alt="BioWiki"
-            className="h-9 w-auto"
-          />
+        <Link href="/" className="group relative z-10 flex shrink-0 items-center">
+          <BrandLogo priority />
         </Link>
 
         <ul className="hidden items-center gap-1 lg:flex">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button, Navbar } from "@/components/ui";
 import { CloseIcon } from "@/components/ui/Icons";
 import { drawerVariants, overlayVariants } from "@/lib/animations";
@@ -58,7 +59,7 @@ export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {
             >
               <div className="flex items-center justify-between border-b border-glass-divider px-6 py-4">
                 <span className="flex items-center">
-                  <img src="/brand-logo.png" alt="BioWiki" className="h-8 w-auto" />
+                  <BrandLogo />
                 </span>
                 <button
                   type="button"

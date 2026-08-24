@@ -104,6 +104,7 @@ export function SearchPageContent() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search accessions, genes, organisms, tax IDs, publications…"
+            aria-label="Search catalogue"
             autoFocus
             className="h-16 w-full bg-transparent font-body text-base text-content-primary outline-none placeholder:text-content-muted"
           />

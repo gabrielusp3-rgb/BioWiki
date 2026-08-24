@@ -17,38 +17,67 @@ interface DataSource {
   url: string;
 }
 
-const DATA_SOURCES: DataSource[] = [
+const CONNECTORS: DataSource[] = [
   {
     name: "NCBI",
-    description: "GenBank and RefSeq nucleotide and protein records, taxonomy.",
+    description:
+      "GenBank, RefSeq, PubMed and Datasets — nucleotide and protein records, taxonomy, literature and assemblies. Operational BioWiki connector.",
     url: "https://www.ncbi.nlm.nih.gov/",
   },
   {
     name: "UniProt",
-    description: "Reviewed and unreviewed protein sequence and functional annotation.",
+    description: "Reviewed and unreviewed protein sequence and functional annotation. Operational BioWiki connector.",
     url: "https://www.uniprot.org/",
   },
   {
     name: "Ensembl",
-    description: "Genome annotation and comparative genomics.",
+    description: "Genome annotation and comparative genomics. Operational BioWiki connector.",
     url: "https://www.ensembl.org/",
   },
   {
     name: "PDB",
-    description: "Experimentally determined 3D protein and nucleic acid structures.",
+    description: "Experimentally determined 3D protein and nucleic acid structures. Operational BioWiki connector.",
     url: "https://www.rcsb.org/",
   },
   {
     name: "ENA",
-    description: "European Nucleotide Archive — raw and assembled sequence data.",
+    description: "European Nucleotide Archive — raw and assembled sequence data. Operational BioWiki connector.",
     url: "https://www.ebi.ac.uk/ena/browser/home",
   },
   {
+    name: "Rfam",
+    description: "RNA families; member sequences are resolved via NCBI for sequence text. Operational BioWiki connector.",
+    url: "https://rfam.org/",
+  },
+];
+
+const RELATED_ARCHIVES: DataSource[] = [
+  {
     name: "DDBJ",
-    description: "DNA Data Bank of Japan — nucleotide sequence submissions.",
+    description:
+      "DNA Data Bank of Japan, an INSDC partner archive. BioWiki does not include a DDBJ connector and does not query DDBJ.",
     url: "https://www.ddbj.nig.ac.jp/",
   },
 ];
+
+function SourceCard({ source }: { source: DataSource }) {
+  return (
+    <a
+      href={source.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="glass hairline group flex items-center justify-between gap-4 p-5 transition-colors duration-300 hover:border-white/20"
+    >
+      <div className="flex flex-col gap-1">
+        <span className="font-display text-sm font-bold uppercase tracking-wide text-content-primary">
+          {source.name}
+        </span>
+        <span className="text-sm text-content-secondary">{source.description}</span>
+      </div>
+      <ExternalIcon className="h-4 w-4 shrink-0 text-content-muted transition-colors group-hover:text-content-primary" />
+    </a>
+  );
+}
 
 export default function LicensePage() {
   return (
@@ -61,31 +90,30 @@ export default function LicensePage() {
             title="Data sources and usage terms"
             description="BIOWIKI does not claim ownership of the biological records it indexes. Each sequence remains subject to the license and usage terms of its originating database."
           >
+            <p className="mb-4 font-display text-xs font-bold uppercase tracking-widest text-content-muted">
+              Connectors used by BioWiki
+            </p>
             <div className="flex flex-col gap-4">
-              {DATA_SOURCES.map((source) => (
-                <a
-                  key={source.name}
-                  href={source.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="glass hairline group flex items-center justify-between gap-4 p-5 transition-colors duration-300 hover:border-white/20"
-                >
-                  <div className="flex flex-col gap-1">
-                    <span className="font-display text-sm font-bold uppercase tracking-wide text-content-primary">
-                      {source.name}
-                    </span>
-                    <span className="text-sm text-content-secondary">{source.description}</span>
-                  </div>
-                  <ExternalIcon className="h-4 w-4 shrink-0 text-content-muted transition-colors group-hover:text-content-primary" />
-                </a>
+              {CONNECTORS.map((source) => (
+                <SourceCard key={source.name} source={source} />
+              ))}
+            </div>
+
+            <p className="mb-4 mt-10 font-display text-xs font-bold uppercase tracking-widest text-content-muted">
+              Related public archives (not queried by BioWiki)
+            </p>
+            <div className="flex flex-col gap-4">
+              {RELATED_ARCHIVES.map((source) => (
+                <SourceCard key={source.name} source={source} />
               ))}
             </div>
 
             <p className="mt-10 max-w-2xl text-sm leading-relaxed text-content-secondary">
               BIOWIKI never fabricates sequences, organisms, accessions or metadata. Every record
-              displayed once the database is connected is traceable to one of the sources above,
-              along with its original accession. Consult each source directly for the specific
-              license terms that apply to your intended use.
+              displayed once the database is connected is traceable to an operational connector
+              above, along with its original accession. DDBJ is listed only as a related INSDC
+              archive. Consult each source directly for the specific license terms that apply to
+              your intended use.
             </p>
           </Section>
         </Container>

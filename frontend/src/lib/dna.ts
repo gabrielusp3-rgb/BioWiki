@@ -25,7 +25,6 @@ export const DNA_SOURCE_OPTIONS: { value: string; label: string }[] = [
   { value: "ncbi_refseq", label: "NCBI RefSeq" },
   { value: "ensembl", label: "Ensembl" },
   { value: "ena", label: "ENA" },
-  { value: "ddbj", label: "DDBJ" },
 ];
 
 export const MOLECULE_TYPE_LABEL: Record<DnaMoleculeType, string> = {

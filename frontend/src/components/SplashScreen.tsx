@@ -146,7 +146,7 @@ export function SplashScreen() {
 
       {videoDone && !appReady && (
         <span className="absolute bottom-10 left-1/2 -translate-x-1/2 font-display text-[11px] uppercase tracking-[0.25em] text-white/60">
-          Finalizando carregamento…
+          Loading…
         </span>
       )}
     </div>

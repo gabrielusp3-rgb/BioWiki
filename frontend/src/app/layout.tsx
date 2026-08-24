@@ -18,7 +18,7 @@ const inter = Inter({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://biowiki.org";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 const SITE_DESCRIPTION =
   "Explore the biological diversity of life through real molecular sequences from internationally recognised public databases.";
 

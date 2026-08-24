@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Container } from "@/components/ui";
 
 interface FooterLink {
@@ -37,14 +38,14 @@ const COLUMNS: FooterColumn[] = [
     title: "Resources",
     links: [
       { label: "Documentation", href: "/docs" },
-      { label: "GitHub", href: "https://github.com/gabrielusp3-rgb", external: true },
+      { label: "GitHub", href: "https://github.com/gabrielusp3-rgb/BioWiki", external: true },
       { label: "Contact", href: "mailto:contact@biowiki.org", external: true },
       { label: "License", href: "/license" },
     ],
   },
 ];
 
-const DATA_SOURCES = ["NCBI", "UniProt", "Ensembl", "PDB", "ENA", "DDBJ"];
+const DATA_SOURCES = ["NCBI", "UniProt", "Ensembl", "PDB", "ENA", "PubMed"];
 
 function FooterAnchor({ link }: { link: FooterLink }) {
   const className =
@@ -73,15 +74,11 @@ export function SiteFooter() {
           {/* Brand */}
           <div className="col-span-2 flex flex-col gap-4">
             <Link href="/" className="inline-flex items-center">
-              <img
-                src="/brand-logo.png"
-                alt="BioWiki"
-                className="h-10 w-auto"
-              />
+              <BrandLogo />
             </Link>
             <p className="max-w-sm text-sm leading-relaxed text-content-secondary">
-              A next-generation scientific repository of real molecular sequences
-              aggregated from internationally recognised public databases.
+              A local catalogue of real molecular sequences aggregated from
+              public sequence archives.
             </p>
             <div className="mt-2 flex flex-col gap-2">
               <span className="eyebrow">Data sources</span>

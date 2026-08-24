@@ -1,0 +1,174 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: biowiki
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d biowiki"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/biowiki
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Apply migrations
+        run: python -m alembic upgrade head
+      - name: Compile
+        run: python -m compileall app
+      - name: Tests that do not need the populated catalogue
+        run: python -m pytest -m "not live" -q
+
+  frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  compose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v7
+      - name: Validate Compose file
+        run: docker compose config
+      - name: Build and start
+        run: docker compose up --build -d
+      - name: Wait for API health
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8000/api/v1/health; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "API did not become healthy"
+          docker compose logs
+          exit 1
+      - name: Wait for UI
+        run: |
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3000 >/dev/null; then
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "UI did not become reachable"
+          docker compose logs web
+          exit 1
+      - name: Empty-database schema stamp
+        run: docker compose exec -T api python -m alembic current
+      - name: Stop
+        if: always()
+        run: docker compose down -v
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: biowiki
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d biowiki"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/biowiki
+      NEXT_PUBLIC_API_URL: http://127.0.0.1:8000/api/v1
+      NEXT_PUBLIC_SITE_URL: http://127.0.0.1:3000
+      PLAYWRIGHT_SKIP_WEBSERVER: "1"
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:3000
+      PLAYWRIGHT_API_URL: http://127.0.0.1:8000/api/v1
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version-file: .python-version
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Install backend
+        working-directory: backend
+        run: |
+          pip install -r requirements.txt
+          python -m alembic upgrade head
+      - name: Install frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm run build
+      - name: Start API and UI, then run Playwright
+        run: |
+          python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 &
+          for i in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/api/v1/health; then
+              break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "API did not become healthy"
+              exit 1
+            fi
+            sleep 1
+          done
+          (cd "$GITHUB_WORKSPACE/frontend" && npm run start -- --hostname 127.0.0.1 --port 3000) &
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:3000 >/dev/null; then
+              break
+            fi
+            if [ "$i" -eq 40 ]; then
+              echo "UI did not become reachable"
+              exit 1
+            fi
+            sleep 2
+          done
+          cd "$GITHUB_WORKSPACE/frontend"
+          npx playwright test
+        working-directory: backend

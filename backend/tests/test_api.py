@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import httpx
+import pytest
+
+pytestmark = pytest.mark.live
 
 
 def test_health(api: httpx.Client) -> None:
@@ -75,6 +78,82 @@ def test_search_ins(api: httpx.Client) -> None:
     body = response.json()
     assert body["total"] >= 1
     assert body["results"]
+
+
+def test_search_accession_nm_000207(api: httpx.Client) -> None:
+    response = api.get("/search", params={"q": "NM_000207", "limit": 10})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total"] >= 1
+    assert any(item["accession"] == "NM_000207" for item in body["results"])
+
+
+def test_search_title_insulin(api: httpx.Client) -> None:
+    response = api.get("/search", params={"q": "insulin", "limit": 10})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total"] >= 1
+    assert body["results"]
+    blob = " ".join(
+        f"{item.get('title', '')} {item.get('accession', '')}" for item in body["results"]
+    ).lower()
+    assert "insulin" in blob or any(
+        "INS" in (item.get("accession") or "").upper() for item in body["results"]
+    )
+
+
+def test_search_suggest(api: httpx.Client) -> None:
+    response = api.get("/search/suggest", params={"q": "INS", "limit": 5})
+    assert response.status_code == 200
+    body = response.json()
+    suggestions = body.get("suggestions") or []
+    assert suggestions
+    assert all("label" in item and "type" in item for item in suggestions)
+
+
+def test_search_empty_results(api: httpx.Client) -> None:
+    response = api.get(
+        "/search", params={"q": "zzznosequencewiththisqueryxyz", "limit": 5}
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["total"] == 0
+    assert body["results"] == []
+
+
+def test_search_pagination(api: httpx.Client) -> None:
+    first = api.get("/search", params={"q": "insulin", "limit": 2})
+    assert first.status_code == 200
+    body = first.json()
+    assert body["total"] >= 1
+    cursor = body.get("nextCursor")
+    if cursor:
+        second = api.get("/search", params={"q": "insulin", "limit": 2, "cursor": cursor})
+        assert second.status_code == 200
+        ids_first = [item["id"] for item in body["results"]]
+        ids_second = [item["id"] for item in second.json()["results"]]
+        assert ids_first
+        assert set(ids_first).isdisjoint(set(ids_second))
+
+
+def test_search_type_filter(api: httpx.Client) -> None:
+    response = api.get("/search", params={"q": "insulin", "types": "protein", "limit": 10})
+    assert response.status_code == 200
+    body = response.json()
+    for item in body["results"]:
+        assert item["type"] == "protein"
+
+
+def test_search_publications_insulin(api: httpx.Client) -> None:
+    response = api.get("/search", params={"q": "insulin", "limit": 5})
+    assert response.status_code == 200
+    body = response.json()
+    pubs = body.get("publications") or []
+    total = body.get("publicationsTotal", 0)
+    if total:
+        assert pubs
+        assert pubs[0]["title"]
+
 
 
 def test_organisms_list_and_detail(api: httpx.Client) -> None:

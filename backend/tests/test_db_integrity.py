@@ -5,6 +5,7 @@ These tests SELECT only. They never INSERT/UPDATE/DELETE production rows.
 
 from __future__ import annotations
 
+import pytest
 from sqlalchemy import func, select, text
 
 from app.database.session import get_sessionmaker
@@ -22,6 +23,8 @@ from scripts.seed_initial import (
     RNA_ACCESSIONS,
     VIRUS_ACCESSIONS,
 )
+
+pytestmark = pytest.mark.live
 
 ORIGINAL_CURATED = (
     DNA_ACCESSIONS + RNA_ACCESSIONS + PROTEIN_ACCESSIONS + VIRUS_ACCESSIONS
