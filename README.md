@@ -1,22 +1,70 @@
-<img src="assets/branding/biowiki-logo.png" alt="BioWiki — Your global genomic database" width="420">
+<img src="assets/branding/biowiki-logo.png" alt="BioWiki" width="420">
 
 # BioWiki
 
-BioWiki is a local biological sequence database: PostgreSQL stores the records, FastAPI serves them, and a Next.js interface is used to browse DNA, RNA, proteins, CRISPR guides, viruses, genome assemblies, organisms, and linked publications.
+BioWiki is a catalogue of real molecular sequences: DNA, RNA, proteins, CRISPR guides, viruses, genome assemblies, organisms, and linked publications. Records come from public archives. The software does not invent accessions or residues. It is not a clinical diagnostic tool.
 
-It is a catalogue and query system for real accessions from public databases. It is not a clinical diagnostic tool and it does not invent sequences.
-
-**Status:** local 0.1.0. The application code is MIT-licensed. Sequence records remain under the terms of their originating databases.
-
-**Stack:** Next.js 15, React 19, TypeScript, FastAPI, SQLAlchemy, PostgreSQL. The UI background uses Three.js.
+**Repository:** [github.com/gabrielusp3-rgb/BioWiki](https://github.com/gabrielusp3-rgb/BioWiki)
 
 ---
 
-## About
+## Use BioWiki
 
-Records enter the database only through an **operator CLI**. The HTTP API is read-only (`GET`). The web app talks to `/api/v1`. Scientific data lives in PostgreSQL, not in this Git repository.
+Open the public site in a browser. No install, no terminal, no clone.
 
-This local instance currently holds:
+| | |
+| --- | --- |
+| Live demo | Not published from this workspace (no Vercel or Render credentials here). After **Publish** below, the site URL is `https://<project>.vercel.app`. |
+| API | `https://<api-host>/api/v1` |
+| OpenAPI | `https://<api-host>/docs` |
+
+A visitor can search, open a record, follow a publication, and download FASTA, CSV, JSON, or GenBank. Production must use a managed PostgreSQL database populated with real accessions (`BOOTSTRAP_SEED=auto` imports the curated seed when the catalogue is empty).
+
+Localhost is not the product.
+
+---
+
+## Publish
+
+Public hosting is two services plus a database. Custom domains are optional.
+
+### 1. API and PostgreSQL (Render)
+
+1. Open [Render](https://render.com) and connect `gabrielusp3-rgb/BioWiki`.
+2. Use the Blueprint file `render.yaml` (PostgreSQL 17 + Docker API).
+3. Set `CORS_ORIGINS` to the Vercel origin, for example `https://<project>.vercel.app`.
+4. Confirm `BOOTSTRAP_SEED=auto` so an empty database loads curated real accessions from NCBI/UniProt (network required on first boot).
+5. Note the API hostname. Health: `GET https://<api-host>/api/v1/health`.
+
+Managed `DATABASE_URL` values such as `postgres://…?sslmode=require` are accepted.
+
+### 2. Frontend (Vercel)
+
+1. Open [Vercel](https://vercel.com) and import the same GitHub repository.
+2. Set **Root Directory** to `frontend`.
+3. Environment variables:
+
+   - `NEXT_PUBLIC_API_URL` = `https://<api-host>/api/v1`
+   - `NEXT_PUBLIC_SITE_URL` = `https://<project>.vercel.app`
+
+4. Deploy. Production must not use localhost, `127.0.0.1`, or a private IP.
+
+Until those two hosts exist, there is no public BioWiki URL. Do not treat a local browser session as the live demo.
+
+---
+
+## Development
+
+For people who want to run or change the code.
+
+```bash
+git clone https://github.com/gabrielusp3-rgb/BioWiki.git
+cd BioWiki
+```
+
+**Stack:** Next.js 15, React 19, TypeScript, FastAPI, SQLAlchemy, PostgreSQL. The UI background uses Three.js. Application code is MIT-licensed; sequence records remain under the terms of their originating databases.
+
+A populated local instance (not Git, not production unless you import the same records) may look like:
 
 | Resource | Count |
 | --- | ---: |
@@ -30,11 +78,9 @@ This local instance currently holds:
 | Organisms | 454 |
 | Genome assemblies | 32 |
 
-Counts come from the live database, not from files in Git. They change when the CLI imports more records.
+Those counts are from one live database. They change when the CLI imports more records.
 
----
-
-## Features
+### Features
 
 - Browse DNA, RNA, proteins, CRISPR guides, viruses, organisms, and genome assemblies
 - Record pages by accession, with residues and source metadata
@@ -43,8 +89,9 @@ Counts come from the live database, not from files in Git. They change when the 
 - Filters, cursor pagination (`nextCursor`)
 - Live aggregates (`/statistics`)
 - Exports in FASTA, CSV, JSON, and GenBank
-- FastAPI OpenAPI UI at http://127.0.0.1:8000/docs when the API is running
+- FastAPI OpenAPI UI at `/docs` on the API host (locally http://127.0.0.1:8000/docs)
 
+Records enter PostgreSQL only through the operator CLI. The HTTP API is read-only (`GET`). Scientific data lives in the database, not in Git.
 ---
 
 ## Data sources
@@ -66,7 +113,7 @@ The in-app `/license` page lists DDBJ as a related INSDC archive. There is **no 
 
 ---
 
-## Architecture
+## Local architecture
 
 ```text
 NCBI / UniProt / Ensembl / PDB / ENA / Rfam / PubMed / Datasets
@@ -120,7 +167,7 @@ The repository does not ship a PostgreSQL dump. Schema for a clean database is a
 
 ---
 
-## Running with Docker
+## Running locally with Docker
 
 From the repository root (Docker Desktop or Engine with the Compose plugin):
 
@@ -321,7 +368,8 @@ The in-app `/license` page lists public archives for attribution; DDBJ is listed
 
 ## Limitations
 
-- PostgreSQL is required; this repository does not include a data dump
+- PostgreSQL is required; this repository does not include a data dump. Production uses `BOOTSTRAP_SEED=auto` to import curated real accessions into an empty managed database
+- A public HTTPS URL exists only after Vercel (UI) and Render (API + Postgres) are connected; this workspace cannot complete that without platform credentials
 - Imports need network access to external APIs and are operator-driven
 - The HTTP API does not ingest data
 - Docker Compose is the optional path; local Postgres + uvicorn + Next.js remains valid. Compose is exercised in GitHub Actions when a local Docker daemon is not available

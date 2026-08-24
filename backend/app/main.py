@@ -66,8 +66,10 @@ def create_app() -> FastAPI:
         "allow_methods": ["GET", "HEAD", "OPTIONS"],
         "allow_headers": ["*"],
     }
-    # Ngrok preview tunnels are a local-dev convenience, not a production origin.
-    if settings.environment.lower() in {"development", "dev", "local"}:
+    if settings.cors_origin_regex:
+        cors_kwargs["allow_origin_regex"] = settings.cors_origin_regex
+    elif not settings.is_production:
+        # Ngrok preview tunnels are a local-dev convenience, not a production origin.
         cors_kwargs["allow_origin_regex"] = r"https://.*\.ngrok-free\.app"
     app.add_middleware(CORSMiddleware, **cors_kwargs)
     app.add_middleware(GZipMiddleware, minimum_size=500)

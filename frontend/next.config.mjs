@@ -3,7 +3,6 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
-  output: "standalone",
   transpilePackages: [
     "three",
     "@react-three/fiber",
@@ -14,5 +13,11 @@ const nextConfig = {
     optimizePackageImports: ["framer-motion"],
   },
 };
+
+// Standalone output is for the Docker image. Vercel ignores a custom distDir
+// layout and should not use `output: "standalone"`.
+if (!process.env.VERCEL) {
+  nextConfig.output = "standalone";
+}
 
 export default nextConfig;

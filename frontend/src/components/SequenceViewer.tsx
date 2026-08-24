@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { API_BASE_URL } from "@/lib/api";
 
 function classFor(ch: string): string {
   const c = ch.toUpperCase();
@@ -59,12 +60,14 @@ export function SequenceViewer({
           >
             {copied ? "Copied" : "Copy"}
           </button>
-          <a
-            href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/download/sequence/${encodeURIComponent(accession)}?format=fasta`}
-            className="glass glass-hover px-3 py-1.5 text-[0.6rem] uppercase tracking-widest text-white"
-          >
-            FASTA
-          </a>
+          {API_BASE_URL ? (
+            <a
+              href={`${API_BASE_URL}/download/sequence/${encodeURIComponent(accession)}?format=fasta`}
+              className="glass glass-hover px-3 py-1.5 text-[0.6rem] uppercase tracking-widest text-white"
+            >
+              FASTA
+            </a>
+          ) : null}
         </div>
       </div>
       <div className="max-h-96 overflow-auto p-5 font-mono text-xs leading-6">

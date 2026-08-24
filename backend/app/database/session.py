@@ -18,12 +18,18 @@ from app.core.config import get_settings
 @lru_cache
 def get_engine() -> AsyncEngine:
     settings = get_settings()
+    connect_args: dict = {}
+    use_ssl = settings.database_ssl or settings.is_production
+    if use_ssl and "ssl=" not in settings.database_url:
+        connect_args["ssl"] = True
     return create_async_engine(
         settings.database_url,
         echo=settings.sql_echo,
         pool_size=settings.db_pool_size,
         max_overflow=settings.db_max_overflow,
         pool_pre_ping=True,
+        pool_recycle=1800,
+        connect_args=connect_args,
     )
 
 

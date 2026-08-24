@@ -1,12 +1,12 @@
 /**
  * Backend API client.
  * Base URL comes from NEXT_PUBLIC_API_URL so the frontend stays decoupled from
- * the FastAPI service. When it is not configured (e.g. during early development)
- * requests are skipped and callers receive empty, honest results — the UI never
- * fabricates data to fill the gap.
+ * the FastAPI service. Local development may omit the variable and talk to
+ * localhost. Production must set NEXT_PUBLIC_API_URL to the public API;
+ * missing it yields an empty base so the UI does not call the author's machine.
  */
 export const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") ??
   (process.env.NODE_ENV === "production" ? "" : "http://localhost:8000/api/v1");
 
 export const isApiConfigured = Boolean(API_BASE_URL);

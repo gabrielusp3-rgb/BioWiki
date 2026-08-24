@@ -1,10 +1,12 @@
+import { API_BASE_URL } from "./api";
+
 /**
  * API reference copy for the in-app documentation pages.
- * Paths and limits must match backend/app/api/v1. Local default base is /api/v1.
+ * Paths and limits must match backend/app/api/v1.
+ * Examples use the configured public API, or /api/v1 when unset.
  */
 
-export const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+export const API_BASE = API_BASE_URL || "/api/v1";
 
 export type HttpMethod = "GET";
 

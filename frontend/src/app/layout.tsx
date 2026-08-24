@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { BackgroundDNAMount } from "@/components/BackgroundDNAMount";
 import { SplashScreen } from "@/components/SplashScreen";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -18,7 +19,7 @@ const inter = Inter({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const SITE_URL = siteUrl();
 const SITE_DESCRIPTION =
   "Explore the biological diversity of life through real molecular sequences from internationally recognised public databases.";
 
@@ -68,6 +69,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     locale: "en_US",
+    images: [{ url: "/brand-logo.png", width: 1024, height: 576, alt: "BioWiki" }],
   },
   twitter: {
     card: "summary_large_image",

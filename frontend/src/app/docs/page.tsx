@@ -19,7 +19,7 @@ const DOC_CARDS = [
   {
     eyebrow: "Programmatic access",
     accent: "#39FF14",
-    body: "The REST API is versioned under /api/v1. List endpoints use cursor pagination via nextCursor. See the in-app API page and the FastAPI OpenAPI UI at http://127.0.0.1:8000/docs when the backend is running.",
+    body: "The REST API is versioned under /api/v1. List endpoints use cursor pagination via nextCursor. The in-app API page lists the routes; OpenAPI lives at /docs on the API host.",
   },
   {
     eyebrow: "Data integrity",

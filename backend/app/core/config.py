@@ -4,8 +4,10 @@ from __future__ import annotations
 
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from app.core.database_url import normalize_database_url
 
 
 class Settings(BaseSettings):
@@ -24,12 +26,21 @@ class Settings(BaseSettings):
         default="postgresql+asyncpg://biowiki:biowiki@localhost:5432/biowiki",
         alias="DATABASE_URL",
     )
+    database_ssl: bool = Field(default=False, alias="DATABASE_SSL")
     sql_echo: bool = Field(default=False, alias="SQL_ECHO")
     db_pool_size: int = Field(default=10, alias="DB_POOL_SIZE")
     db_max_overflow: int = Field(default=20, alias="DB_MAX_OVERFLOW")
 
     # CORS — comma separated list of allowed origins for the frontend.
     cors_origins: str = Field(default="http://localhost:3000", alias="CORS_ORIGINS")
+    cors_origin_regex: str = Field(default="", alias="CORS_ORIGIN_REGEX")
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def _normalize_database_url(cls, value: object) -> object:
+        if isinstance(value, str):
+            return normalize_database_url(value)
+        return value
 
     rate_limit_enabled: bool = Field(default=True, alias="RATE_LIMIT_ENABLED")
     rate_limit_requests: int = Field(default=120, alias="RATE_LIMIT_REQUESTS")
@@ -37,6 +48,10 @@ class Settings(BaseSettings):
 
     # Comma-separated API keys; empty means the API is open (local development).
     api_keys: str = Field(default="", alias="API_KEYS")
+
+    @property
+    def is_production(self) -> bool:
+        return self.environment.lower() in {"production", "prod"}
 
     @property
     def cors_origins_list(self) -> list[str]:

@@ -1,0 +1,6 @@
+---
+description: Do not add Cursor attribution to git commits
+alwaysApply: true
+---
+
+Do not add `Co-authored-by: Cursor`, `cursoragent`, or similar automatic attribution trailers to commit messages. The repository author is Gabriel. Commit messages should describe the change only.

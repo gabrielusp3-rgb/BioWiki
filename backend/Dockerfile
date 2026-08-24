@@ -17,7 +17,7 @@ ENV PYTHONUNBUFFERED=1 \
 
 EXPOSE 8000
 
-HEALTHCHECK --interval=10s --timeout=5s --start-period=40s --retries=10 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health')"
+HEALTHCHECK --interval=10s --timeout=5s --start-period=90s --retries=12 \
+    CMD python -c "import os,urllib.request; p=os.environ.get('PORT','8000'); urllib.request.urlopen('http://127.0.0.1:%s/api/v1/health' % p)"
 
 CMD ["python", "docker_entrypoint.py"]
