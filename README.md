@@ -34,7 +34,7 @@ Current production:
 - API: Vercel FastAPI (`backend/`)
 - Database: Neon PostgreSQL, connected as `DATABASE_URL` / `DATABASE_URL_UNPOOLED`
 
-To reproduce on another account: import the GitHub repository twice on Vercel (frontend root `frontend`, API root `backend`), provision Neon, connect it to the API project, set `BIOWIKI_ENV=production`, `NEXT_PUBLIC_API_URL`, and `NEXT_PUBLIC_SITE_URL`, then ingest curated accessions with `python -m scripts.seed_initial --no-search`. Disable Vercel Deployment Protection so visitors are not asked to log in.
+To reproduce on another account: import the GitHub repository twice on Vercel (frontend root `frontend`, API root `backend`), provision Neon, connect it to the API project, set `BIOWIKI_ENV=production`, `CORS_ORIGINS` to the public site origin only, `NEXT_PUBLIC_API_URL`, and `NEXT_PUBLIC_SITE_URL`, then ingest curated accessions with `python -m scripts.seed_initial --no-search`. Leave `API_KEYS` unset for the public read-only API. Disable Vercel Deployment Protection so visitors are not asked to log in.
 
 `render.yaml` remains a Docker + managed Postgres alternative. Production must not use localhost, `127.0.0.1`, or a private IP.
 
@@ -247,11 +247,35 @@ Backend variables actually used include `DATABASE_URL`, `CORS_ORIGINS`, `BIOWIKI
 
 ## API
 
-Base path: **`/api/v1`**. JSON uses camelCase. Sequence, protein, virus, genome and publication lists return `{ results, total, nextCursor }`. Organism lists return `{ organisms, total, nextCursor }`.
+**Base URL:** https://biowiki-api.vercel.app/api/v1
+
+**OpenAPI:** https://biowiki-api.vercel.app/docs
+
+**Schema:** https://biowiki-api.vercel.app/openapi.json
+
+Authentication is optional for the public read-only API; rate limiting applies. Production does not require `X-API-Key`. If an operator sets `API_KEYS` on the server, catalogue routes then require `X-API-Key: <YOUR_API_KEY>` and return 401 when the header is missing or unknown. Health, readiness, `/docs` and `/openapi.json` stay public. Never publish a real key.
+
+```bash
+curl https://biowiki-api.vercel.app/api/v1/health
+curl https://biowiki-api.vercel.app/api/v1/statistics
+curl "https://biowiki-api.vercel.app/api/v1/search?q=insulin&limit=20"
+```
+
+When keys are configured on the server:
+
+```bash
+curl \
+  -H "X-API-Key: <YOUR_API_KEY>" \
+  https://biowiki-api.vercel.app/api/v1/statistics
+```
+
+JSON uses camelCase. Sequence, protein, virus, genome and publication lists return `{ results, total, nextCursor }`. Organism lists return `{ organisms, total, nextCursor }`. Default rate limit is 120 requests / 60 seconds per API process (`RATE_LIMIT_*`); 429 includes `Retry-After`.
 
 | Method | Path | Notes |
 | --- | --- | --- |
-| GET | `/health`, `/ready` | Liveness / DB probe |
+| GET | `/` (API host) | Index: docs + `/api/v1` |
+| GET | `/api/v1` | Version index |
+| GET | `/health`, `/ready` | Liveness / DB probe (always public) |
 | GET | `/sequences` | Requires `type=dna\|rna\|crispr` |
 | GET | `/rna`, `/crispr` | Category lists |
 | GET | `/sequences/{accession}` | Single record, including residues |
@@ -264,9 +288,7 @@ Base path: **`/api/v1`**. JSON uses camelCase. Sequence, protein, virus, genome 
 | GET | `/statistics`, `/statistics/sync`, `/statistics/integrity` | Live aggregates |
 | GET | `/download`, `/download/sequences`, `/download/sequence/{accession}` | fasta, csv, json, genbank |
 
-Typical query flags: `q`, `organism`, `source`, `limit` (1–100 on lists; bulk download up to 10 000), `cursor`. If `API_KEYS` is set, send `X-API-Key`.
-
-Interactive schema: `/docs`.
+Typical query flags: `q`, `organism`, `source`, `limit` (1–100 on lists; bulk download up to 10 000), `cursor`.
 
 ---
 
@@ -360,7 +382,7 @@ The in-app `/license` page lists public archives for attribution; DDBJ is listed
 - Imports need network access to external APIs and are operator-driven
 - The HTTP API does not ingest data
 - Docker Compose is the optional path; local Postgres + uvicorn + Next.js remains valid. Compose is exercised in GitHub Actions when a local Docker daemon is not available
-- Optional API keys; an empty `API_KEYS` list leaves the local API open
+- Optional API keys; an empty `API_KEYS` list leaves the public read-only API open
 - The rate limiter is in-process (per API process), not a distributed store
 - A Compose/CI database has schema only until CLI ingest
 - `live` pytest tests are skipped in CI because they assert on a populated catalogue

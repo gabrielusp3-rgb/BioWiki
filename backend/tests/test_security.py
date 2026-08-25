@@ -54,6 +54,7 @@ def test_rate_limit_middleware_blocks_after_limit() -> None:
     blocked = client.get("/api/v1/search")
     assert blocked.status_code == 429
     assert blocked.json()["detail"] == "Rate limit exceeded"
+    assert blocked.headers.get("retry-after") == "60"
     assert client.get("/api/v1/health").status_code == 200
 
 

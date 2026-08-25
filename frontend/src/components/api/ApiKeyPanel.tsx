@@ -2,7 +2,7 @@
 
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 
-const HEADER_EXAMPLE = "X-API-Key: <your-key>";
+const HEADER_EXAMPLE = "X-API-Key: <YOUR_API_KEY>";
 
 export function ApiKeyPanel() {
   const { copied, copy } = useCopyToClipboard();
@@ -15,13 +15,12 @@ export function ApiKeyPanel() {
       </div>
 
       <p className="text-sm leading-relaxed text-content-secondary">
-        Authentication is optional. With an empty
+        Authentication is optional for the public read-only API; rate limiting
+        applies. With an empty
         <code className="mx-1 font-mono text-category-dna">API_KEYS</code>
-        list the HTTP API is open. When keys are configured in the backend
-        <code className="mx-1 font-mono text-content-primary">.env</code>,
-        send them in the
-        <code className="mx-1 font-mono text-category-dna">X-API-Key</code>
-        header. There is no key signup in this application.
+        list the HTTP API is open. When keys are configured on the server, send
+        <code className="mx-1 font-mono text-category-dna">X-API-Key: &lt;YOUR_API_KEY&gt;</code>
+        . There is no key signup in this application.
       </p>
 
       <div className="flex items-center justify-between gap-3 border border-glass-border bg-black/40 px-4 py-3">

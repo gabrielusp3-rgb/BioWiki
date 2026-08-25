@@ -142,7 +142,7 @@ export const REQUEST_SAMPLES: CodeSample[] = [
     label: "cURL",
     language: "bash",
     code: `curl "${API_BASE}/search?q=insulin&types=protein&limit=20"
-# If API_KEYS is set on the server, also send: -H "X-API-Key: $BIOWIKI_API_KEY"`,
+# If API_KEYS is set on the server: -H "X-API-Key: <YOUR_API_KEY>"`,
   },
   {
     id: "javascript",
@@ -225,7 +225,7 @@ export const API_FEATURES: ApiFeature[] = [
   {
     title: "Authentication",
     description:
-      "Optional. If API_KEYS is empty the API is open. If keys are set, send X-API-Key.",
+      "Optional for the public read-only API; rate limiting applies. If API_KEYS is empty the API is open. If keys are set, send X-API-Key: <YOUR_API_KEY>.",
   },
   {
     title: "Rate limits",

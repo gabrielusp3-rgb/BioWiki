@@ -15,7 +15,7 @@ from starlette.responses import JSONResponse, Response
 
 # Liveness only. /ready hits PostgreSQL, so it stays rate-limited.
 _EXEMPT_SUFFIXES = ("/health",)
-_EXEMPT_PATHS = {"/", "/docs", "/redoc", "/openapi.json"}
+_EXEMPT_PATHS = {"/", "/docs", "/redoc", "/openapi.json", "/api/v1", "/api/v1/"}
 # In-process map; bound so a scan of distinct IPs cannot grow without limit.
 _MAX_CLIENTS = 8192
 
