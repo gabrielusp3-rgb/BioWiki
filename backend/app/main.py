@@ -53,7 +53,6 @@ Programmatic access to real biological sequences (DNA, RNA, proteins, CRISPR
 guides, viruses and genomes) sourced from recognised international databases.
 
 - Versioned under `/api/v1`
-- Cursor-based pagination on list endpoints (`nextCursor`)
 - PostgreSQL full-text search on `/search`
 - Rate limited; optional API-key authentication via the `X-API-Key` header"""
 
