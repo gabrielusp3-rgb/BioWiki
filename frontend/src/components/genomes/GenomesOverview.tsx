@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Button, StatCard } from "@/components/ui";
+import { Button, Skeleton, StatCard } from "@/components/ui";
 import { ChevronRightIcon, ExternalIcon } from "@/components/ui/Icons";
 import { isApiConfigured } from "@/lib/api";
+import { deriveGenomeOverviewStats } from "@/lib/genome-stats";
 import { listGenomes } from "@/services/sequenceService";
 import { getStatistics } from "@/services/statisticsService";
 import type { GenomeAssembly } from "@/types/sequence";
@@ -31,9 +32,11 @@ export function GenomesOverview() {
     ])
       .then(([page, stats]) => {
         if (controller.signal.aborted) return;
-        setGenomes(page.results);
-        setTotal(page.total);
-        if (stats) setOrganisms(stats.organisms);
+        const listed = page.results ?? [];
+        const derived = deriveGenomeOverviewStats(listed, page.total, stats);
+        setGenomes(listed);
+        setTotal(derived.stored);
+        setOrganisms(derived.trackedOrganisms);
       })
       .catch(() => {
         if (!controller.signal.aborted) setError(true);
@@ -42,30 +45,41 @@ export function GenomesOverview() {
   }, []);
 
   const distinctOrganisms = genomes
-    ? new Set(genomes.map((g) => g.organism)).size
+    ? deriveGenomeOverviewStats(genomes, total ?? 0, null).distinctOrganisms
     : 0;
+  const awaitingLive = isApiConfigured && !error && genomes === null;
 
   return (
     <div className="flex flex-col gap-10">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <StatCard
-          value={total ?? 0}
-          label="Complete assemblies stored"
-          category="genome"
-          index={1}
-        />
-        <StatCard
-          value={distinctOrganisms}
-          label="Organisms with genome-level data"
-          category="genome"
-          index={2}
-        />
-        <StatCard
-          value={organisms ?? 0}
-          label="Organisms tracked (database)"
-          category="genome"
-          index={3}
-        />
+        {awaitingLive ? (
+          <>
+            <Skeleton height={140} />
+            <Skeleton height={140} />
+            <Skeleton height={140} />
+          </>
+        ) : (
+          <>
+            <StatCard
+              value={total ?? 0}
+              label="Complete assemblies stored"
+              category="genome"
+              index={1}
+            />
+            <StatCard
+              value={distinctOrganisms}
+              label="Organisms with genome-level data"
+              category="genome"
+              index={2}
+            />
+            <StatCard
+              value={organisms ?? 0}
+              label="Organisms tracked (database)"
+              category="genome"
+              index={3}
+            />
+          </>
+        )}
       </div>
 
       {!isApiConfigured || error ? (

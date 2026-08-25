@@ -18,6 +18,11 @@ function easeOutExpo(t: number): number {
 /**
  * Animated numeric count-up that triggers when the target element enters the
  * viewport. Respects `prefers-reduced-motion` by snapping to the final value.
+ *
+ * If `end` changes after the first trigger (live totals arriving after mount),
+ * the displayed value follows the new total instead of staying at the first
+ * target — otherwise statistic cards can freeze at 0 while the list below
+ * already shows records.
  */
 export function useCountUp<T extends HTMLElement>({
   end,
@@ -39,14 +44,19 @@ export function useCountUp<T extends HTMLElement>({
       return;
     }
 
+    if (startedRef.current) {
+      setValue(end);
+      return;
+    }
+
     let raf = 0;
     let startTime = 0;
 
-    const run = () => {
+    const run = (to: number) => {
       const step = (now: number) => {
         if (!startTime) startTime = now;
         const progress = Math.min((now - startTime) / duration, 1);
-        setValue(start + (end - start) * easeOutExpo(progress));
+        setValue(start + (to - start) * easeOutExpo(progress));
         if (progress < 1) raf = requestAnimationFrame(step);
       };
       raf = requestAnimationFrame(step);
@@ -57,7 +67,7 @@ export function useCountUp<T extends HTMLElement>({
         entries.forEach((entry) => {
           if (entry.isIntersecting && !startedRef.current) {
             startedRef.current = true;
-            run();
+            run(end);
             if (once) observer.disconnect();
           }
         });

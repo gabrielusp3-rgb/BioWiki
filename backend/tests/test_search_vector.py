@@ -108,6 +108,7 @@ async def test_required_extensions_installed() -> None:
     assert "pgcrypto" in ext or "plpgsql" in ext
 
 
+@pytest.mark.live
 async def test_live_alembic_revision_matches_repo() -> None:
     async with get_sessionmaker()() as session:
         stamped = (
