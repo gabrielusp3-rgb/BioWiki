@@ -33,11 +33,14 @@ export function LiveStatistics({ statistics }: LiveStatisticsProps) {
         setSync(stats.sync);
         setLive([
           { id: "sequences", value: stats.totalSequences, label: "Sequences" },
-          { id: "organisms", value: stats.organisms, label: "Organisms" },
-          { id: "proteins", value: byKey.protein ?? 0, label: "Proteins", category: "protein" },
-          { id: "rna", value: byKey.rna ?? 0, label: "RNA", category: "rna" },
           { id: "dna", value: byKey.dna ?? 0, label: "DNA", category: "dna" },
+          { id: "rna", value: byKey.rna ?? 0, label: "RNA", category: "rna" },
+          { id: "proteins", value: byKey.protein ?? 0, label: "Proteins", category: "protein" },
+          { id: "crispr", value: byKey.crispr ?? 0, label: "CRISPR", category: "crispr" },
+          { id: "virus", value: byKey.virus ?? 0, label: "Virus", category: "virus" },
           { id: "publications", value: stats.publications, label: "Publications" },
+          { id: "organisms", value: stats.organisms, label: "Organisms" },
+          { id: "genomes", value: stats.genomes, label: "Genome assemblies", category: "genome" },
         ]);
       })
       .catch(() => {

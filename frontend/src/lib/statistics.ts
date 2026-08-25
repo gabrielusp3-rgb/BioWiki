@@ -20,11 +20,14 @@ export interface Statistic {
  */
 export const INSTITUTIONAL_STATISTICS: Statistic[] = [
   { id: "sequences", value: 1_500_000, suffix: "+", label: "Sequences" },
-  { id: "organisms", value: 200, suffix: "+", label: "Organisms" },
-  { id: "proteins", value: 500_000, suffix: "+", label: "Proteins", category: "protein" },
-  { id: "rna", value: 400_000, suffix: "+", label: "RNA", category: "rna" },
   { id: "dna", value: 500_000, suffix: "+", label: "DNA", category: "dna" },
+  { id: "rna", value: 400_000, suffix: "+", label: "RNA", category: "rna" },
+  { id: "proteins", value: 500_000, suffix: "+", label: "Proteins", category: "protein" },
   { id: "crispr", value: 150_000, suffix: "+", label: "CRISPR", category: "crispr" },
+  { id: "virus", value: 120_000, suffix: "+", label: "Virus", category: "virus" },
+  { id: "publications", value: 1_000_000, suffix: "+", label: "Publications" },
+  { id: "organisms", value: 200, suffix: "+", label: "Organisms" },
+  { id: "genomes", value: 50_000, suffix: "+", label: "Genome assemblies", category: "genome" },
 ];
 
 const grouping = new Intl.NumberFormat("en-US");

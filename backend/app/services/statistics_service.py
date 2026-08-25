@@ -67,24 +67,27 @@ async def get_statistics(session: AsyncSession) -> StatisticsRead:
         )
     ).one()
 
+    labels = {
+        cat.key: cat.label
+        for cat in (
+            await session.execute(select(Category).order_by(Category.key))
+        ).scalars().all()
+    }
     categories: list[CategoryStat] = []
     live_by_key: dict[str, int] = {}
-    for cat in (
-        await session.execute(select(Category).order_by(Category.key))
-    ).scalars().all():
-        types = sync_service.CATEGORY_TYPES.get(cat.key, [])
-        if cat.key == "genome":
+    # Always emit live per-category counts. Do not hide DNA/RNA/protein
+    # because the `categories` lookup table was never seeded.
+    for key, types in sync_service.CATEGORY_TYPES.items():
+        if key == "genome":
             count = type_stats.get(SequenceType.GENOME, (0, 0))[0] + int(genomes)
             residues = int(type_stats.get(SequenceType.GENOME, (0, 0))[1])
-        elif types:
-            count, residues = _for_types(types)
         else:
-            count, residues = 0, 0
-        live_by_key[cat.key] = count
+            count, residues = _for_types(types)
+        live_by_key[key] = count
         categories.append(
             CategoryStat(
-                key=cat.key,
-                label=cat.label,
+                key=key,
+                label=labels.get(key) or sync_service.CATEGORY_LABELS[key],
                 count=count,
                 total_residues=residues,
             )

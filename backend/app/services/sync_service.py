@@ -30,6 +30,15 @@ CATEGORY_TYPES: dict[str, list[SequenceType]] = {
     "genome": [SequenceType.GENOME],
 }
 
+CATEGORY_LABELS: dict[str, str] = {
+    "dna": "DNA",
+    "rna": "RNA",
+    "protein": "Protein",
+    "crispr": "CRISPR",
+    "virus": "Virus",
+    "genome": "Genome",
+}
+
 
 async def _category_live_counts(session: AsyncSession) -> dict[str, int]:
     """One GROUP BY plus genome_records count — same numbers as per-key COUNTs."""
@@ -63,10 +72,18 @@ async def refresh_counts(session: AsyncSession) -> dict[str, int]:
     updated: dict[str, int] = {}
 
     live = await _category_live_counts(session)
-    for cat in (await session.execute(select(Category))).scalars().all():
-        count = live.get(cat.key, 0)
+    existing = {
+        cat.key: cat
+        for cat in (await session.execute(select(Category))).scalars().all()
+    }
+    for key, label in CATEGORY_LABELS.items():
+        cat = existing.get(key)
+        if cat is None:
+            cat = Category(key=key, label=label)
+            session.add(cat)
+        count = live.get(key, 0)
         cat.sequence_count = count
-        updated[cat.key] = count
+        updated[key] = count
 
     org_counts = dict(
         (
