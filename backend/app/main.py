@@ -73,7 +73,8 @@ Always public (no key): `/`, `/api/v1`, `/docs`, `/redoc`, `/openapi.json`,
 returns **429** with `Retry-After`. Exempt: `/`, `/docs`, `/redoc`,
 `/openapi.json`, `/api/v1`, `/api/v1/health`.
 
-**Pagination:** list endpoints return `nextCursor`; pass it as `cursor`.
+**Pagination:** list endpoints return a nextCursor field. Send that value as the
+cursor query parameter to load the next page.
 
 **HTTP:** 200 OK, 401 invalid or missing key (only when `API_KEYS` is set),
 404 not found, 422 validation, 429 rate limit.

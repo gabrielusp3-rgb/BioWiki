@@ -11,7 +11,11 @@ from app.services import mappers, sequence_service
 router = APIRouter(tags=["sequences"], dependencies=[Depends(api_key_guard)])
 
 _LIMIT = Query(20, ge=1, le=100, description="Maximum number of records to return (1–100).")
-_CURSOR = Query(None, max_length=64, description="Opaque keyset cursor from a previous response's `nextCursor`.")
+_CURSOR = Query(
+    None,
+    max_length=64,
+    description="Opaque keyset token from a previous response's nextCursor field.",
+)
 _Q = Query(None, max_length=256, description="Free-text query over name/accession.")
 _ORGANISM = Query(None, max_length=256)
 _SOURCE = Query(None, max_length=64)

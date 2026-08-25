@@ -39,6 +39,8 @@ def test_openapi_documents_optional_api_key() -> None:
     description = schema["info"]["description"]
     assert "YOUR_API_KEY" in description
     assert "nextCursor" in description
+    assert "`nextCursor`" not in description
+    assert "`cursor`" not in description
     assert "401" in description
     servers = {item["url"] for item in schema.get("servers") or []}
     assert "https://biowiki-api.vercel.app" in servers

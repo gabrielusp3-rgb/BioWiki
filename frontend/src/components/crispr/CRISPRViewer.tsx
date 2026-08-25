@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { cn } from "@/lib/cn";
+import { viewerOverlayClass, viewerPanelClass, viewerPanelStyle } from "@/lib/viewer-overlay";
 import { Badge, Button } from "@/components/ui";
 import { CloseIcon } from "@/components/ui/Icons";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
@@ -114,7 +114,7 @@ export function CRISPRViewer({ guide, open, onClose }: CRISPRViewerProps) {
   return createPortal(
     <AnimatePresence>
       {open && active && (
-        <div className="fixed inset-0 z-[1000] grid place-items-center p-0 sm:p-6">
+        <div className={viewerOverlayClass()}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -128,9 +128,10 @@ export function CRISPRViewer({ guide, open, onClose }: CRISPRViewerProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className={cn("glass-strong relative z-10 flex max-h-[90dvh] w-full max-w-3xl flex-col")}
+            className={viewerPanelClass({ maxWidth: "max-w-3xl" })}
+            style={viewerPanelStyle()}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-glass-divider p-6">
+            <div className="flex shrink-0 items-start justify-between gap-4 border-b border-glass-divider p-6">
               <div className="flex min-w-0 flex-col gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge category="crispr" dot>
@@ -162,6 +163,7 @@ export function CRISPRViewer({ guide, open, onClose }: CRISPRViewerProps) {
               </button>
             </div>
 
+            <div className="min-h-0 flex-1 overflow-y-auto">
             <div className="grid grid-cols-2 gap-3 border-b border-glass-divider p-6 sm:grid-cols-4">
               <MetaItem label="PAM" value={active.pam} />
               <MetaItem label="Length" value={formatNt(active.guideLength)} />
@@ -169,7 +171,7 @@ export function CRISPRViewer({ guide, open, onClose }: CRISPRViewerProps) {
               <MetaItem label="Off-target" value={formatScore(active.offTargetScore)} />
             </div>
 
-            <div className="flex flex-col gap-4 overflow-auto p-6">
+            <div className="flex flex-col gap-4 p-6">
               <span className="eyebrow">Guide RNA · Spacer</span>
               {loading ? (
                 <p className="text-sm text-content-secondary">Loading guide from the database…</p>
@@ -194,8 +196,9 @@ export function CRISPRViewer({ guide, open, onClose }: CRISPRViewerProps) {
                 estimate efficiency or off-target values on the client.
               </p>
             </div>
+            </div>
 
-            <div className="flex flex-wrap items-center justify-end gap-3 border-t border-glass-divider p-6">
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-glass-divider p-6">
               <Button
                 variant="ghost"
                 size="sm"

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { cn } from "@/lib/cn";
+import { viewerOverlayClass, viewerPanelClass, viewerPanelStyle } from "@/lib/viewer-overlay";
 import { Badge } from "@/components/ui";
 import { CloseIcon } from "@/components/ui/Icons";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
@@ -135,7 +135,7 @@ function ViewerBody(props: {
 
   return (
     <>
-      <div className="flex items-start justify-between gap-4 border-b border-glass-divider p-6">
+      <div className="flex shrink-0 items-start justify-between gap-4 border-b border-glass-divider p-6">
         <div className="flex min-w-0 flex-col gap-2">
           <Badge category={resolvedAccent} dot>
             {kind === "protein" ? "Protein" : molecule === "rna" ? "RNA" : "DNA"}
@@ -168,8 +168,8 @@ function ViewerBody(props: {
         )}
       </div>
 
+      <div className="min-h-0 flex-1 overflow-y-auto">
       {meta && meta.length > 0 && <MetaGrid meta={meta} />}
-
       <SequenceToolbar
         legend={legend}
         copied={copied}
@@ -181,7 +181,7 @@ function ViewerBody(props: {
         onToggleFullscreen={onToggleFullscreen}
       />
 
-      <div className="min-h-[160px] flex-1 overflow-auto p-6">
+      <div className="p-6">
         {loading ? (
           <p className="text-sm text-content-secondary">Loading residues from the database…</p>
         ) : sequence ? (
@@ -195,6 +195,7 @@ function ViewerBody(props: {
         ) : (
           <p className="text-sm text-content-secondary">{emptyMessage}</p>
         )}
+      </div>
       </div>
     </>
   );
@@ -229,7 +230,7 @@ export function SequenceViewer(props: SequenceViewerProps) {
 
   if (!asModal) {
     return (
-      <div className="glass-strong flex max-h-[80dvh] flex-col">
+      <div className="glass-strong flex max-h-[80dvh] min-h-0 flex-col overflow-hidden">
         <ViewerBody data={props} fullscreen={false} />
       </div>
     );
@@ -240,7 +241,7 @@ export function SequenceViewer(props: SequenceViewerProps) {
   return createPortal(
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[1000] grid place-items-center p-0 sm:p-6">
+        <div className={viewerOverlayClass(fullscreen)}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -254,10 +255,8 @@ export function SequenceViewer(props: SequenceViewerProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className={cn(
-              "glass-strong relative z-10 flex w-full flex-col",
-              fullscreen ? "h-full max-w-none" : "max-h-[90dvh] max-w-4xl",
-            )}
+            className={viewerPanelClass({ fullscreen })}
+            style={viewerPanelStyle(fullscreen)}
           >
             <ViewerBody
               data={props}

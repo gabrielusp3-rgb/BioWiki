@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { cn } from "@/lib/cn";
+import { viewerOverlayClass, viewerPanelClass, viewerPanelStyle } from "@/lib/viewer-overlay";
 import { Badge, Button } from "@/components/ui";
 import { CloseIcon, ExternalIcon } from "@/components/ui/Icons";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
@@ -40,11 +40,11 @@ function SequenceView({ sequence }: { sequence: string }) {
   return (
     <div className="font-mono text-[13px] leading-6">
       {lines.map((line, rowIndex) => (
-        <div key={rowIndex} className="flex gap-4">
+        <div key={rowIndex} className="flex min-w-0 gap-4">
           <span className="w-16 shrink-0 select-none text-right text-content-muted">
             {rowIndex * LINE_WIDTH + 1}
           </span>
-          <span className="tracking-[0.15em]">
+          <span className="min-w-0 break-all tracking-[0.08em]">
             {line.split("").map((residue, i) => (
               <span key={i} style={{ color: aaColor(residue) }}>
                 {residue}
@@ -143,7 +143,7 @@ export function ProteinViewer({ protein, open, onClose }: ProteinViewerProps) {
   return createPortal(
     <AnimatePresence>
       {open && active && (
-        <div className="fixed inset-0 z-[1000] grid place-items-center p-0 sm:p-6">
+        <div className={viewerOverlayClass(fullscreen)}>
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -157,12 +157,10 @@ export function ProteinViewer({ protein, open, onClose }: ProteinViewerProps) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 16, scale: 0.98 }}
             transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className={cn(
-              "glass-strong relative z-10 flex w-full flex-col",
-              fullscreen ? "h-full max-w-none sm:h-full" : "max-h-[90dvh] max-w-4xl",
-            )}
+            className={viewerPanelClass({ fullscreen })}
+            style={viewerPanelStyle(fullscreen)}
           >
-            <div className="flex items-start justify-between gap-4 border-b border-glass-divider p-6">
+            <div className="flex shrink-0 items-start justify-between gap-4 border-b border-glass-divider p-6">
               <div className="flex min-w-0 flex-col gap-2">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge category="protein" dot>
@@ -209,6 +207,7 @@ export function ProteinViewer({ protein, open, onClose }: ProteinViewerProps) {
               </div>
             </div>
 
+            <div className="flex min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <div className="grid grid-cols-2 gap-3 border-b border-glass-divider p-6 sm:grid-cols-4">
               <MetaItem label="Length" value={formatAa(active.length)} />
               <MetaItem label="Molecular weight" value={formatMw(active.molecularWeight)} />
@@ -265,7 +264,7 @@ export function ProteinViewer({ protein, open, onClose }: ProteinViewerProps) {
               <span className="eyebrow">Sequence · Residue view</span>
               <GroupLegend />
             </div>
-            <div className="min-h-[160px] flex-1 overflow-auto p-6">
+            <div className="p-6">
               {loading ? (
                 <p className="text-sm text-content-secondary">Loading residues from the database…</p>
               ) : residues ? (
@@ -277,8 +276,9 @@ export function ProteinViewer({ protein, open, onClose }: ProteinViewerProps) {
                 </p>
               )}
             </div>
+            </div>
 
-            <div className="flex flex-wrap items-center justify-end gap-3 border-t border-glass-divider p-6">
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-3 border-t border-glass-divider p-6">
               <Button
                 variant="ghost"
                 size="sm"

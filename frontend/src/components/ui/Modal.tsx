@@ -56,7 +56,7 @@ export function Modal({
     <AnimatePresence>
       {open && (
         <div
-          className="fixed inset-0 z-[1000] grid place-items-center p-4 sm:p-6"
+          className="fixed inset-0 z-[1000] flex items-center justify-center overflow-hidden p-4 sm:p-6"
           role="dialog"
           aria-modal="true"
           aria-label={title}
@@ -75,9 +75,10 @@ export function Modal({
             animate="visible"
             exit="exit"
             className={cn(
-              "glass-strong relative z-10 flex max-h-[88dvh] w-full flex-col",
+              "glass-strong relative z-10 flex max-h-full min-h-0 w-full flex-col overflow-hidden",
               sizes[size],
             )}
+            style={{ maxHeight: "100%", minHeight: 0, overflow: "hidden" }}
           >
             {(title || description) && (
               <div className="flex items-start justify-between gap-6 border-b border-glass-divider p-6">
@@ -102,7 +103,7 @@ export function Modal({
               </div>
             )}
 
-            <div className="flex-1 overflow-y-auto p-6">{children}</div>
+            <div className="min-h-0 flex-1 overflow-y-auto p-6">{children}</div>
 
             {footer && (
               <div className="flex items-center justify-end gap-3 border-t border-glass-divider p-6">

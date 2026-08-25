@@ -39,13 +39,13 @@ export function SequenceHighlight({
   return (
     <div className="font-mono text-[13px] leading-6">
       {lines.map((line, rowIndex) => (
-        <div key={rowIndex} className="flex gap-4">
+        <div key={rowIndex} className="flex min-w-0 gap-4">
           {showLineNumbers && (
             <span className="w-16 shrink-0 select-none text-right text-content-muted">
               {rowIndex * lineWidth + 1}
             </span>
           )}
-          <span className="break-all tracking-[0.15em]">
+          <span className="min-w-0 break-all tracking-[0.08em]">
             {line.split("").map((residue, i) => (
               <span key={i} style={{ color: residueColor(residue, kind) }}>
                 {residue}
