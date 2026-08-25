@@ -1,27 +1,29 @@
-import Image from "next/image";
-
 type BrandLogoProps = {
   className?: string;
   priority?: boolean;
 };
 
 /**
- * Local lockup. The file is a static asset (not user input), so `unoptimized`
- * skips the image pipeline. A sized wrapper keeps next/image from laying out
- * at the file's intrinsic 1024px width and covering the primary navigation.
+ * Site mark (transparent PNG) plus the BIOWIKI wordmark in type, so the header
+ * is not a raster lockup with a rectangular backdrop. A plain img is used so the
+ * mark cannot be absolutely positioned against the footer's `relative` box.
  */
 export function BrandLogo({ className = "", priority = false }: BrandLogoProps) {
   return (
-    <span className={`relative inline-block h-8 w-[7.5rem] shrink-0 overflow-hidden ${className}`.trim()}>
-      <Image
+    <span className={`inline-flex items-center gap-2.5 ${className}`.trim()}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src="/brand-logo.png"
-        alt="BioWiki"
-        fill
-        className="object-contain object-left"
-        sizes="120px"
-        priority={priority}
-        unoptimized
+        alt=""
+        width={32}
+        height={32}
+        className="pointer-events-none h-8 w-8 shrink-0 object-contain"
+        decoding="async"
+        fetchPriority={priority ? "high" : "auto"}
       />
+      <span className="font-display text-sm font-bold uppercase tracking-tightest text-content-primary sm:text-base">
+        BIOWIKI
+      </span>
     </span>
   );
 }

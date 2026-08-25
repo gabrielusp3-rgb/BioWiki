@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     url: SITE_URL,
     locale: "en_US",
-    images: [{ url: "/brand-logo.png", width: 1024, height: 576, alt: "BioWiki" }],
+    images: [{ url: "/brand-logo.png", width: 412, height: 405, alt: "BioWiki" }],
   },
   twitter: {
     card: "summary_large_image",

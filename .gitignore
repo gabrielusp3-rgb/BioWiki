@@ -45,6 +45,7 @@ frontend/playwright/.cache/
 
 .idea/
 .vscode/
+.cursor/
 *.swp
 .vercel/
 .agents/
