@@ -16,6 +16,7 @@ const NAV_ITEMS = [
   { label: "Genomes", href: "/genomes" },
   { label: "Virus", href: "/virus" },
   { label: "Organisms", href: "/organisms" },
+  { label: "Publications", href: "/publications" },
   { label: "Downloads", href: "/downloads" },
   { label: "API", href: "/api" },
 ];

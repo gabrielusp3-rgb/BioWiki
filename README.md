@@ -69,9 +69,9 @@ Those counts are from one live database. They change when the CLI imports more r
 
 ### Features
 
-- Browse DNA, RNA, proteins, CRISPR guides, viruses, organisms, and genome assemblies
+- Browse DNA, RNA, proteins, CRISPR guides, viruses, organisms, genome assemblies, and publications (`/publications`)
 - Record pages by accession, with residues and source metadata
-- Publications linked to sequences (PubMed identifiers)
+- Publication pages by PubMed ID (`/publications/{pmid}`), linked to stored sequences
 - Full-text search and autocomplete (`/search`)
 - Filters, cursor pagination (`nextCursor`)
 - Live aggregates (`/statistics`)

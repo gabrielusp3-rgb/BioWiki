@@ -25,7 +25,9 @@ class ConnectorSettings(BaseSettings):
     max_retries: int = Field(default=3)
     backoff_base_seconds: float = Field(default=0.5)
     backoff_max_seconds: float = Field(default=8.0)
-    user_agent: str = Field(default="BIOWIKI-Connector/0.1 (+https://biowiki.org)")
+    user_agent: str = Field(
+        default="BIOWIKI-Connector/0.1 (+https://github.com/gabrielusp3-rgb/BioWiki)"
+    )
 
     # NCBI E-utilities (also serves GenBank and RefSeq)
     ncbi_base_url: str = Field(default="https://eutils.ncbi.nlm.nih.gov/entrez/eutils")

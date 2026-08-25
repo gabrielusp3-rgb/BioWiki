@@ -14,7 +14,7 @@ const DOC_CARDS = [
   {
     eyebrow: "Browsing",
     accent: "#00F2FF",
-    body: "Use the category pages (DNA, RNA, Proteins, CRISPR, Viruses, Genomes) to explore records, or the global search for accessions, gene names, organisms and publications. Every count shown is a live aggregate.",
+    body: "Use the category pages (DNA, RNA, Proteins, CRISPR, Viruses, Genomes) and the publication catalogue to explore records, or the global search for accessions, gene names, organisms and PMIDs. Every count shown is a live aggregate.",
   },
   {
     eyebrow: "Programmatic access",

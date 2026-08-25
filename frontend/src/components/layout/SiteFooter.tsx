@@ -23,6 +23,7 @@ const COLUMNS: FooterColumn[] = [
       { label: "CRISPR", href: "/crispr" },
       { label: "Genomes", href: "/genomes" },
       { label: "Viruses", href: "/virus" },
+      { label: "Publications", href: "/publications" },
     ],
   },
   {
@@ -39,7 +40,6 @@ const COLUMNS: FooterColumn[] = [
     links: [
       { label: "Documentation", href: "/docs" },
       { label: "GitHub", href: "https://github.com/gabrielusp3-rgb/BioWiki", external: true },
-      { label: "Contact", href: "mailto:contact@biowiki.org", external: true },
       { label: "License", href: "/license" },
     ],
   },
@@ -122,10 +122,12 @@ export function SiteFooter() {
               Documentation
             </Link>
             <a
-              href="mailto:contact@biowiki.org"
+              href="https://github.com/gabrielusp3-rgb/BioWiki"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-xs text-content-muted transition-colors hover:text-content-primary"
             >
-              Contact
+              GitHub
             </a>
           </div>
         </div>

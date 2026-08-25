@@ -89,6 +89,26 @@ export const API_ENDPOINTS: ApiEndpoint[] = [
   },
   {
     method: "GET",
+    path: "/publications",
+    summary: "List bibliographic records stored in the catalogue.",
+    params: [
+      { name: "q", type: "string", description: "Free text over title or abstract" },
+      { name: "accession", type: "string", description: "Only publications linked to this accession" },
+      { name: "organism", type: "string", description: "Only publications linked to this organism" },
+      { name: "limit", type: "integer", description: "Page size (default 20, max 100)" },
+      { name: "cursor", type: "string", description: "Opaque nextCursor from a previous page" },
+    ],
+  },
+  {
+    method: "GET",
+    path: "/publications/{pubmed_id}",
+    summary: "One publication by PubMed ID, including linked sequence accessions.",
+    params: [
+      { name: "pubmed_id", type: "integer", description: "PubMed identifier", required: true },
+    ],
+  },
+  {
+    method: "GET",
     path: "/search",
     summary: "Full-text search over sequences in PostgreSQL.",
     params: [

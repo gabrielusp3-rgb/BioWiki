@@ -74,12 +74,20 @@ export function PublicationDetailContent({ pubmedId }: { pubmedId: string }) {
           <span className="font-mono text-content-primary">{pubmedId}</span> exists
           in the database.
         </p>
-        <Link
-          href="/search"
-          className="border border-glass-border px-4 py-2 font-display text-xs font-semibold uppercase tracking-wide text-content-secondary transition-colors hover:border-white/30 hover:text-content-primary"
-        >
-          Search the database
-        </Link>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/publications"
+            className="border border-glass-border px-4 py-2 font-display text-xs font-semibold uppercase tracking-wide text-content-secondary transition-colors hover:border-white/30 hover:text-content-primary"
+          >
+            Publication catalogue
+          </Link>
+          <Link
+            href="/search"
+            className="border border-glass-border px-4 py-2 font-display text-xs font-semibold uppercase tracking-wide text-content-secondary transition-colors hover:border-white/30 hover:text-content-primary"
+          >
+            Search the database
+          </Link>
+        </div>
       </div>
     );
   }

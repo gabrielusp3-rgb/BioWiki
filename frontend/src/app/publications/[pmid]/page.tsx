@@ -22,7 +22,7 @@ export default async function PublicationPage({ params }: PageProps) {
 
   return (
     <>
-      <SiteHeader />
+      <SiteHeader activeHref="/publications" />
       <main id="main" className="pt-16">
         <Container width="wide">
           <Section
