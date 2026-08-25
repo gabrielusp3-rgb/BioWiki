@@ -4,7 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { viewerOverlayClass, viewerPanelClass, viewerPanelStyle } from "@/lib/viewer-overlay";
+import {
+  viewerBodyClass,
+  viewerOverlayClass,
+  viewerPanelClass,
+  viewerPanelStyle,
+} from "@/lib/viewer-overlay";
 import { Badge } from "@/components/ui";
 import { CloseIcon } from "@/components/ui/Icons";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
@@ -168,7 +173,7 @@ function ViewerBody(props: {
         )}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className={viewerBodyClass}>
       {meta && meta.length > 0 && <MetaGrid meta={meta} />}
       <SequenceToolbar
         legend={legend}

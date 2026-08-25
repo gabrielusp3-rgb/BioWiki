@@ -4,7 +4,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { viewerOverlayClass, viewerPanelClass, viewerPanelStyle } from "@/lib/viewer-overlay";
+import {
+  viewerBodyClass,
+  viewerOverlayClass,
+  viewerPanelClass,
+  viewerPanelStyle,
+} from "@/lib/viewer-overlay";
 import { Badge, Button } from "@/components/ui";
 import { CloseIcon } from "@/components/ui/Icons";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
@@ -36,13 +41,13 @@ function SequenceView({ sequence }: { sequence: string }) {
   }, [sequence]);
 
   return (
-    <div className="font-mono text-[13px] leading-6">
+    <div className="overflow-x-auto font-mono text-[13px] leading-6">
       {lines.map((line, rowIndex) => (
         <div key={rowIndex} className="flex min-w-0 gap-4">
           <span className="w-16 shrink-0 select-none text-right text-content-muted">
             {rowIndex * LINE_WIDTH + 1}
           </span>
-          <span className="min-w-0 break-all tracking-[0.08em]">
+          <span className="min-w-0 whitespace-pre tracking-[0.08em]">
             {line.split("").map((base, i) => (
               <span key={i} style={{ color: baseColor(base) }}>
                 {base}
@@ -202,7 +207,7 @@ export function DNAViewer({ sequence, open, onClose }: DNAViewerProps) {
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto">
+            <div className={viewerBodyClass}>
             <div className="grid grid-cols-2 gap-3 border-b border-glass-divider p-6 sm:grid-cols-4">
               <MetaItem label="Length" value={formatBp(active.length)} />
               <MetaItem label="GC content" value={formatGc(active.gcContent)} />

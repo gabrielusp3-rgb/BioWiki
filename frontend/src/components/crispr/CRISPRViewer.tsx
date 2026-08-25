@@ -4,7 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import { viewerOverlayClass, viewerPanelClass, viewerPanelStyle } from "@/lib/viewer-overlay";
+import {
+  viewerBodyClass,
+  viewerOverlayClass,
+  viewerPanelClass,
+  viewerPanelStyle,
+} from "@/lib/viewer-overlay";
 import { Badge, Button } from "@/components/ui";
 import { CloseIcon } from "@/components/ui/Icons";
 import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
@@ -163,7 +168,7 @@ export function CRISPRViewer({ guide, open, onClose }: CRISPRViewerProps) {
               </button>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-y-auto">
+            <div className={viewerBodyClass}>
             <div className="grid grid-cols-2 gap-3 border-b border-glass-divider p-6 sm:grid-cols-4">
               <MetaItem label="PAM" value={active.pam} />
               <MetaItem label="Length" value={formatNt(active.guideLength)} />

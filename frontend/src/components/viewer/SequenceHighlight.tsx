@@ -37,7 +37,7 @@ export function SequenceHighlight({
   }, [sequence, lineWidth, renderCap]);
 
   return (
-    <div className="font-mono text-[13px] leading-6">
+    <div className="overflow-x-auto font-mono text-[13px] leading-6">
       {lines.map((line, rowIndex) => (
         <div key={rowIndex} className="flex min-w-0 gap-4">
           {showLineNumbers && (
@@ -45,7 +45,7 @@ export function SequenceHighlight({
               {rowIndex * lineWidth + 1}
             </span>
           )}
-          <span className="min-w-0 break-all tracking-[0.08em]">
+          <span className="min-w-0 whitespace-pre tracking-[0.08em]">
             {line.split("").map((residue, i) => (
               <span key={i} style={{ color: residueColor(residue, kind) }}>
                 {residue}

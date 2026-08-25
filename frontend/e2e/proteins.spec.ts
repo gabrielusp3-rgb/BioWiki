@@ -81,8 +81,28 @@ test("protein preview overlay keeps the residue view scrollable inside the viewp
   await page.getByRole("button", { name: "View", exact: true }).click();
 
   await expect(page.getByRole("heading", { name: PROTEIN.name })).toBeVisible();
+  const lengthValue = page.getByTitle("219 aa");
+  const massValue = page.getByTitle("24.5 kDa");
+  await expect(lengthValue).toBeVisible();
+  await expect(massValue).toBeVisible();
   await expect(page.getByText("Sequence · Residue view")).toBeVisible();
   await expect(page.getByRole("button", { name: "Download FASTA" })).toBeInViewport();
+
+  const functionBody = page.getByText(/ATP-dependent conversion of 7-carboxy-7-deazaguanine/);
+  await expect(functionBody).toBeVisible();
+  const lengthBox = await lengthValue.boundingBox();
+  const functionBox = await functionBody.boundingBox();
+  expect(lengthBox).toBeTruthy();
+  expect(functionBox).toBeTruthy();
+  expect(functionBox!.y).toBeGreaterThan(lengthBox!.y + lengthBox!.height - 2);
+
+  const firstLine = SEQUENCE.slice(0, 60);
+  const firstResidues = page.getByText(firstLine, { exact: true });
+  await expect(firstResidues).toBeVisible();
+  const firstBox = await firstResidues.boundingBox();
+  expect(firstBox).toBeTruthy();
+  expect(firstBox!.width).toBeGreaterThan(280);
+  expect(firstBox!.height).toBeLessThan(40);
 
   const lastLine = SEQUENCE.slice(-SEQUENCE.length % 60 || 60);
   const lastResidues = page.getByText(lastLine, { exact: true });

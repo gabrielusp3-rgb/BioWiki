@@ -9,6 +9,14 @@ export function viewerOverlayClass(fullscreen = false) {
   );
 }
 
+/**
+ * Scrollable body of a viewer. Must stay a column (block / flex-col).
+ * A row flex here stacks Length/Function/Sequence side-by-side and collapses
+ * residue lines into a single vertical letter column.
+ */
+export const viewerBodyClass =
+  "flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain";
+
 /** Glass panel capped to the overlay, so header/footer stay on screen. */
 export function viewerPanelClass(options: { fullscreen?: boolean; maxWidth?: string } = {}) {
   const { fullscreen = false, maxWidth = "max-w-4xl" } = options;
