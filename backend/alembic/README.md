@@ -14,5 +14,6 @@ python -m alembic upgrade head
 Required PostgreSQL extensions (created by the migration): `pgcrypto`, `pg_trgm`.
 
 Do not point Alembic at a database that already holds scientific rows unless
-it is already stamped at `0004_publication_abstract`. Never dump the live
-corpus into git.
+it is already stamped at `0004_publication_abstract` or a later revision.
+`0005_seed_categories` only inserts missing UI category rows. Never dump the
+live corpus into git.

@@ -27,6 +27,7 @@ from sqlalchemy.exc import ProgrammingError
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.core.config import get_settings
+from tests.alembic_head import repo_alembic_head
 
 TEST_DB_NAME = "biowiki_alembic_test"
 BACKEND_DIR = Path(__file__).resolve().parents[1]
@@ -258,8 +259,20 @@ async def _assert_upgraded_schema(test_url: str) -> None:
                 "genome_records",
                 "taxonomy",
                 "ingestion_runs",
+                "categories",
             }
             assert required <= tables
+            category_keys = set(
+                (await conn.execute(text("SELECT key FROM categories"))).scalars()
+            )
+            assert category_keys == {
+                "dna",
+                "rna",
+                "protein",
+                "crispr",
+                "virus",
+                "genome",
+            }
 
             gen = (
                 await conn.execute(
@@ -364,7 +377,7 @@ async def _assert_upgraded_schema(test_url: str) -> None:
             stamped = (
                 await conn.execute(text("SELECT version_num FROM alembic_version"))
             ).scalar_one()
-            assert stamped == "0004_publication_abstract"
+            assert stamped == repo_alembic_head()
     finally:
         await engine.dispose()
 

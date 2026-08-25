@@ -7,6 +7,7 @@ import pytest
 
 from app.database.session import get_sessionmaker
 from app.models.sequence import Sequence
+from tests.alembic_head import repo_alembic_head
 
 
 async def test_search_vector_is_stored_generated_column() -> None:
@@ -112,4 +113,4 @@ async def test_live_alembic_revision_matches_repo() -> None:
         stamped = (
             await session.execute(text("SELECT version_num FROM alembic_version"))
         ).scalar_one()
-    assert stamped == "0004_publication_abstract"
+    assert stamped == repo_alembic_head()
