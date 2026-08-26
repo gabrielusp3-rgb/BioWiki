@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -39,6 +41,10 @@ def test_openapi_documents_optional_api_key() -> None:
     description = schema["info"]["description"]
     assert "YOUR_API_KEY" in description
     assert "nextCursor" in description
+    paths = schema.get("paths") or {}
+    sequence_list = paths.get("/api/v1/sequences") or paths.get("/sequences")
+    assert sequence_list, list(paths)[:8]
+    assert "nextCursor" in json.dumps(sequence_list)
     assert "`nextCursor`" not in description
     assert "`cursor`" not in description
     assert "401" in description

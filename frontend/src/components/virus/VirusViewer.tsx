@@ -16,21 +16,23 @@ import { useCopyToClipboard } from "@/hooks/useCopyToClipboard";
 import { getVirus } from "@/services/virusService";
 import { isApiConfigured } from "@/lib/api";
 import { baseColor, downloadText, formatBases, toFasta, toJson } from "@/lib/virus";
+import { rnaLetters } from "@/lib/sequence-colors";
 import { baseColors } from "@/lib/design-tokens";
 import type { VirusSequence } from "@/types/virus";
 
 const RENDER_CAP = 9000;
 const LINE_WIDTH = 60;
 
-function SequenceView({ sequence }: { sequence: string }) {
+function SequenceView({ sequence, molecule }: { sequence: string; molecule: "dna" | "rna" }) {
   const lines = useMemo(() => {
-    const capped = sequence.slice(0, RENDER_CAP);
+    const letters = molecule === "rna" ? rnaLetters(sequence) : sequence;
+    const capped = letters.slice(0, RENDER_CAP);
     const rows: string[] = [];
     for (let i = 0; i < capped.length; i += LINE_WIDTH) {
       rows.push(capped.slice(i, i + LINE_WIDTH));
     }
     return rows;
-  }, [sequence]);
+  }, [sequence, molecule]);
 
   return (
     <div className="overflow-x-auto font-mono text-[13px] leading-6">
@@ -216,7 +218,7 @@ export function VirusViewer({ virus, open, onClose }: VirusViewerProps) {
               {loading ? (
                 <p className="text-sm text-content-secondary">Loading residues from the database…</p>
               ) : residues ? (
-                <SequenceView sequence={residues} />
+                <SequenceView sequence={residues} molecule={active.molecule} />
               ) : (
                 <p className="text-sm text-content-secondary">
                   Residues are served from the database. Connect the backend to view and

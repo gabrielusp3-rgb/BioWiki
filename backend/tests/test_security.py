@@ -10,6 +10,7 @@ from starlette.responses import PlainTextResponse
 from starlette.testclient import TestClient
 
 from app.core.rate_limit import RateLimitMiddleware
+from app.schemas.common import ListResponse
 from app.services.export_service import safe_download_filename
 from app.services.pagination import decode_cursor
 
@@ -31,6 +32,14 @@ def test_safe_download_filename_strips_crlf_and_quotes() -> None:
 def test_safe_download_filename_keeps_real_accessions() -> None:
     assert safe_download_filename("NG_074726", ".fasta") == "NG_074726.fasta"
     assert safe_download_filename("NM_000207.3", ".gb") == "NM_000207.3.gb"
+
+
+def test_list_response_serializes_next_cursor_as_camel_case() -> None:
+    payload = ListResponse[dict](results=[{"accession": "NM_000207"}], total=21, next_cursor="Mg")
+    dumped = payload.model_dump(by_alias=True)
+    assert dumped["nextCursor"] == "Mg"
+    assert dumped["total"] == 21
+    assert "next_cursor" not in dumped
 
 
 def test_decode_cursor_caps_huge_offsets() -> None:

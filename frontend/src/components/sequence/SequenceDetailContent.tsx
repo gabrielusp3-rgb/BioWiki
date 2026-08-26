@@ -51,7 +51,12 @@ function gcPercent(gc: number | null | undefined): string | null {
 
 function buildMeta(seq: SequenceDetail): { label: string; value: string }[] {
   const length = seq.length ?? seq.guideLength;
-  const unit = seq.type === "protein" || seq.type === "peptide" ? "aa" : "bp";
+  const unit =
+    seq.type === "protein" || seq.type === "peptide"
+      ? "aa"
+      : seq.type === "rna" || seq.type === "crispr" || (seq.type === "virus" && seq.molecule === "rna")
+        ? "nt"
+        : "bp";
   const items: ({ label: string; value: string | null | undefined } | null)[] = [
     { label: "Accession", value: seq.version ? `${seq.accession}.${seq.version}` : seq.accession },
     { label: "Type", value: TYPE_LABEL[seq.type] ?? seq.type },

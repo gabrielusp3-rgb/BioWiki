@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
-import { residueColor, type SequenceKind } from "@/lib/sequence-colors";
+import { residueColor, rnaLetters, type Molecule, type SequenceKind } from "@/lib/sequence-colors";
 
 const grouping = new Intl.NumberFormat("en-US");
 
 export interface SequenceHighlightProps {
   sequence: string;
   kind: SequenceKind;
+  molecule?: Molecule;
   /** Residues per rendered line. */
   lineWidth?: number;
   /** Hard cap on rendered residues to keep the DOM light for huge genomes. */
@@ -23,18 +24,21 @@ export interface SequenceHighlightProps {
 export function SequenceHighlight({
   sequence,
   kind,
+  molecule = "dna",
   lineWidth = 60,
   renderCap = 12_000,
   showLineNumbers = true,
 }: SequenceHighlightProps) {
   const { lines, truncated } = useMemo(() => {
-    const capped = sequence.slice(0, renderCap);
+    const display =
+      kind === "nucleotide" && molecule === "rna" ? rnaLetters(sequence) : sequence;
+    const capped = display.slice(0, renderCap);
     const rows: string[] = [];
     for (let i = 0; i < capped.length; i += lineWidth) {
       rows.push(capped.slice(i, i + lineWidth));
     }
     return { lines: rows, truncated: sequence.length > renderCap };
-  }, [sequence, lineWidth, renderCap]);
+  }, [sequence, kind, molecule, lineWidth, renderCap]);
 
   return (
     <div className="overflow-x-auto font-mono text-[13px] leading-6">

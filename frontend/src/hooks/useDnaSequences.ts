@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { listDna } from "@/services/dnaService";
-import { isApiConfigured } from "@/lib/api";
+import { isApiConfigured, readNextCursor } from "@/lib/api";
 import { DEFAULT_DNA_FILTERS, type DnaFilters, type DnaSequence } from "@/types/dna";
 
 export type DnaStatus = "idle" | "loading" | "success" | "error" | "unavailable";
@@ -54,7 +54,7 @@ export function useDnaSequences() {
         if (controller.signal.aborted) return;
         setResults(response.results);
         setTotal(response.total);
-        setNextCursor(response.nextCursor);
+        setNextCursor(readNextCursor(response));
         setStatus("success");
       })
       .catch((error: unknown) => {
@@ -70,7 +70,7 @@ export function useDnaSequences() {
   }, [debouncedQuery, filters, cursors, pageIndex]);
 
   const canPrev = pageIndex > 0;
-  const canNext = nextCursor !== null;
+  const canNext = Boolean(nextCursor);
 
   const nextPage = useCallback(() => {
     if (!nextCursor) return;

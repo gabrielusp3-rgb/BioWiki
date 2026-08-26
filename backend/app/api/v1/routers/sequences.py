@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,7 +25,11 @@ _SHORT = Query(None, max_length=64)
 _GENE = Query(None, max_length=120)
 
 
-@router.get("/sequences", summary="List nucleotide sequences (DNA, RNA or CRISPR)")
+@router.get(
+    "/sequences",
+    response_model=ListResponse[Any],
+    summary="List nucleotide sequences (DNA, RNA or CRISPR)",
+)
 async def list_sequences(
     type: str = Query(..., max_length=16, description="Sequence type: dna | rna | crispr"),
     q: str | None = _Q,

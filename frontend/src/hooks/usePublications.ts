@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import { isApiConfigured } from "@/lib/api";
+import { isApiConfigured, readNextCursor } from "@/lib/api";
 import { listPublications } from "@/services/publicationService";
 import type { Publication } from "@/types/publication";
 
@@ -51,7 +51,7 @@ export function usePublications() {
         if (controller.signal.aborted) return;
         setResults(response.results);
         setTotal(response.total);
-        setNextCursor(response.nextCursor);
+        setNextCursor(readNextCursor(response));
         setStatus("success");
       })
       .catch((error: unknown) => {
@@ -88,7 +88,7 @@ export function usePublications() {
     pageIndex,
     pageSize: PAGE_SIZE,
     canPrev: pageIndex > 0,
-    canNext: nextCursor !== null,
+    canNext: Boolean(nextCursor),
     nextPage,
     prevPage,
   };

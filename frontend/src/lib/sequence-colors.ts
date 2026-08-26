@@ -7,6 +7,14 @@ export type SequenceKind = "nucleotide" | "protein";
 /** Nucleotide molecule — controls whether the legend shows T (DNA) or U (RNA). */
 export type Molecule = "dna" | "rna";
 
+/**
+ * NCBI RefSeq stores mRNA/rRNA as a DNA alphabet (T). For RNA views, show U
+ * without rewriting the stored record.
+ */
+export function rnaLetters(sequence: string): string {
+  return sequence.replace(/T/g, "U").replace(/t/g, "u");
+}
+
 export interface LegendEntry {
   color: string;
   label: string;

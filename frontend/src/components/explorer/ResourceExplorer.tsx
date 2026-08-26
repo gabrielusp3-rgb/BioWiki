@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Section } from "@/components/ui/Container";
 import { Badge } from "@/components/ui/Badge";
 import { formatNumber, formatBases } from "@/lib/format";
+import { readNextCursor } from "@/lib/api";
 
 export interface Row {
   key: string;
@@ -62,7 +63,7 @@ export function ResourceExplorer({
         const mapped = page.results.map(mapRow);
         setRows((prev) => (reset ? mapped : [...prev, ...mapped]));
         setTotal(page.total);
-        setCursor(page.nextCursor ?? null);
+        setCursor(readNextCursor(page));
       } catch {
         setError(true);
       } finally {

@@ -193,6 +193,7 @@ function ViewerBody(props: {
           <SequenceHighlight
             sequence={sequence}
             kind={kind}
+            molecule={molecule}
             lineWidth={lineWidth}
             renderCap={renderCap}
             showLineNumbers={showLineNumbers}

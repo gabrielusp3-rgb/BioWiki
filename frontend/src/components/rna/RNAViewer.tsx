@@ -24,6 +24,7 @@ import {
   toFasta,
   toJson,
 } from "@/lib/rna";
+import { rnaLetters } from "@/lib/sequence-colors";
 import { baseColors } from "@/lib/design-tokens";
 import type { RnaSequence } from "@/types/rna";
 
@@ -32,7 +33,7 @@ const LINE_WIDTH = 60;
 
 function SequenceView({ sequence }: { sequence: string }) {
   const lines = useMemo(() => {
-    const capped = sequence.slice(0, RENDER_CAP);
+    const capped = rnaLetters(sequence).slice(0, RENDER_CAP);
     const rows: string[] = [];
     for (let i = 0; i < capped.length; i += LINE_WIDTH) {
       rows.push(capped.slice(i, i + LINE_WIDTH));
@@ -215,14 +216,22 @@ export function RNAViewer({ sequence, open, onClose }: RNAViewerProps) {
             </div>
 
             <div className="flex items-center justify-between gap-4 px-6 pt-5">
-              <span className="eyebrow">FASTA · Base view</span>
+              <span className="eyebrow">FASTA · RNA view</span>
               <BaseLegend />
             </div>
             <div className="p-6">
               {loading ? (
                 <p className="text-sm text-content-secondary">Loading residues from the database…</p>
               ) : residues ? (
-                <SequenceView sequence={residues} />
+                <>
+                  <SequenceView sequence={residues} />
+                  {/[Tt]/.test(residues) && (
+                    <p className="mt-3 text-xs text-content-muted">
+                      NCBI stores this transcript in the DNA alphabet (T). Shown here as RNA
+                      (U). Downloads keep the source FASTA unchanged.
+                    </p>
+                  )}
+                </>
               ) : (
                 <p className="text-sm text-content-secondary">
                   Residues are served from the database. Connect the backend to view and

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel, ConfigDict
 from pydantic.alias_generators import to_camel

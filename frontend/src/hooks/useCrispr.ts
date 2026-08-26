@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { listCrispr } from "@/services/crisprService";
-import { isApiConfigured } from "@/lib/api";
+import { isApiConfigured, readNextCursor } from "@/lib/api";
 import { DEFAULT_CRISPR_FILTERS, type CrisprFilters, type CrisprGuide } from "@/types/crispr";
 
 export type CrisprStatus = "idle" | "loading" | "success" | "error" | "unavailable";
@@ -52,7 +52,7 @@ export function useCrispr() {
         if (controller.signal.aborted) return;
         setResults(response.results);
         setTotal(response.total);
-        setNextCursor(response.nextCursor);
+        setNextCursor(readNextCursor(response));
         setStatus("success");
       })
       .catch((error: unknown) => {
@@ -68,7 +68,7 @@ export function useCrispr() {
   }, [debouncedQuery, filters, cursors, pageIndex]);
 
   const canPrev = pageIndex > 0;
-  const canNext = nextCursor !== null;
+  const canNext = Boolean(nextCursor);
 
   const nextPage = useCallback(() => {
     if (!nextCursor) return;

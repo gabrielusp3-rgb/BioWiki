@@ -37,6 +37,15 @@ export function buildQuery(params: GetOptions["params"]): string {
   return qs ? `?${qs}` : "";
 }
 
+/** List pages may emit nextCursor (wire) or next_cursor (raw dict). */
+export function readNextCursor(payload: {
+  nextCursor?: string | null;
+  next_cursor?: string | null;
+}): string | null {
+  const value = payload.nextCursor ?? payload.next_cursor;
+  return value ? value : null;
+}
+
 export async function apiGet<T>(path: string, options: GetOptions = {}): Promise<T> {
   if (!isApiConfigured) {
     throw new ApiError("API base URL is not configured.", 0);

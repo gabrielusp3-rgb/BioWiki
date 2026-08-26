@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { search, suggest } from "@/services/searchService";
-import { isApiConfigured } from "@/lib/api";
+import { isApiConfigured, readNextCursor } from "@/lib/api";
 import {
   DEFAULT_FILTERS,
   type SearchFilters,
@@ -89,7 +89,7 @@ export function useSearch({
         if (controller.signal.aborted) return;
         setResults(searchResponse.results);
         setTotal(searchResponse.total);
-        setNextCursor(searchResponse.nextCursor ?? null);
+        setNextCursor(readNextCursor(searchResponse));
         setPublications(searchResponse.publications ?? []);
         setPublicationsTotal(searchResponse.publicationsTotal ?? 0);
         setSuggestions(suggestResponse.suggestions);
@@ -120,7 +120,7 @@ export function useSearch({
     try {
       const page = await search(trimmed, filters, { cursor: nextCursor });
       setResults((prev) => [...prev, ...page.results]);
-      setNextCursor(page.nextCursor ?? null);
+      setNextCursor(readNextCursor(page));
       setTotal(page.total);
     } catch {
       // Keep the already-loaded results; the button stays available for retry.

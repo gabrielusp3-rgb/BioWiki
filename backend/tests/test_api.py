@@ -52,6 +52,7 @@ def test_list_sequences_dna(api: httpx.Client) -> None:
     body = response.json()
     assert body["total"] >= 5
     assert body["results"]
+    assert "nextCursor" in body
     assert all(item.get("accession") for item in body["results"])
 
 
