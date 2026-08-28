@@ -13,7 +13,6 @@ const LINKS = [
   { href: "/genomes", label: "Genomes" },
   { href: "/organisms", label: "Organisms" },
   { href: "/search", label: "Search" },
-  { href: "/api", label: "API" },
 ];
 
 export function Navbar() {

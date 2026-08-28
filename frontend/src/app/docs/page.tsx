@@ -19,7 +19,7 @@ const DOC_CARDS = [
   {
     eyebrow: "Programmatic access",
     accent: "#39FF14",
-    body: "The REST API is versioned under /api/v1. List endpoints use cursor pagination via nextCursor. The in-app API page lists the routes; OpenAPI lives at /docs on the API host.",
+    body: "The REST API is versioned under /api/v1 on the API host (https://biowiki-api.vercel.app). List endpoints use cursor pagination via nextCursor. OpenAPI lives at /docs on that host. The catalogue UI does not embed the API.",
   },
   {
     eyebrow: "Data integrity",

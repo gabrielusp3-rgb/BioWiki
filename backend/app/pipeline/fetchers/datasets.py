@@ -15,7 +15,7 @@ from app.pipeline.logging import get_logger
 from app.pipeline.models import ImportReport, ParsedGenome, ParsedOrganism
 from app.pipeline.run_log import record_run
 from app.database.session import get_sessionmaker
-from app.pipeline.validation import infer_group_from_lineage
+from app.pipeline.taxonomy import group_from_taxonomy, parse_ncbi_taxonomy_xml
 from app.services.connectors.datasets import NCBIDatasetsConnector
 
 logger = get_logger("biowiki.pipeline.fetchers.datasets")
@@ -27,21 +27,6 @@ _LEVEL_MAP = {
     "contig": "contig",
 }
 
-# NCBI Taxonomy ESummary "division" → BIOWIKI OrganismGroup values.
-_NCBI_DIVISION_TO_GROUP = {
-    "bacteria": "bacteria",
-    "plants": "plant",
-    "fungi": "fungus",
-    "viruses": "virus",
-    "phages": "virus",
-    "archaea": "archaea",
-    "protozoa": "protozoan",
-    "vertebrates": "animal",
-    "invertebrates": "animal",
-    "mammals": "animal",
-    "rodents": "animal",
-    "primates": "animal",
-}
 
 
 def _report_to_parsed(report: dict[str, Any]) -> ParsedGenome | None:
@@ -140,12 +125,12 @@ async def fetch_reports(
 
 
 async def _annotate_taxonomy(genomes: list[ParsedGenome]) -> None:
-    """Fill organism group from NCBI Taxonomy ESummary (real division field)."""
+    """Fill organism lineage and group from NCBI Taxonomy (official records)."""
     tax_ids = list(
         dict.fromkeys(
             str(g.organism.tax_id)
             for g in genomes
-            if g.organism and g.organism.tax_id and not g.organism.group
+            if g.organism and g.organism.tax_id and (not g.organism.group or not g.organism.lineage)
         )
     )
     if not tax_ids:
@@ -154,40 +139,36 @@ async def _annotate_taxonomy(genomes: list[ParsedGenome]) -> None:
     from app.pipeline.fetchers.base import chunked
     from app.services.connectors.ncbi import NCBIConnector
 
-    lookup: dict[str, dict] = {}
+    lookup: dict[int, dict] = {}
     async with NCBIConnector() as conn:
         for group in chunked(tax_ids, 40):
             try:
-                payload = await conn.esummary("taxonomy", list(group))
+                xml = await conn.efetch(
+                    "taxonomy", list(group), rettype="xml", retmode="xml"
+                )
+                lookup.update(parse_ncbi_taxonomy_xml(xml))
             except Exception:
-                logger.exception("taxonomy esummary failed for %d tax id(s)", len(group))
+                logger.exception("taxonomy efetch failed for %d tax id(s)", len(group))
                 continue
-            result = payload.get("result") if isinstance(payload, dict) else None
-            if not isinstance(result, dict):
-                continue
-            for tax_id in group:
-                doc = result.get(tax_id)
-                if isinstance(doc, dict):
-                    lookup[tax_id] = doc
 
     for genome in genomes:
-        if genome.organism is None or genome.organism.group:
+        if genome.organism is None:
             continue
-        doc = lookup.get(str(genome.organism.tax_id))
+        doc = lookup.get(int(genome.organism.tax_id))
         if not doc:
             continue
-        division = str(doc.get("division") or "").strip().lower()
-        group = _NCBI_DIVISION_TO_GROUP.get(division)
-        if group:
-            genome.organism.group = group
-        common = doc.get("commonname")
-        if common and not genome.organism.common_name:
-            genome.organism.common_name = str(common)
-        rank = doc.get("rank")
-        if rank and not genome.organism.rank:
-            genome.organism.rank = str(rank)
+        lineage = doc.get("lineage") or []
+        if lineage and not genome.organism.lineage:
+            genome.organism.lineage = lineage
+        if doc.get("common_name") and not genome.organism.common_name:
+            genome.organism.common_name = str(doc["common_name"])
+        if doc.get("rank") and not genome.organism.rank:
+            genome.organism.rank = str(doc["rank"])
         if not genome.organism.group:
-            genome.organism.group = infer_group_from_lineage(genome.organism.lineage)
+            genome.organism.group = group_from_taxonomy(
+                lineage=genome.organism.lineage,
+                division=doc.get("division"),
+            )
 
 
 async def ingest(

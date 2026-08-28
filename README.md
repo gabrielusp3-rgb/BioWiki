@@ -76,7 +76,7 @@ Those counts are from one live database. They change when the CLI imports more r
 - Filters, cursor pagination (`nextCursor`)
 - Live aggregates (`/statistics`)
 - Exports in FASTA, CSV, JSON, and GenBank
-- FastAPI OpenAPI UI at `/docs` on the API host (locally http://127.0.0.1:8000/docs)
+- FastAPI OpenAPI UI at `/docs` on the API host (locally http://127.0.0.1:8000/docs). The catalogue site does not embed the API; `/api` on the frontend redirects there.
 
 Records enter PostgreSQL only through the operator CLI. The HTTP API is read-only (`GET`). Scientific data lives in the database, not in Git.
 ---
@@ -330,11 +330,9 @@ GitHub Actions (`.github/workflows/ci.yml`) runs Python 3.13 with Postgres 17 (m
 
 ## Security notes (dependencies)
 
-The UI is pinned to **Next.js 15.5.23** (Maintenance LTS on the 15.5 line). Direct `postcss` is 8.5.26; npm `overrides` force that version so Next’s nested PostCSS copy is not left on 8.4.x ([GHSA-qx2v-qp2m-jg93](https://github.com/advisories/GHSA-qx2v-qp2m-jg93), [GHSA-6g55-p6wh-862q](https://github.com/advisories/GHSA-6g55-p6wh-862q)).
+The UI is pinned to **Next.js 15.5.24** (Maintenance LTS on the 15.5 line). Direct `postcss` is 8.5.26; npm `overrides` force that version so Next’s nested PostCSS copy is not left on 8.4.x ([GHSA-qx2v-qp2m-jg93](https://github.com/advisories/GHSA-qx2v-qp2m-jg93), [GHSA-6g55-p6wh-862q](https://github.com/advisories/GHSA-6g55-p6wh-862q)).
 
-`npm audit` still reports **sharp** 0.34.5 (optional dependency of Next) as high: [GHSA-f88m-g3jw-g9cj](https://github.com/advisories/GHSA-f88m-g3jw-g9cj) (libvips issues in sharp before 0.35.0). npm’s suggested upgrade is Next **16.3.2**, a major line change. An unofficial `sharp` 0.35 override is known to break Next’s standalone tracing on 15.x / 16.2. BioWiki does not process untrusted user uploads; the lockup uses `next/image` with `unoptimized`. Next 16 was not taken solely to clear the advisory.
-
-Next.js has announced a scheduled security release on **26 August 2026** (`15.5.24` / `16.3.3`). That patch is not on npm at the time of this release (confirmed: `npm view next@15.5.24` returns 404). Upgrade when it is published.
+`npm audit` may still report **sharp** (optional dependency of Next). BioWiki does not process untrusted user uploads; the lockup uses `next/image` with `unoptimized`. Next 16 was not taken solely to clear remaining sharp advisories.
 
 ---
 
@@ -348,6 +346,8 @@ Run from `backend/` with the virtualenv active. None of these are HTTP routes.
 | `python -m scripts.seed_initial` | First load of curated real accessions |
 | `python -m scripts.expand_dataset` | Broader import jobs (checkpoint file is local and not committed) |
 | `python -m scripts.backfill_empty_residues` | Fill empty `residues` from official NCBI FASTA when GenBank has CONTIG only |
+| `python -m scripts.backfill_organism_groups` | Dry-run NCBI Taxonomy lineage/group repair (add `--apply` to write) |
+| `python -m scripts.audit_catalogue` | Read-only catalogue matrix against the public API |
 | `python -m scripts.verify_expansion` | Read-only checks against the live database |
 
 Smoke scripts (`smoke_api.ps1`, `smoke_search.ps1`, `smoke_connectors.py`) are optional local checks.
@@ -386,7 +386,6 @@ The in-app `/license` page lists public archives for attribution; DDBJ is listed
 - The rate limiter is in-process (per API process), not a distributed store
 - A Compose/CI database has schema only until CLI ingest
 - `live` pytest tests are skipped in CI because they assert on a populated catalogue
-- Next.js 15.5.24 (announced for 26 August 2026) is not yet on npm; see **Security notes**
 
 ---
 

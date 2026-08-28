@@ -28,7 +28,6 @@ export function Footer() {
             title="Platform"
             links={[
               ["Search", "/search"],
-              ["API", "/api"],
               ["Downloads", "/downloads"],
               ["Documentation", "/docs"],
             ]}

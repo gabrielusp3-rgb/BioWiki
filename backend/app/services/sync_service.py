@@ -56,7 +56,9 @@ async def _category_live_counts(session: AsyncSession) -> dict[str, int]:
     live: dict[str, int] = {}
     for key, types in CATEGORY_TYPES.items():
         if key == "genome":
-            live[key] = type_counts.get(SequenceType.GENOME, 0) + genome_rec
+            # Assemblies live in genome_records. SequenceType.GENOME rows are a
+            # different entity and must not inflate the genome catalogue count.
+            live[key] = genome_rec
         else:
             live[key] = sum(type_counts.get(seq_type, 0) for seq_type in types)
     return live
@@ -259,6 +261,23 @@ async def check_integrity(session: AsyncSession) -> IntegrityReport:
             detail="every sequence↔publication link points to a real sequence",
             expected=0,
             actual=orphan_refs,
+        )
+    )
+
+    genome_seq = int(
+        (
+            await session.execute(
+                select(func.count()).where(Sequence.seq_type == SequenceType.GENOME)
+            )
+        ).scalar_one()
+    )
+    checks.append(
+        IntegrityCheck(
+            name="genome:assemblies_not_duplicated_as_sequences",
+            ok=genome_seq == 0,
+            detail="genome catalogue is genome_records; SequenceType.GENOME stays unused",
+            expected=0,
+            actual=genome_seq,
         )
     )
 

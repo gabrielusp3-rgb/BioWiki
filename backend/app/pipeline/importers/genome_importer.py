@@ -40,6 +40,12 @@ def validate_genome(pg: ParsedGenome) -> None:
         raise ValidationError("genome organism is required", field="organism")
     if not (isinstance(org.tax_id, int) and org.tax_id > 0):
         raise ValidationError("organism.tax_id must be a positive integer", field="organism.tax_id")
+    if not org.group:
+        raise ValidationError(
+            "organism.group could not be determined from NCBI Taxonomy; "
+            "refusing to invent a kingdom",
+            field="organism.group",
+        )
     if pg.assembly_level is not None and pg.assembly_level not in _LEVELS:
         raise ValidationError(
             f"assembly_level must be one of {sorted(_LEVELS)}", field="assembly_level"

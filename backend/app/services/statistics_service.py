@@ -79,7 +79,7 @@ async def get_statistics(session: AsyncSession) -> StatisticsRead:
     # because the `categories` lookup table was never seeded.
     for key, types in sync_service.CATEGORY_TYPES.items():
         if key == "genome":
-            count = type_stats.get(SequenceType.GENOME, (0, 0))[0] + int(genomes)
+            count = int(genomes)
             residues = int(type_stats.get(SequenceType.GENOME, (0, 0))[1])
         else:
             count, residues = _for_types(types)

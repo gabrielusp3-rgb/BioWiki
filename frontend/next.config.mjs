@@ -3,6 +3,15 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
+  async redirects() {
+    return [
+      {
+        source: "/api",
+        destination: "https://biowiki-api.vercel.app/docs",
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {

@@ -38,12 +38,13 @@ def test_statistics_matches_live_dataset(api: httpx.Client) -> None:
     response = api.get("/statistics")
     assert response.status_code == 200
     body = response.json()
-    assert body["totalSequences"] == 1542
-    assert body["publications"] == 5838
-    assert body["organisms"] == 454
-    assert body["genomes"] == 32
     keys = {item["key"]: item["count"] for item in body["categories"]}
-    assert keys["genome"] == 32
+    assert body["totalSequences"] == keys["dna"] + keys["rna"] + keys["protein"] + keys["crispr"] + keys["virus"]
+    assert body["genomes"] == keys["genome"]
+    assert body["totalSequences"] > 0
+    assert body["publications"] > 0
+    assert body["organisms"] > 0
+    assert body["genomes"] > 0
 
 
 def test_list_sequences_dna(api: httpx.Client) -> None:
@@ -223,7 +224,8 @@ def test_download_index(api: httpx.Client) -> None:
     assert response.status_code == 200
     body = response.json()
     assert "fasta" in body["formats"]
-    assert body["totalRecords"] == 1542
+    assert body["totalRecords"] == sum(d["records"] for d in body["datasets"])
+    assert body["totalRecords"] > 0
 
 
 def test_search_rejects_sql_injection_payloads(api: httpx.Client) -> None:

@@ -25,7 +25,6 @@ const DEFAULT_ITEMS: NavItem[] = [
   { label: "CRISPR", href: "/crispr" },
   { label: "Genomes", href: "/genomes" },
   { label: "Virus", href: "/virus" },
-  { label: "API", href: "/api" },
 ];
 
 export function Navbar({

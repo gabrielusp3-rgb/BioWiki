@@ -18,25 +18,34 @@ test("home page renders the catalogue title", async ({ page }) => {
   await expect(page.getByRole("link", { name: /biowiki/i }).first()).toBeVisible();
 });
 
-test("primary navigation reaches DNA, search, API and license pages", async ({ page }) => {
+test("primary navigation reaches DNA, search, license; API is not a catalogue item", async ({ page }) => {
   test.setTimeout(120_000);
   await page.goto("/");
   await waitForSplash(page);
   await page.getByRole("banner").getByRole("link", { name: "DNA", exact: true }).click();
   await expect(page).toHaveURL(/\/dna/, { timeout: 30_000 });
   await expect(page.getByRole("heading", { name: /DNA/i }).first()).toBeVisible();
+  await expect(page.getByRole("banner").getByRole("link", { name: "API", exact: true })).toHaveCount(0);
 
   await page.goto("/search");
   await waitForSplash(page);
   await expect(page.getByLabel("Search catalogue")).toBeVisible();
 
-  await page.goto("/api");
-  await waitForSplash(page);
-  await expect(page.getByRole("heading", { name: /API/i }).first()).toBeVisible();
-
   await page.goto("/license");
   await waitForSplash(page);
   await expect(page.getByText(/DDBJ/i).first()).toBeVisible();
+});
+
+test("home page does not embed the developer API", async ({ page }) => {
+  await page.goto("/");
+  await waitForSplash(page);
+  await expect(page.getByText(/A REST API BUILT FOR BIOINFORMATICS/i)).toHaveCount(0);
+});
+
+test("legacy /api path redirects to the public OpenAPI", async ({ request, baseURL }) => {
+  const res = await request.get(`${baseURL}/api`, { maxRedirects: 0 });
+  expect([301, 302, 307, 308]).toContain(res.status());
+  expect(res.headers()["location"] ?? "").toContain("biowiki-api.vercel.app/docs");
 });
 
 test("catalogue sections render without crashing", async ({ page }) => {

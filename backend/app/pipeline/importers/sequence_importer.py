@@ -46,7 +46,7 @@ from app.models.organism import Organism
 from app.models.publication import SequenceReference
 from app.models.sequence import Sequence
 from app.models.source import DataSource
-from app.pipeline.importers.publication_importer import upsert_publication
+from app.pipeline.errors import ValidationError
 from app.pipeline.models import ParsedOrganism, ParsedSequence
 from app.pipeline.validation import infer_group_from_lineage, normalize_lineage
 
@@ -125,6 +125,13 @@ class SequenceImporter:
         if clash:
             slug = f"{slug}-{parsed.tax_id}"
 
+        if group is None:
+            raise ValidationError(
+                "organism.group could not be determined from source taxonomy; "
+                "refusing to invent a kingdom",
+                field="organism.group",
+            )
+
         organism = Organism(
             slug=slug[:160],
             scientific_name=_clip(parsed.scientific_name, 300) or parsed.scientific_name,
@@ -132,7 +139,7 @@ class SequenceImporter:
             tax_id=parsed.tax_id,
             rank=parsed.rank,
             lineage=lineage or None,
-            group=group or OrganismGroup.BACTERIA,
+            group=group,
             image_url=_clip(parsed.image_url, 500),
         )
         self.session.add(organism)
@@ -231,6 +238,26 @@ class SequenceImporter:
 
     async def _apply_feature(self, seq: Sequence, ps: ParsedSequence) -> None:
         st = seq.seq_type
+        keep = {
+            SequenceType.DNA: DnaFeature,
+            SequenceType.GENOME: DnaFeature,
+            SequenceType.RNA: RnaFeature,
+            SequenceType.PROTEIN: ProteinFeature,
+            SequenceType.PEPTIDE: ProteinFeature,
+            SequenceType.CRISPR: CrisprFeature,
+            SequenceType.VIRUS: VirusFeature,
+        }.get(st)
+        for model in (DnaFeature, RnaFeature, ProteinFeature, CrisprFeature, VirusFeature):
+            if model is not keep:
+                await self.session.execute(delete(model).where(model.sequence_id == seq.id))
+        if st not in (SequenceType.PROTEIN, SequenceType.PEPTIDE):
+            await self.session.execute(
+                delete(ProteinPdbRef).where(ProteinPdbRef.sequence_id == seq.id)
+            )
+            await self.session.execute(
+                delete(ProteinDomain).where(ProteinDomain.sequence_id == seq.id)
+            )
+
         if st == SequenceType.DNA or st == SequenceType.GENOME:
             feat = await self.session.get(DnaFeature, seq.id) or DnaFeature(sequence_id=seq.id)
             feat.molecule_type = DnaMoleculeType(ps.molecule_type or "other")

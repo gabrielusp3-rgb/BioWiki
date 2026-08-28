@@ -72,11 +72,11 @@ export function DownloadsSection() {
             consistent with how every individual record is exported.
           </p>
         </div>
-        <Link href="/api">
+        <a href="https://biowiki-api.vercel.app/docs" target="_blank" rel="noopener noreferrer">
           <Button variant="glass" trailingIcon={<ExternalIcon className="h-4 w-4" />}>
-            Read the API docs
+            OpenAPI reference
           </Button>
-        </Link>
+        </a>
       </div>
     </div>
   );

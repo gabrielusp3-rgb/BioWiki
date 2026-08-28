@@ -54,3 +54,68 @@ def make_fixture_protein(**overrides) -> ParsedSequence:
     )
     data.update(overrides)
     return ParsedSequence(**data)
+
+
+def make_fixture_rna(**overrides) -> ParsedSequence:
+    """TEST FIXTURE: in-memory RNA record. Do not persist."""
+    data = dict(
+        seq_type="rna",
+        accession="TEST_FIXTURE_RNA",
+        name="TEST FIXTURE RNA transcript",
+        organism=make_fixture_organism(),
+        source_key="ncbi_refseq",
+        molecule="rna",
+        rna_class="mrna",
+        residues="ATGCATGCATGC",
+        length=12,
+        is_coding=True,
+    )
+    data.update(overrides)
+    return ParsedSequence(**data)
+
+
+def make_fixture_virus(**overrides) -> ParsedSequence:
+    """TEST FIXTURE: in-memory virus record. Do not persist."""
+    data = dict(
+        seq_type="virus",
+        accession="TEST_FIXTURE_VIRUS",
+        name="TEST FIXTURE virus record",
+        organism=make_fixture_organism(
+            scientific_name="TEST FIXTURE virus",
+            tax_id=11320,
+            lineage=["Viruses", "Orthomyxoviridae"],
+            group="virus",
+        ),
+        source_key="ncbi_refseq",
+        molecule="rna",
+        family="Orthomyxoviridae",
+        genome_type="ssRNA-",
+        residues="ATGCATGCATGC",
+        length=12,
+    )
+    data.update(overrides)
+    return ParsedSequence(**data)
+
+
+def make_fixture_crispr(**overrides) -> ParsedSequence:
+    """TEST FIXTURE: in-memory CRISPR record. Do not persist."""
+    data = dict(
+        seq_type="crispr",
+        accession="TEST_FIXTURE_CRISPR",
+        name="TEST FIXTURE CRISPR guide",
+        organism=make_fixture_organism(
+            scientific_name="TEST FIXTURE streptococcus",
+            tax_id=1303,
+            lineage=["Bacteria", "Bacillota", "Streptococcaceae"],
+            group="bacteria",
+        ),
+        source_key="ncbi_genbank",
+        molecule="dna",
+        cas_system="cas9",
+        residues="GTTTTAGAGCTAGAAATAGCAAGTTAAAATAAGGCTAGTCCGTTATCAACTTGAAAAAGT",
+        length=60,
+        pam="NGG",
+        target_gene="TEST",
+    )
+    data.update(overrides)
+    return ParsedSequence(**data)

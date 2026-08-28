@@ -147,7 +147,7 @@ class GenBankParser(BaseParser):
         if not accession:
             return None
 
-        seq_type, molecule = self._infer_type(context, gb_molecule, unit)
+        seq_type, molecule = GenBankParser._infer_type(context, gb_molecule, unit)
         organism = None
         if sci_name:
             taxon_match = _TAXON_RE.search("\n".join(header))
@@ -410,11 +410,30 @@ class GenBankParser(BaseParser):
         return "".join(residues).upper()
 
     @staticmethod
-    def _infer_type(context: ImportContext, gb_molecule: str, unit: str) -> tuple[str, str | None]:
-        if context.seq_type:
-            return context.seq_type, context.molecule
+    def _locus_classification(gb_molecule: str, unit: str) -> tuple[str | None, str | None]:
+        """Polymer class from the LOCUS line (official GenBank fields)."""
         if unit == "aa":
             return "protein", "protein"
-        if "RNA" in gb_molecule:
+        if "RNA" in (gb_molecule or ""):
             return "rna", "rna"
+        if gb_molecule:
+            return "dna", "dna"
+        return None, None
+
+    @staticmethod
+    def _infer_type(context: ImportContext, gb_molecule: str, unit: str) -> tuple[str, str | None]:
+        """Semantic category from the operator context, polymer from the LOCUS.
+
+        Virus/CRISPR/genome stay as catalogue categories even when the LOCUS
+        molecule is DNA or RNA. DNA/RNA/protein follow the official LOCUS so an
+        import job labelled ``dna`` cannot store an mRNA transcript as DNA.
+        """
+        locus_type, locus_mol = GenBankParser._locus_classification(gb_molecule, unit)
+        semantic = {"virus", "crispr", "genome"}
+        if context.seq_type in semantic:
+            return context.seq_type, context.molecule or locus_mol
+        if locus_type:
+            return locus_type, locus_mol
+        if context.seq_type:
+            return context.seq_type, context.molecule
         return "dna", "dna"

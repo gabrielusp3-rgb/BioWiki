@@ -35,6 +35,13 @@ def test_same_accession_same_checksum_is_idempotent_identity() -> None:
     assert first.source_key == second.source_key
 
 
+def test_same_source_accession_new_version_is_a_distinct_key() -> None:
+    first = make_fixture_dna(accession="NM_000207", version="2", residues="ATGCATGC")
+    second = make_fixture_dna(accession="NM_000207", version="3", residues="ATGCATGC")
+    assert (first.source_key, first.accession) == (second.source_key, second.accession)
+    assert first.version != second.version
+
+
 def test_sequence_unique_constraint_covers_source_accession_version() -> None:
     names = {constraint.name for constraint in Sequence.__table__.constraints}
     assert "sequences_source_accession_version" in names

@@ -18,7 +18,6 @@ const NAV_ITEMS = [
   { label: "Organisms", href: "/organisms" },
   { label: "Publications", href: "/publications" },
   { label: "Downloads", href: "/downloads" },
-  { label: "API", href: "/api" },
 ];
 
 export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {

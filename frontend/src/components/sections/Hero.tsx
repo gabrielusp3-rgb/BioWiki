@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Badge, Button, Container } from "@/components/ui";
-import { DownloadIcon, ExternalIcon, ChevronRightIcon } from "@/components/ui/Icons";
+import { DownloadIcon, ChevronRightIcon } from "@/components/ui/Icons";
 import { fadeInUp, staggerContainer, transitions } from "@/lib/animations";
 import { categories } from "@/lib/design-tokens";
 import { CATEGORY_META } from "@/lib/categories";
@@ -76,15 +76,6 @@ export function Hero() {
                   trailingIcon={<ChevronRightIcon className="h-4 w-4" />}
                 >
                   Explore Database
-                </Button>
-              </Link>
-              <Link href="/api">
-                <Button
-                  variant="glass"
-                  size="lg"
-                  trailingIcon={<ExternalIcon className="h-4 w-4" />}
-                >
-                  API Documentation
                 </Button>
               </Link>
               <Link href="/downloads">

@@ -36,6 +36,17 @@ _GENOME_TYPES = {g.value for g in GenomeType}
 
 _NUCLEOTIDE_TYPES = {"dna", "rna", "crispr", "virus", "genome"}
 
+# Semantic category × polymer. Virus and CRISPR are not a polymer type.
+_COMPATIBLE_MOLECULE: dict[str, set[str]] = {
+    "dna": {"dna"},
+    "rna": {"rna"},
+    "protein": {"protein"},
+    "peptide": {"protein"},
+    "virus": {"dna", "rna"},
+    "crispr": {"dna", "rna"},
+    "genome": {"dna", "rna"},
+}
+
 # NCBI bins that are real source labels but cannot be mapped onto OrganismGroup
 # without inventing a kingdom-level classification. Records in these bins are
 # rejected, never stored as bacteria/animal/etc.
@@ -154,10 +165,28 @@ def validate(ps: ParsedSequence) -> None:
             "OrganismGroup cannot be assigned without inventing a classification",
             field="organism.group",
         )
+    else:
+        raise ValidationError(
+            "organism.group could not be determined from source taxonomy; "
+            "refusing to invent a kingdom",
+            field="organism.group",
+        )
 
-    # Molecule
+    # Molecule — compatible with the semantic category, not inferred from alphabet.
     if ps.molecule is not None:
         _require(ps.molecule in _MOLECULES, f"invalid molecule: {ps.molecule!r}", "molecule")
+        allowed = _COMPATIBLE_MOLECULE.get(ps.seq_type)
+        if allowed is not None:
+            _require(
+                ps.molecule in allowed,
+                f"molecule {ps.molecule!r} is incompatible with seq_type {ps.seq_type!r}",
+                "molecule",
+            )
+    elif ps.seq_type in {"dna", "rna", "protein", "peptide", "virus"}:
+        raise ValidationError(
+            f"{ps.seq_type} requires an official molecule type",
+            field="molecule",
+        )
 
     # Length / residues
     length = ps.effective_length()
@@ -167,6 +196,14 @@ def validate(ps: ParsedSequence) -> None:
         alphabet = _PROTEIN if ps.seq_type in {"protein", "peptide"} else _NUCLEOTIDE
         invalid = set(ps.residues.upper()) - alphabet
         _require(not invalid, f"residues contain invalid symbols: {sorted(invalid)}", "residues")
+        # Long ACGT-only strings stored as protein are nucleotide sequences, not peptides.
+        if ps.seq_type in {"protein", "peptide"}:
+            symbols = set(ps.residues.upper())
+            if len(ps.residues) >= 80 and symbols and symbols <= set("ACGTN"):
+                raise ValidationError(
+                    "protein residues match a nucleotide alphabet",
+                    field="residues",
+                )
 
     if ps.gc_content is not None:
         _require(0.0 <= ps.gc_content <= 1.0, "gc_content must be within 0–1", "gc_content")

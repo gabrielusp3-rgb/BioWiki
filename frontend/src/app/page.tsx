@@ -5,7 +5,6 @@ import { LiveStatistics } from "@/components/sections/LiveStatistics";
 import { GlobalSearch } from "@/components/sections/GlobalSearch";
 import { Categories } from "@/components/sections/Categories";
 import { FeaturedOrganisms } from "@/components/sections/FeaturedOrganisms";
-import { ApiSection } from "@/components/sections/ApiSection";
 
 export default function HomePage() {
   return (
@@ -23,7 +22,6 @@ export default function HomePage() {
         <GlobalSearch />
         <Categories />
         <FeaturedOrganisms />
-        <ApiSection />
       </main>
       <SiteFooter />
     </>

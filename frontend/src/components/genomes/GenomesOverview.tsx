@@ -100,11 +100,11 @@ export function GenomesOverview() {
                 Browse organisms
               </Button>
             </Link>
-            <Link href="/api">
+            <a href="https://biowiki-api.vercel.app/docs" target="_blank" rel="noopener noreferrer">
               <Button variant="outline" trailingIcon={<ExternalIcon className="h-4 w-4" />}>
-                /genomes endpoint reference
+                OpenAPI /genomes
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       ) : genomes === null ? (
