@@ -48,6 +48,7 @@ from app.models.publication import SequenceReference
 from app.models.sequence import Sequence
 from app.models.source import DataSource
 from app.pipeline.errors import ValidationError
+from app.pipeline.importers.publication_importer import upsert_publication
 from app.pipeline.models import ParsedOrganism, ParsedSequence
 from app.pipeline.validation import infer_group_from_lineage, normalize_lineage
 

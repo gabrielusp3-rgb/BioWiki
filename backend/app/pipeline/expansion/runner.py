@@ -571,14 +571,14 @@ async def run_sequence_jobs(
             print(f"      FAILED {job_id}: {exc}")
             continue
         _show(job_id, report)
-        if _source_job_failed(report):
+        if _source_job_failed(report) or report.failed > 0:
             _mark_failed(
                 checkpoint,
                 path,
                 job_id,
                 "; ".join(report.errors[:3]) or "source unavailable",
             )
-            print(f"      FAILED {job_id}: source unavailable (not marked completed)")
+            print(f"      FAILED {job_id}: not marked completed ({report.failed} failed)")
             continue
         _merge(combined, report)
         checkpoint["last_stats"] = await snapshot()

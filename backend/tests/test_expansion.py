@@ -128,6 +128,12 @@ def test_source_failure_report_is_retryable() -> None:
     assert _source_job_failed(failed) is True
 
 
+def test_sequence_importer_resolves_publication_upsert() -> None:
+    from app.pipeline.importers.sequence_importer import upsert_publication
+
+    assert callable(upsert_publication)
+
+
 def test_pagination_cursors_above_10k() -> None:
     for offset in (0, 20, 10000, 11542, 25000):
         assert decode_cursor(encode_cursor(offset)) == offset
