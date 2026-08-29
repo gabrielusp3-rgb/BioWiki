@@ -402,6 +402,16 @@ def _limit(quota: int, n_jobs: int, *, min_n: int = 8, max_n: int = 42) -> int:
     return max(min_n, min(max_n, max(1, quota // n_jobs)))
 
 
+def _deprioritize_tax_ids(
+    taxa: list[tuple[str, int, str]],
+    later: set[int],
+) -> list[tuple[str, int, str]]:
+    """Keep job ids stable while avoiding model-organism-first ingestion."""
+    head = [row for row in taxa if row[1] not in later]
+    tail = [row for row in taxa if row[1] in later]
+    return head + tail
+
+
 def _dna_cds(organism: str) -> str:
     return (
         f'"{organism}"[Organism] AND biomol_genomic[PROP] AND '
@@ -663,7 +673,7 @@ def build_sequence_jobs(
 
     if allow("uniprot", "protein"):
         prot_limit = _limit(prot_quota, len(cellular), min_n=8, max_n=40)
-        for name, tax_id, _group in cellular:
+        for name, tax_id, _group in _deprioritize_tax_ids(cellular, {9606, 10090, 10116}):
             jobs.append(
                 {
                     "id": f"prot-{_slug(name)}",
@@ -764,7 +774,7 @@ def build_sequence_jobs(
 
     if allow("ncbi", "crispr"):
         climit = _limit(crispr_quota, len(prokaryotes), min_n=6, max_n=28)
-        for name, tax_id, _group in prokaryotes:
+        for name, tax_id, _group in _deprioritize_tax_ids(prokaryotes, {562}):
             jobs.append(
                 {
                     "id": f"crispr-{_slug(name)}",
@@ -793,24 +803,24 @@ def build_sequence_jobs(
 
     if allow("genomes", "genome"):
         genome_taxa = [
-            "Homo sapiens",
-            "Mus musculus",
+            "Arabidopsis thaliana",
+            "Oryza sativa",
+            "Chlamydomonas reinhardtii",
+            "Saccharomyces cerevisiae",
+            "Streptomyces coelicolor",
+            "Methanocaldococcus jannaschii",
+            "Haloferax volcanii",
+            "Plasmodium falciparum",
             "Danio rerio",
             "Gallus gallus",
             "Anolis carolinensis",
             "Xenopus tropicalis",
             "Drosophila melanogaster",
-            "Arabidopsis thaliana",
-            "Oryza sativa",
-            "Saccharomyces cerevisiae",
-            "Escherichia coli",
-            "Streptomyces coelicolor",
-            "Methanocaldococcus jannaschii",
-            "Haloferax volcanii",
-            "Plasmodium falciparum",
             "Mammuthus primigenius",
             "Loxodonta africana",
-            "Chlamydomonas reinhardtii",
+            "Escherichia coli",
+            "Mus musculus",
+            "Homo sapiens",
         ]
         for name in genome_taxa:
             jobs.append(
@@ -818,7 +828,7 @@ def build_sequence_jobs(
                     "id": f"asm-{_slug(name)}",
                     "kind": "genomes",
                     "taxon": name,
-                    "limit": 2,
+                    "limit": 6,
                     "category": "genome",
                     "reason": "assembly metadata only; no chromosome residues",
                 }
@@ -862,13 +872,20 @@ def summarize_plan(jobs: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def build_shortfall_jobs(remaining: int) -> list[dict[str, Any]]:
-    """Extra clade/marker jobs if named-taxon discovery finishes below the ceiling.
+def build_shortfall_jobs(
+    remaining: int,
+    *,
+    categories: set[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Extra clade/marker jobs for categories that are still scientifically short.
 
     Distinct Entrez/UniProt terms — not a second pass over the same first-N hits.
+    When ``categories`` is set, DNA/RNA fill is omitted unless those categories
+    are explicitly requested.
     """
     extra = max(40, remaining)
     per = min(180, max(40, extra // 12))
+    wanted = categories
     jobs: list[dict[str, Any]] = [
         {
             "id": "fill2-dna-actinopterygii",
@@ -993,6 +1010,14 @@ def build_shortfall_jobs(remaining: int) -> list[dict[str, Any]]:
             "reason": "Swiss-Prot fungal clade fill",
         },
         {
+            "id": "fill2-prot-animals",
+            "kind": "uniprot",
+            "query": "(taxonomy_id:33208) AND (reviewed:true) AND (length:[80 TO 500])",
+            "limit": min(120, max(30, extra // 12)),
+            "category": "protein",
+            "reason": "Swiss-Prot metazoan clade fill",
+        },
+        {
             "id": "fill2-prot-refseq-archaea",
             "kind": "ncbi",
             "term": "Archaea[Organism] AND srcdb_refseq[PROP] AND 80:600[SLEN]",
@@ -1039,4 +1064,6 @@ def build_shortfall_jobs(remaining: int) -> list[dict[str, Any]]:
             "reason": "second Cas9 NGG pass after newly ingested allowlisted DNA",
         },
     ]
-    return jobs
+    if wanted is None:
+        return jobs
+    return [job for job in jobs if str(job.get("category") or "") in wanted]

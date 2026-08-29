@@ -21,20 +21,32 @@ from app.models.sequence import Sequence
 from app.models.source import DataSource
 from app.pipeline.expansion.cas9_ngg import find_cas9_ngg_sites
 from app.pipeline.expansion.checkpoint import (
+    COMPLETED_SUCCESSFULLY,
+    DEFERRED_CATEGORY_OVERFILLED,
+    RUNNING,
+    SKIPPED_ALREADY_PRESENT,
+    TEMPORARY_FAILURE,
     add_new_tax,
+    apply_succeeded_runs,
     default_checkpoint,
+    job_is_done,
     load_checkpoint,
     save_checkpoint,
+    set_job_status,
     tax_counts,
 )
 from app.pipeline.expansion.diversity import (
-    CATEGORY_SHARES,
     COMPUTATIONAL_TAX_IDS,
     DEFAULT_MAX_LENGTHS,
     PUBMED_SEARCHES,
     build_sequence_jobs,
     build_shortfall_jobs,
     summarize_plan,
+)
+from app.pipeline.expansion.scheduler import (
+    deficient_categories,
+    schedule_jobs,
+    skip_status,
 )
 from app.pipeline.expansion.targets import (
     publication_remaining,
@@ -238,21 +250,14 @@ def _should_skip_sequence_job(
     additional: int,
     ceiling: int,
 ) -> str | None:
-    if job.get("kind") == "genomes":
-        return None
-    total = int(stats["sequences"])
-    hard_stop = ceiling + max(200, additional // 20)
-    if total >= hard_stop:
-        return f"hard stop at {total} (ceiling {ceiling})"
-    cat = str(job.get("category") or "")
-    share = CATEGORY_SHARES.get(cat)
-    if share is None or total < ceiling:
-        return None
-    new_cat = int((checkpoint.get("new_by_category") or {}).get(cat) or 0)
-    cat_target = int(additional * share)
-    if new_cat >= cat_target:
-        return f"{cat} share filled ({new_cat}>={cat_target}) and total {total}>={ceiling}"
-    return None
+    """Backward-compatible skip reason. Deferred DNA/RNA is not a completion."""
+    return skip_status(
+        job,
+        new_by_category=checkpoint.get("new_by_category") or {},
+        stats=stats,
+        additional=additional,
+        ceiling=ceiling,
+    )
 
 
 async def _retry(factory: Callable[[], Awaitable[ImportReport]], *, attempts: int = 3) -> ImportReport:
@@ -327,6 +332,7 @@ async def _run_job(
             dry_run=dry_run,
             batch_size=batch_size,
             additional=additional,
+            job_id=str(job.get("id") or "crispr-computational-ngg"),
         )
     records = await _fetch_job_records(job, batch_size)
 
@@ -382,6 +388,7 @@ async def run_computational_ngg(
     dry_run: bool,
     batch_size: int,
     additional: int,
+    job_id: str = "crispr-computational-ngg",
 ) -> ImportReport:
     """Cas9 NGG sites copied from allowlisted authentic DNA already in BioWiki."""
     async with get_sessionmaker()() as session:
@@ -480,7 +487,7 @@ async def run_computational_ngg(
         parsed,
         source_key=COMPUTATIONAL_SOURCE_KEY,
         kind="computational_ngg",
-        params={"method": COMPUTATIONAL_METHOD, "limit": limit},
+        params={"id": job_id, "method": COMPUTATIONAL_METHOD, "limit": limit},
         batch_size=batch_size,
     )
     _merge(report, imported)
@@ -503,21 +510,80 @@ async def refresh_and_integrity() -> dict[str, Any]:
 def _mark_failed(checkpoint: dict[str, Any], path: Path, job_id: str, error: str) -> None:
     checkpoint.setdefault("failed", {})[job_id] = error
     checkpoint["temporary_failure"] = int(checkpoint.get("temporary_failure") or 0) + 1
+    set_job_status(
+        checkpoint,
+        job_id,
+        TEMPORARY_FAILURE,
+        category=str(checkpoint.get("category") or ""),
+        source=str(checkpoint.get("source") or ""),
+        reason=error,
+    )
     save_checkpoint(path, checkpoint)
 
 
 def _mark_completed(
     checkpoint: dict[str, Any], path: Path, job_id: str, report: ImportReport
 ) -> None:
-    completed = set(checkpoint.get("completed") or [])
-    completed.add(job_id)
-    checkpoint["completed"] = sorted(completed)
+    status = (
+        SKIPPED_ALREADY_PRESENT
+        if report.created == 0 and report.updated == 0
+        else COMPLETED_SUCCESSFULLY
+    )
+    set_job_status(
+        checkpoint,
+        job_id,
+        status,
+        category=str(checkpoint.get("category") or ""),
+        source=str(checkpoint.get("source") or ""),
+        records_created=report.created,
+        records_updated=report.updated,
+        records_skipped=report.skipped,
+    )
     failed = checkpoint.setdefault("failed", {})
     if job_id in failed:
         history = checkpoint.setdefault("failed_history", {})
         history[job_id] = failed.pop(job_id)
     checkpoint.setdefault("reports", []).append({"id": job_id, **report.as_dict()})
     save_checkpoint(path, checkpoint)
+
+
+async def _succeeded_expansion_runs() -> list[dict[str, Any]]:
+    from app.models.ingestion import IngestionRun
+
+    async with get_sessionmaker()() as session:
+        rows = list(
+            (
+                await session.execute(
+                    select(IngestionRun)
+                    .where(
+                        IngestionRun.kind.in_(["expansion_job", "computational_ngg"]),
+                        IngestionRun.status == "succeeded",
+                    )
+                    .order_by(IngestionRun.started_at)
+                )
+            )
+            .scalars()
+            .all()
+        )
+    latest: dict[str, dict[str, Any]] = {}
+    for row in rows:
+        params = row.params or {}
+        job_id = params.get("id")
+        if not job_id and row.kind == "computational_ngg":
+            job_id = "crispr-computational-ngg"
+        if not job_id:
+            continue
+        finished = row.finished_at.isoformat() if row.finished_at is not None else None
+        latest[str(job_id)] = {
+            "job_id": str(job_id),
+            "status": row.status,
+            "created": row.created,
+            "updated": row.updated,
+            "skipped": row.skipped,
+            "total": row.total,
+            "finished_at": finished,
+        }
+    return list(latest.values())
 
 
 async def run_sequence_jobs(
@@ -532,7 +598,6 @@ async def run_sequence_jobs(
     global_cap: int | None,
 ) -> ImportReport:
     combined = ImportReport()
-    completed = set(checkpoint.get("completed") or [])
     for index, job in enumerate(jobs, start=1):
         job_id = job["id"]
         checkpoint["job_id"] = job_id
@@ -541,20 +606,33 @@ async def run_sequence_jobs(
         checkpoint["batch_number"] = index
         checkpoint["candidate_position"] = index
         stats = await snapshot()
-        skip_reason = _should_skip_sequence_job(job, stats, checkpoint, additional, ceiling)
-        if skip_reason:
-            print(f"  skip {job_id}: {skip_reason}")
-            if job_id not in completed:
-                completed.add(job_id)
-                checkpoint["completed"] = sorted(completed)
-                save_checkpoint(path, checkpoint)
+        defer = _should_skip_sequence_job(job, stats, checkpoint, additional, ceiling)
+        if defer:
+            print(f"  defer {job_id}: {defer}")
+            set_job_status(
+                checkpoint,
+                job_id,
+                DEFERRED_CATEGORY_OVERFILLED,
+                category=str(job.get("category") or ""),
+                source=str(job.get("kind") or ""),
+                reason=defer,
+            )
+            save_checkpoint(path, checkpoint)
             continue
-        if job_id in completed:
-            print(f"  skip {job_id}: already in checkpoint")
+        if job_is_done(checkpoint, job_id):
+            print(f"  skip {job_id}: already completed in checkpoint")
             continue
         failed_map = checkpoint.get("failed") or {}
         if job_id in failed_map:
             print(f"  retry {job_id}: previously failed ({str(failed_map[job_id])[:80]})")
+        set_job_status(
+            checkpoint,
+            job_id,
+            RUNNING,
+            category=str(job.get("category") or ""),
+            source=str(job.get("kind") or ""),
+        )
+        save_checkpoint(path, checkpoint)
         print(f"\n[{job_id}] {job['kind']} limit={job.get('limit', '-')}")
         try:
             report = await _retry(
@@ -582,10 +660,10 @@ async def run_sequence_jobs(
             print(f"      FAILED {job_id}: not marked completed ({report.failed} failed)")
             continue
         _merge(combined, report)
-        checkpoint["last_stats"] = await snapshot()
         _mark_completed(checkpoint, path, job_id, report)
-        completed = set(checkpoint.get("completed") or [])
-        if (not dry_run) and (report.created or report.updated) and index % 15 == 0:
+        checkpoint["last_stats"] = await snapshot()
+        save_checkpoint(path, checkpoint)
+        if (not dry_run) and (report.created or report.updated) and index % 10 == 0:
             try:
                 await refresh_and_integrity()
             except RuntimeError as exc:
@@ -605,35 +683,81 @@ async def run_pubmed(
     completed = set(checkpoint.get("completed") or [])
 
     elink_id = "pubmed-elink-all"
-    if elink_id not in completed:
+    if not job_is_done(checkpoint, elink_id) and elink_id not in completed:
         async with get_sessionmaker()() as session:
-            accessions = list(
+            rows = list(
                 (
                     await session.execute(
-                        select(Sequence.accession)
+                        select(Sequence.accession, Sequence.seq_type)
                         .join(DataSource, Sequence.source_id == DataSource.id)
                         .where(DataSource.key.in_(["ncbi_genbank", "ncbi_refseq"]))
                     )
-                )
-                .scalars()
-                .all()
+                ).all()
             )
-        print(f"\n[{elink_id}] {len(accessions)} NCBI accession(s)")
+        nuccore: list[str] = []
+        protein_acc: list[str] = []
+        for accession, seq_type in rows:
+            if not accession:
+                continue
+            value = seq_type.value if hasattr(seq_type, "value") else str(seq_type)
+            if value == SequenceType.PROTEIN.value:
+                protein_acc.append(accession)
+            else:
+                nuccore.append(accession)
+        print(
+            f"\n[{elink_id}] {len(nuccore)} nuccore + {len(protein_acc)} protein NCBI accession(s)"
+        )
         elink_ok = dry_run
+        elink_report = ImportReport()
         if dry_run:
             print("      dry-run skip PubMed ELink persist")
         else:
             try:
-                report = await _retry(
-                    lambda: pubmed.ingest_elinks(accessions, dbfrom="nuccore", max_pmids=20000)
-                )
-                _show(elink_id, report)
-                _merge(combined, report)
+
+                async def _elink_ncbi() -> ImportReport:
+                    merged = ImportReport()
+                    if nuccore:
+                        _merge(
+                            merged,
+                            await pubmed.ingest_elinks(
+                                nuccore, dbfrom="nuccore", max_pmids=20000
+                            ),
+                        )
+                    if protein_acc:
+                        _merge(
+                            merged,
+                            await pubmed.ingest_elinks(
+                                protein_acc, dbfrom="protein", max_pmids=20000
+                            ),
+                        )
+                    return merged
+
+                elink_report = await _retry(_elink_ncbi)
+                _show(elink_id, elink_report)
+                _merge(combined, elink_report)
                 elink_ok = True
             except Exception as exc:  # noqa: BLE001
                 checkpoint.setdefault("failed", {})[elink_id] = str(exc)
+                set_job_status(
+                    checkpoint,
+                    elink_id,
+                    TEMPORARY_FAILURE,
+                    category="publication",
+                    source="pubmed",
+                    reason=str(exc),
+                )
                 print(f"      FAILED {elink_id}: {exc}")
         if elink_ok:
+            set_job_status(
+                checkpoint,
+                elink_id,
+                COMPLETED_SUCCESSFULLY,
+                category="publication",
+                source="pubmed",
+                records_created=elink_report.created,
+                records_updated=elink_report.updated,
+                records_skipped=elink_report.skipped,
+            )
             completed.add(elink_id)
             checkpoint["completed"] = sorted(completed)
         checkpoint["last_stats"] = await snapshot()
@@ -645,18 +769,26 @@ async def run_pubmed(
         if remaining <= 0:
             print(f"  skip {search_id}: publication total target reached ({stats['publications']})")
             break
-        if search_id in completed:
+        if job_is_done(checkpoint, search_id) or search_id in completed:
             print(f"  skip {search_id}: already in checkpoint")
             continue
         page_limit = min(limit, max(remaining, 50), 400)
         print(f"\n[{search_id}] PubMed search limit={page_limit} remaining={remaining}")
         if dry_run:
+            set_job_status(
+                checkpoint,
+                search_id,
+                COMPLETED_SUCCESSFULLY,
+                category="publication",
+                source="pubmed",
+            )
             completed.add(search_id)
             checkpoint["completed"] = sorted(completed)
             save_checkpoint(path, checkpoint)
             continue
         retstart = 0
         pages = 0
+        search_report = ImportReport()
         try:
             while remaining > 0 and pages < 12:
                 chunk = min(page_limit, remaining + 25, 400)
@@ -666,6 +798,7 @@ async def run_pubmed(
                     )
                 )
                 _show(f"{search_id}-p{pages + 1}", report)
+                _merge(search_report, report)
                 _merge(combined, report)
                 pages += 1
                 retstart += chunk
@@ -675,16 +808,34 @@ async def run_pubmed(
                 remaining = publication_remaining(stats["publications"], publication_target)
         except Exception as exc:  # noqa: BLE001
             checkpoint.setdefault("failed", {})[search_id] = str(exc)
+            set_job_status(
+                checkpoint,
+                search_id,
+                TEMPORARY_FAILURE,
+                category="publication",
+                source="pubmed",
+                reason=str(exc),
+            )
             save_checkpoint(path, checkpoint)
             print(f"      FAILED {search_id}: {exc}")
             continue
+        set_job_status(
+            checkpoint,
+            search_id,
+            COMPLETED_SUCCESSFULLY,
+            category="publication",
+            source="pubmed",
+            records_created=search_report.created,
+            records_updated=search_report.updated,
+            records_skipped=search_report.skipped,
+        )
         completed.add(search_id)
         checkpoint["completed"] = sorted(completed)
         checkpoint["last_stats"] = await snapshot()
         save_checkpoint(path, checkpoint)
 
     backfill_id = "pubmed-backfill"
-    if backfill_id not in completed and not dry_run:
+    if not job_is_done(checkpoint, backfill_id) and backfill_id not in completed and not dry_run:
         print(f"\n[{backfill_id}]")
         async with get_sessionmaker()() as session:
             pmids = list(
@@ -710,6 +861,13 @@ async def run_pubmed(
             except Exception as exc:  # noqa: BLE001
                 checkpoint.setdefault("failed", {})[backfill_id] = str(exc)
                 print(f"      FAILED {backfill_id}: {exc}")
+        set_job_status(
+            checkpoint,
+            backfill_id,
+            COMPLETED_SUCCESSFULLY,
+            category="publication",
+            source="pubmed",
+        )
         completed.add(backfill_id)
         checkpoint["completed"] = sorted(completed)
         checkpoint["last_stats"] = await snapshot()
@@ -751,6 +909,18 @@ async def run_expansion(
         return {"plan": plan, "jobs": jobs}
 
     checkpoint = load_checkpoint(path) if resume else default_checkpoint()
+    job_categories = {job["id"]: str(job.get("category") or "") for job in jobs}
+    if not dry_run and not diversity_plan:
+        try:
+            runs = await _succeeded_expansion_runs()
+            reconciled = apply_succeeded_runs(
+                checkpoint, runs, job_categories=job_categories
+            )
+            if reconciled:
+                print(f"reconciled {len(reconciled)} job(s) from ingestion_runs: {reconciled[:8]}")
+                save_checkpoint(path, checkpoint)
+        except Exception as exc:  # noqa: BLE001
+            print(f"checkpoint reconcile skipped ({exc})")
 
     before = await snapshot()
     if checkpoint.get("before") is None:
@@ -767,11 +937,16 @@ async def run_expansion(
     save_checkpoint(path, checkpoint)
     _print_snapshot("DATASET BEFORE", before)
 
-    ceiling = sequence_ceiling(int(before["sequences"]), additional_sequences)
+    ceiling = sequence_ceiling(int((checkpoint.get("before") or before)["sequences"]), additional_sequences)
     print(
-        f"\nTargets: sequences {before['sequences']} + {additional_sequences} "
-        f"-> ceiling {ceiling}; publications TOTAL {publication_target} "
-        f"(now {before['publications']})"
+        f"\nTargets: additional {additional_sequences} from recorded baseline "
+        f"{(checkpoint.get('before') or before)['sequences']} "
+        f"(soft reference {ceiling}; underfilled categories continue). "
+        f"publications TOTAL {publication_target} (now {before['publications']})"
+    )
+    print(
+        "new_by_category:",
+        json.dumps(checkpoint.get("new_by_category") or {}, sort_keys=True),
     )
 
     if validate_only:
@@ -782,13 +957,31 @@ async def run_expansion(
     seq_report = ImportReport()
     pub_report = ImportReport()
     if not pubmed_only:
-        print("\n--- sequence expansion ---")
+        scheduled, deferred = schedule_jobs(
+            jobs, new_by_category=checkpoint.get("new_by_category") or {}
+        )
+        scheduled = [job for job in scheduled if not job_is_done(checkpoint, job["id"])]
+        still_deferred = [job for job in deferred if not job_is_done(checkpoint, job["id"])]
+        for job in still_deferred:
+            set_job_status(
+                checkpoint,
+                job["id"],
+                DEFERRED_CATEGORY_OVERFILLED,
+                category=str(job.get("category") or ""),
+                source=str(job.get("kind") or ""),
+                reason="category already over its planned NEW share",
+            )
+        save_checkpoint(path, checkpoint)
+        print(
+            f"\n--- sequence expansion "
+            f"(run {len(scheduled)}, defer {len(still_deferred)} overfilled DNA/RNA) ---"
+        )
         _merge(
             seq_report,
             await run_sequence_jobs(
                 checkpoint,
                 path,
-                jobs,
+                scheduled,
                 additional=additional_sequences,
                 ceiling=ceiling,
                 batch_size=batch_size,
@@ -796,13 +989,19 @@ async def run_expansion(
                 global_cap=max_record_length,
             ),
         )
-        stats_mid = await snapshot()
-        remaining = ceiling - int(stats_mid["sequences"])
-        if remaining > 0:
-            fill_jobs = build_shortfall_jobs(remaining)
+        fill_cats = deficient_categories(checkpoint.get("new_by_category") or {})
+        fill_jobs = [
+            job
+            for job in build_shortfall_jobs(max(400, additional_sequences // 4), categories=fill_cats)
+            if not job_is_done(checkpoint, job["id"])
+        ]
+        fill_jobs, _fill_deferred = schedule_jobs(
+            fill_jobs, new_by_category=checkpoint.get("new_by_category") or {}
+        )
+        if fill_jobs:
             print(
-                f"\n--- shortfall fill ({remaining} below ceiling, "
-                f"{len(fill_jobs)} extra discovery jobs) ---"
+                f"\n--- category-aware shortfall "
+                f"({sorted(fill_cats)}: {len(fill_jobs)} jobs) ---"
             )
             _merge(
                 seq_report,

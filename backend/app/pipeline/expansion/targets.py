@@ -1,6 +1,34 @@
-"""Two different target semantics: additional sequences vs total publications."""
+"""Two different target semantics: additional sequences vs total publications.
+
+The original +10,000 plan used approximate NEW-category shares. After DNA/RNA
+overshoot those shares remain scientific reference goals, not delete-to-fit
+quotas. The global sequence ceiling is soft: underfilled categories continue.
+"""
 
 from __future__ import annotations
+
+# Approximate NEW records from the original +10,000 biodiversity plan.
+CATEGORY_NEW_GOALS: dict[str, int] = {
+    "dna": 2500,
+    "rna": 2000,
+    "protein": 3000,
+    "virus": 1200,
+    "crispr": 1000,
+}
+
+# Categories that may be frozen once their NEW goal is already exceeded.
+FROZEN_WHEN_OVERFILLED: tuple[str, ...] = ("dna", "rna")
+
+# Resume / future interleave order. Deficit-priority may reorder the first four.
+PRIORITY_CATEGORIES: tuple[str, ...] = ("protein", "virus", "crispr", "genome")
+INTERLEAVE_ORDER: tuple[str, ...] = (
+    "protein",
+    "virus",
+    "crispr",
+    "genome",
+    "dna",
+    "rna",
+)
 
 
 def sequence_ceiling(baseline_sequences: int, additional_sequences: int) -> int:
@@ -40,3 +68,19 @@ def species_over_new_cap(
 ) -> bool:
     cap = species_new_cap(additional_sequences, fraction=fraction)
     return int(new_by_tax_id.get(tax_id, 0)) >= cap
+
+
+def category_new_count(category: str, new_by_category: dict[str, int] | None) -> int:
+    return int((new_by_category or {}).get(category) or 0)
+
+
+def category_deficit(category: str, new_by_category: dict[str, int] | None) -> int:
+    """How many NEW records this category still wants. Never negative."""
+    goal = CATEGORY_NEW_GOALS.get(category)
+    if goal is None:
+        return 0
+    return max(0, goal - category_new_count(category, new_by_category))
+
+
+def category_deficits(new_by_category: dict[str, int] | None) -> dict[str, int]:
+    return {category: category_deficit(category, new_by_category) for category in CATEGORY_NEW_GOALS}

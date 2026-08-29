@@ -55,6 +55,16 @@ def test_jobs_scale_with_additional_sequences() -> None:
     assert large["virus_families"] >= 35
 
 
+def test_protein_and_crispr_jobs_do_not_start_with_model_organisms() -> None:
+    jobs = build_sequence_jobs(10000)
+    protein = [job for job in jobs if job.get("category") == "protein"]
+    crispr = [job for job in jobs if job.get("category") == "crispr"]
+    assert protein[0]["id"] != "prot-homo-sapiens"
+    assert any(job["id"] == "prot-homo-sapiens" for job in protein)
+    assert crispr[0]["id"] != "crispr-escherichia-coli"
+    assert any(job["id"] == "crispr-escherichia-coli" for job in crispr)
+
+
 def test_shortfall_jobs_do_not_repeat_main_plan() -> None:
     main_ids = {job["id"] for job in build_sequence_jobs(10000)}
     fill = build_shortfall_jobs(2500)
@@ -158,3 +168,248 @@ def test_pagination_cursors_above_10k() -> None:
     assert decode_cursor(page1) == 20
     assert decode_cursor(page2) == 40
     assert decode_cursor(page1) != decode_cursor(page2)
+
+
+def test_dna_cannot_starve_protein() -> None:
+    from app.pipeline.expansion.scheduler import schedule_jobs, skip_status
+
+    jobs = [
+        {"id": "dna-a", "category": "dna", "kind": "ncbi"},
+        {"id": "dna-b", "category": "dna", "kind": "ncbi"},
+        {"id": "prot-a", "category": "protein", "kind": "uniprot"},
+        {"id": "virus-a", "category": "virus", "kind": "ncbi"},
+        {"id": "crispr-a", "category": "crispr", "kind": "ncbi"},
+    ]
+    counts = {"dna": 5761, "rna": 2556, "protein": 0, "virus": 0, "crispr": 0}
+    scheduled, deferred = schedule_jobs(jobs, new_by_category=counts)
+    assert {job["id"] for job in deferred} == {"dna-a", "dna-b"}
+    assert [job["id"] for job in scheduled] == ["prot-a", "virus-a", "crispr-a"]
+    assert skip_status({"id": "prot-a", "category": "protein"}, new_by_category=counts) is None
+    assert skip_status({"id": "dna-a", "category": "dna"}, new_by_category=counts) == (
+        "DEFERRED_CATEGORY_OVERFILLED"
+    )
+
+
+def test_rna_cannot_starve_virus() -> None:
+    from app.pipeline.expansion.scheduler import schedule_jobs, skip_status
+
+    jobs = [
+        {"id": "rna-a", "category": "rna", "kind": "ncbi"},
+        {"id": "virus-a", "category": "virus", "kind": "ncbi"},
+    ]
+    counts = {"dna": 5761, "rna": 2556, "protein": 0, "virus": 0, "crispr": 0}
+    scheduled, deferred = schedule_jobs(jobs, new_by_category=counts)
+    assert [job["id"] for job in scheduled] == ["virus-a"]
+    assert [job["id"] for job in deferred] == ["rna-a"]
+    assert skip_status({"id": "virus-a", "category": "virus"}, new_by_category=counts) is None
+
+
+def test_dna_rna_cannot_starve_crispr_or_computational_job() -> None:
+    from app.pipeline.expansion.scheduler import schedule_jobs, skip_status
+
+    jobs = [
+        {"id": "dna-a", "category": "dna", "kind": "ncbi"},
+        {"id": "rna-a", "category": "rna", "kind": "ncbi"},
+        {"id": "crispr-a", "category": "crispr", "kind": "ncbi"},
+        {"id": "crispr-computational-ngg", "category": "crispr", "kind": "computational_ngg"},
+    ]
+    counts = {"dna": 8000, "rna": 4000, "protein": 0, "virus": 0, "crispr": 0}
+    scheduled, deferred = schedule_jobs(jobs, new_by_category=counts)
+    assert {job["id"] for job in deferred} == {"dna-a", "rna-a"}
+    assert [job["id"] for job in scheduled] == ["crispr-a", "crispr-computational-ngg"]
+    stats = {"sequences": 20000}
+    assert (
+        skip_status(
+            {"id": "crispr-computational-ngg", "kind": "computational_ngg", "category": "crispr"},
+            new_by_category=counts,
+            stats=stats,
+            additional=10000,
+            ceiling=11558,
+        )
+        is None
+    )
+
+
+def test_global_soft_target_cannot_stop_underfilled_categories() -> None:
+    from app.pipeline.expansion.scheduler import skip_status
+
+    counts = {"dna": 5761, "rna": 2556, "protein": 0, "virus": 0, "crispr": 0}
+    stats = {"sequences": 20000}
+    for job in (
+        {"id": "prot-x", "category": "protein", "kind": "uniprot"},
+        {"id": "virus-x", "category": "virus", "kind": "ncbi"},
+        {"id": "crispr-x", "category": "crispr", "kind": "ncbi"},
+        {"id": "asm-x", "category": "genome", "kind": "genomes"},
+    ):
+        assert skip_status(job, new_by_category=counts, stats=stats, ceiling=11558) is None
+
+
+def test_deferred_job_is_not_marked_completed() -> None:
+    from app.pipeline.expansion.checkpoint import (
+        DEFERRED_CATEGORY_OVERFILLED,
+        default_checkpoint,
+        job_is_done,
+        set_job_status,
+    )
+
+    checkpoint = default_checkpoint()
+    set_job_status(checkpoint, "rna-left", DEFERRED_CATEGORY_OVERFILLED, category="rna")
+    assert "rna-left" not in checkpoint["completed"]
+    assert job_is_done(checkpoint, "rna-left") is False
+
+
+def test_commit_before_checkpoint_reconcile_is_idempotent() -> None:
+    from app.pipeline.expansion.checkpoint import (
+        apply_succeeded_runs,
+        default_checkpoint,
+        job_is_done,
+    )
+
+    checkpoint = default_checkpoint()
+    checkpoint["inserted"] = 8273
+    checkpoint["new_by_category"] = {"dna": 5749, "rna": 2524}
+    runs = [
+        {
+            "job_id": "rna-paramecium-tetraurelia",
+            "status": "succeeded",
+            "created": 28,
+            "updated": 0,
+            "skipped": 0,
+            "total": 28,
+            "finished_at": "2026-08-29T13:12:46Z",
+        }
+    ]
+    first = apply_succeeded_runs(
+        checkpoint, runs, job_categories={"rna-paramecium-tetraurelia": "rna"}
+    )
+    assert first == ["rna-paramecium-tetraurelia"]
+    assert job_is_done(checkpoint, "rna-paramecium-tetraurelia") is True
+    assert checkpoint["inserted"] == 8301
+    assert checkpoint["new_by_category"]["rna"] == 2552
+    second = apply_succeeded_runs(
+        checkpoint, runs, job_categories={"rna-paramecium-tetraurelia": "rna"}
+    )
+    assert second == []
+    assert checkpoint["inserted"] == 8301
+
+
+def test_category_aware_shortfall_skips_overfilled_dna_rna() -> None:
+    from app.pipeline.expansion.diversity import build_shortfall_jobs
+    from app.pipeline.expansion.scheduler import deficient_categories, schedule_jobs
+
+    counts = {"dna": 5761, "rna": 2556, "protein": 0, "virus": 0, "crispr": 0}
+    cats = deficient_categories(counts)
+    assert "dna" not in cats
+    assert "rna" not in cats
+    assert cats == {"protein", "virus", "crispr"}
+    jobs = build_shortfall_jobs(3000, categories=cats)
+    assert jobs
+    assert all(job["category"] in {"protein", "virus", "crispr"} for job in jobs)
+    scheduled, deferred = schedule_jobs(jobs, new_by_category=counts)
+    assert not deferred
+    assert any(job["category"] == "protein" for job in scheduled)
+    assert any(job["category"] == "virus" for job in scheduled)
+    assert any(job["category"] == "crispr" for job in scheduled)
+
+
+def test_genome_jobs_are_not_sequence_type_genome() -> None:
+    jobs = build_sequence_jobs(10000, categories={"genome"}, sources={"genomes"})
+    assert jobs
+    assert all(job["kind"] == "genomes" for job in jobs)
+    assert all(job.get("seq_type") != "genome" for job in jobs)
+    assert all(job.get("category") == "genome" for job in jobs)
+
+
+def test_legacy_completed_without_report_is_not_success() -> None:
+    from app.pipeline.expansion.checkpoint import (
+        DEFERRED_CATEGORY_OVERFILLED,
+        migrate_checkpoint,
+    )
+
+    data = {
+        "completed": ["dna-skipped-by-ceiling"],
+        "reports": [],
+        "job_status": {},
+    }
+    migrated = migrate_checkpoint(data)
+    assert "dna-skipped-by-ceiling" not in migrated["completed"]
+    assert (
+        migrated["job_status"]["dna-skipped-by-ceiling"]["status"]
+        == DEFERRED_CATEGORY_OVERFILLED
+    )
+
+
+def test_pubmed_jobs_are_not_demoted_without_report() -> None:
+    from app.pipeline.expansion.checkpoint import (
+        COMPLETED_SUCCESSFULLY,
+        migrate_checkpoint,
+    )
+
+    data = {
+        "completed": ["pubmed-elink-all", "pm-crispr"],
+        "reports": [],
+        "job_status": {},
+    }
+    migrated = migrate_checkpoint(data)
+    assert "pubmed-elink-all" in migrated["completed"]
+    assert "pm-crispr" in migrated["completed"]
+    assert migrated["job_status"]["pubmed-elink-all"]["status"] == COMPLETED_SUCCESSFULLY
+
+
+def test_completed_job_is_not_demoted_when_category_frozen() -> None:
+    from app.pipeline.expansion.checkpoint import (
+        COMPLETED_SUCCESSFULLY,
+        DEFERRED_CATEGORY_OVERFILLED,
+        default_checkpoint,
+        job_is_done,
+        set_job_status,
+    )
+
+    checkpoint = default_checkpoint()
+    set_job_status(
+        checkpoint,
+        "rna-tetrahymena-thermophila",
+        COMPLETED_SUCCESSFULLY,
+        category="rna",
+        records_created=28,
+    )
+    set_job_status(
+        checkpoint,
+        "rna-tetrahymena-thermophila",
+        DEFERRED_CATEGORY_OVERFILLED,
+        category="rna",
+        reason="category already over its planned NEW share",
+    )
+    assert (
+        checkpoint["job_status"]["rna-tetrahymena-thermophila"]["status"]
+        == COMPLETED_SUCCESSFULLY
+    )
+    assert "rna-tetrahymena-thermophila" in checkpoint["completed"]
+    assert job_is_done(checkpoint, "rna-tetrahymena-thermophila") is True
+
+
+def test_empty_successful_job_is_skipped_already_present() -> None:
+    from app.pipeline.expansion.checkpoint import (
+        SKIPPED_ALREADY_PRESENT,
+        default_checkpoint,
+        job_is_done,
+        set_job_status,
+    )
+
+    checkpoint = default_checkpoint()
+    set_job_status(
+        checkpoint,
+        "prot-already-there",
+        SKIPPED_ALREADY_PRESENT,
+        category="protein",
+        records_skipped=12,
+    )
+    assert "prot-already-there" in checkpoint["completed"]
+    assert job_is_done(checkpoint, "prot-already-there") is True
+
+
+def test_crisprcasdb_is_not_scraped() -> None:
+    from app.pipeline.expansion.crisprcasdb import crisprcasdb_integration_status
+
+    status = crisprcasdb_integration_status()
+    assert status["status"] == "EXTERNAL_LIMITATION"

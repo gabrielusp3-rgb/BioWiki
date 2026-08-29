@@ -232,11 +232,23 @@ async def ingest_elinks(
 
     linked: list[str] = []
     async with NCBIConnector() as conn:
-        for group in chunked(unique, 40):
+        for group in chunked(unique, 200):
+            ids = list(group)
             try:
-                linked.extend(await conn.elink(dbfrom, "pubmed", list(group)))
+                webenv, query_key = await conn.epost(dbfrom, ids)
+                linked.extend(
+                    await conn.elink(dbfrom, "pubmed", webenv=webenv, query_key=query_key)
+                )
             except Exception:
-                logger.exception("pubmed elink failed for %d accession(s)", len(group))
+                logger.exception(
+                    "pubmed elink EPost failed for %d accession(s); retrying smaller id batches",
+                    len(ids),
+                )
+                for small in chunked(ids, 40):
+                    try:
+                        linked.extend(await conn.elink(dbfrom, "pubmed", list(small)))
+                    except Exception:
+                        logger.exception("pubmed elink failed for %d accession(s)", len(small))
 
     pmids = list(dict.fromkeys(linked))[: max(0, max_pmids)]
     if not pmids:

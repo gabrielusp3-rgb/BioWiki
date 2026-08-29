@@ -192,17 +192,35 @@ class NCBIConnector(BaseConnector):
         content = await self.efetch(db, accession, rettype="fasta", retmode="text")
         return RawRecord(source=self.source, accession=accession, fmt="fasta", content=content)
 
-    async def elink(self, dbfrom: str, db: str, ids: list[str] | str) -> list[str]:
-        """ELink: UIDs in ``db`` linked to the given UIDs in ``dbfrom``
-        (e.g. sequences cited by a PubMed article)."""
-        id_value = ids if isinstance(ids, str) else ",".join(ids)
+    async def elink(
+        self,
+        dbfrom: str,
+        db: str,
+        ids: list[str] | str | None = None,
+        *,
+        webenv: str | None = None,
+        query_key: str | None = None,
+    ) -> list[str]:
+        """ELink: UIDs in ``db`` linked to the given UIDs in ``dbfrom``.
+
+        Prefer ``webenv``/``query_key`` from EPost for large identifier sets.
+        """
         params = {
             **self._common_params(),
             "dbfrom": dbfrom,
             "db": db,
-            "id": id_value,
             "retmode": "json",
         }
+        if webenv and query_key:
+            params["WebEnv"] = webenv
+            params["query_key"] = query_key
+        elif ids:
+            params["id"] = ids if isinstance(ids, str) else ",".join(ids)
+        else:
+            raise ConnectorQueryError(
+                "ELink requires identifiers or a WebEnv/query_key pair.",
+                source=self.source,
+            )
         payload = await self.get_json("elink.fcgi", params=params)
         linked: list[str] = []
         try:

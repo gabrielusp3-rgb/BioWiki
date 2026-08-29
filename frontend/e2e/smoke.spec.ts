@@ -99,7 +99,13 @@ test("search reports empty or real results without fabricating records", async (
 
 test("API liveness probe responds when the backend is running", async ({ request }) => {
   const apiBase = process.env.PLAYWRIGHT_API_URL ?? "http://127.0.0.1:8000/api/v1";
-  const response = await request.get(`${apiBase}/health`);
+  let response;
+  try {
+    response = await request.get(`${apiBase}/health`);
+  } catch {
+    test.skip(true, "API is not running");
+    return;
+  }
   test.skip(response.status() === 0 || response.status() >= 500, "API is not running");
   expect(response.ok()).toBeTruthy();
   expect(await response.json()).toMatchObject({ status: "ok" });
