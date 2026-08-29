@@ -4,18 +4,20 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import Boolean, ForeignKey, Numeric, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID as PGUUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database.base import Base
 from app.models.enums import (
     CAS_SYSTEM_ENUM,
+    CRISPR_EVIDENCE_TYPE_ENUM,
     DNA_MOLECULE_TYPE_ENUM,
     GENOME_TYPE_ENUM,
     RNA_CLASS_ENUM,
     STRAND_ENUM,
     CasSystem,
+    CrisprEvidenceType,
     DnaMoleculeType,
     GenomeType,
     RnaClass,
@@ -99,11 +101,22 @@ class CrisprFeature(Base):
     cas_system: Mapped[CasSystem] = mapped_column(
         CAS_SYSTEM_ENUM, nullable=False, index=True
     )
+    evidence_type: Mapped[CrisprEvidenceType] = mapped_column(
+        CRISPR_EVIDENCE_TYPE_ENUM,
+        nullable=False,
+        index=True,
+        default=CrisprEvidenceType.NATURAL_CRISPR_ELEMENT,
+        server_default="natural_crispr_element",
+    )
     target_gene: Mapped[str | None] = mapped_column(String(120), index=True)
     pam: Mapped[str | None] = mapped_column(String(16))
     genomic_target: Mapped[str | None] = mapped_column(String(120))
     on_target_score: Mapped[float | None] = mapped_column(Numeric(6, 4))
     off_target_score: Mapped[float | None] = mapped_column(Numeric(6, 4))
+    target_source_accession: Mapped[str | None] = mapped_column(String(64), index=True)
+    target_tax_id: Mapped[int | None] = mapped_column(Integer, index=True)
+    source_pmid: Mapped[int | None] = mapped_column(Integer)
+    method: Mapped[str | None] = mapped_column(String(80))
 
 
 class VirusFeature(Base):

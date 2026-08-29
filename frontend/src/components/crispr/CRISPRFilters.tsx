@@ -2,8 +2,8 @@
 
 import type { ChangeEvent } from "react";
 import { Button } from "@/components/ui";
-import { CAS_SYSTEM_OPTIONS, CRISPR_SOURCE_OPTIONS } from "@/lib/crispr";
-import type { CasSystem, CrisprFilters as Filters } from "@/types/crispr";
+import { CAS_SYSTEM_OPTIONS, CRISPR_EVIDENCE_OPTIONS, CRISPR_SOURCE_OPTIONS } from "@/lib/crispr";
+import type { CasSystem, CrisprEvidenceType, CrisprFilters as Filters } from "@/types/crispr";
 
 interface CRISPRFiltersProps {
   filters: Filters;
@@ -66,6 +66,25 @@ export function CRISPRFilters({ filters, onChange, onReset }: CRISPRFiltersProps
           className={fieldClass}
         >
           {CAS_SYSTEM_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value} className="bg-bg-secondary">
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </Field>
+
+      <Field label="Evidence">
+        <select
+          value={filters.evidenceType}
+          onChange={(e) =>
+            onChange({
+              ...filters,
+              evidenceType: e.target.value as CrisprEvidenceType | "all",
+            })
+          }
+          className={fieldClass}
+        >
+          {CRISPR_EVIDENCE_OPTIONS.map((o) => (
             <option key={o.value} value={o.value} className="bg-bg-secondary">
               {o.label}
             </option>

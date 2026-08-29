@@ -14,6 +14,7 @@ function toParams(query: string, filters: CrisprFilters, limit: number, cursor?:
     organism: filters.organism || undefined,
     source: filters.source !== "all" ? filters.source : undefined,
     system: filters.system !== "all" ? filters.system : undefined,
+    evidence_type: filters.evidenceType !== "all" ? filters.evidenceType : undefined,
     target_gene: filters.targetGene || undefined,
     pam: filters.pam || undefined,
     min_length: filters.minLength ?? undefined,

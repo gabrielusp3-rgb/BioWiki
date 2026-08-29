@@ -42,6 +42,11 @@ async def list_sequences(
     system: str | None = _SHORT,
     target_gene: str | None = _GENE,
     pam: str | None = _SHORT,
+    evidence_type: str | None = Query(
+        None,
+        max_length=64,
+        description="natural_crispr_element | experimental_guide | computational_target",
+    ),
     min_length: int | None = Query(None, ge=0),
     max_length: int | None = Query(None, ge=0),
     limit: int = _LIMIT,
@@ -63,7 +68,8 @@ async def list_sequences(
         )
     if t == "crispr":
         return await sequence_service.list_crispr(
-            session, system=system, target_gene=target_gene, pam=pam, **kw
+            session, system=system, target_gene=target_gene, pam=pam,
+            evidence_type=evidence_type, **kw
         )
     raise HTTPException(status_code=422, detail="type must be dna, rna or crispr")
 
@@ -89,7 +95,9 @@ async def list_rna(
 
 
 @router.get(
-    "/crispr", response_model=ListResponse[CrisprRead], summary="List CRISPR guide sequences"
+    "/crispr",
+    response_model=ListResponse[CrisprRead],
+    summary="List CRISPR records (natural elements, experimental guides, computational targets)",
 )
 async def list_crispr(
     q: str | None = _Q,
@@ -98,6 +106,11 @@ async def list_crispr(
     system: str | None = _SHORT,
     target_gene: str | None = _GENE,
     pam: str | None = _SHORT,
+    evidence_type: str | None = Query(
+        None,
+        max_length=64,
+        description="natural_crispr_element | experimental_guide | computational_target",
+    ),
     min_length: int | None = Query(None, ge=0),
     max_length: int | None = Query(None, ge=0),
     limit: int = _LIMIT,
@@ -106,8 +119,8 @@ async def list_crispr(
 ):
     return await sequence_service.list_crispr(
         session, q=q, organism=organism, source=source, system=system,
-        target_gene=target_gene, pam=pam, min_length=min_length,
-        max_length=max_length, limit=limit, cursor=cursor,
+        target_gene=target_gene, pam=pam, evidence_type=evidence_type,
+        min_length=min_length, max_length=max_length, limit=limit, cursor=cursor,
     )
 
 

@@ -15,5 +15,7 @@ Required PostgreSQL extensions (created by the migration): `pgcrypto`, `pg_trgm`
 
 Do not point Alembic at a database that already holds scientific rows unless
 it is already stamped at `0004_publication_abstract` or a later revision.
-`0005_seed_categories` only inserts missing UI category rows. Never dump the
+`0005_seed_categories` only inserts missing UI category rows.
+`0006_crispr_evidence` adds CRISPR evidence type (natural / experimental /
+computational) plus optional target provenance columns. Never dump the
 live corpus into git.

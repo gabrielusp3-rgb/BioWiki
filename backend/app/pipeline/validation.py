@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from app.models.enums import (
     CasSystem,
+    CrisprEvidenceType,
     DnaMoleculeType,
     GenomeType,
     Molecule,
@@ -32,6 +33,7 @@ _DNA_TYPES = {t.value for t in DnaMoleculeType}
 _STRANDS = {s.value for s in Strand}
 _RNA_CLASSES = {c.value for c in RnaClass}
 _CAS = {c.value for c in CasSystem}
+_CRISPR_EVIDENCE = {c.value for c in CrisprEvidenceType}
 _GENOME_TYPES = {g.value for g in GenomeType}
 
 _NUCLEOTIDE_TYPES = {"dna", "rna", "crispr", "virus", "genome"}
@@ -217,6 +219,40 @@ def validate(ps: ParsedSequence) -> None:
         _require(ps.rna_class in _RNA_CLASSES, "rna requires a valid rna_class", "rna_class")
     elif ps.seq_type == "crispr":
         _require(ps.cas_system in _CAS, "crispr requires a valid cas_system", "cas_system")
+        if ps.evidence_type is None:
+            ps.evidence_type = CrisprEvidenceType.NATURAL_CRISPR_ELEMENT.value
+        _require(
+            ps.evidence_type in _CRISPR_EVIDENCE,
+            "crispr requires a valid evidence_type",
+            "evidence_type",
+        )
+        if ps.evidence_type == CrisprEvidenceType.COMPUTATIONAL_TARGET.value:
+            _require(
+                bool(ps.target_source_accession and ps.target_source_accession.strip()),
+                "computational CRISPR requires the authentic target accession",
+                "target_source_accession",
+            )
+            _require(
+                isinstance(ps.target_tax_id, int) and ps.target_tax_id > 0,
+                "computational CRISPR requires the target TaxID",
+                "target_tax_id",
+            )
+            _require(
+                bool(ps.method and ps.method.strip()),
+                "computational CRISPR requires the implemented method name",
+                "method",
+            )
+            _require(
+                ps.on_target_score is None and ps.off_target_score is None,
+                "computational CRISPR must not invent efficiency scores",
+                "on_target_score",
+            )
+        if ps.evidence_type == CrisprEvidenceType.EXPERIMENTAL_GUIDE.value:
+            _require(
+                ps.source_pmid is not None or bool(ps.source_url),
+                "experimental CRISPR requires a publication or source URL",
+                "source_pmid",
+            )
     elif ps.seq_type == "virus":
         _require(bool(ps.family and ps.family.strip()), "virus requires a family", "family")
         _require(ps.genome_type in _GENOME_TYPES, "virus requires a valid genome_type", "genome_type")

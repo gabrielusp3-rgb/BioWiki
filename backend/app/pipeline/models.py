@@ -107,11 +107,16 @@ class ParsedSequence:
 
     # CRISPR
     cas_system: str | None = None
+    evidence_type: str | None = None
     target_gene: str | None = None
     pam: str | None = None
     genomic_target: str | None = None
     on_target_score: float | None = None
     off_target_score: float | None = None
+    target_source_accession: str | None = None
+    target_tax_id: int | None = None
+    source_pmid: int | None = None
+    method: str | None = None
 
     # Virus
     family: str | None = None
@@ -164,6 +169,7 @@ class ImportContext:
     is_coding: bool | None = None       # RNA
     reviewed: bool | None = None        # Protein
     cas_system: str | None = None       # CRISPR
+    evidence_type: str | None = None    # CRISPR evidence class
     genome_type: str | None = None      # Virus
     family: str | None = None           # Virus
     host: str | None = None             # Virus

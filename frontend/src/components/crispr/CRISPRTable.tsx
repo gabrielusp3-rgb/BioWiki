@@ -2,7 +2,7 @@
 
 import { Badge, Button, Skeleton, Table, type Column } from "@/components/ui";
 import { DownloadIcon } from "@/components/ui/Icons";
-import { CAS_SYSTEM_LABEL, formatNt, formatScore } from "@/lib/crispr";
+import { CAS_SYSTEM_LABEL, CRISPR_EVIDENCE_LABEL, formatNt, formatScore } from "@/lib/crispr";
 import type { CrisprStatus } from "@/hooks/useCrispr";
 import type { CrisprGuide } from "@/types/crispr";
 
@@ -72,6 +72,15 @@ export function CRISPRTable({
       key: "system",
       header: "System",
       render: (row) => <Badge category="crispr">{CAS_SYSTEM_LABEL[row.system]}</Badge>,
+    },
+    {
+      key: "evidence",
+      header: "Evidence",
+      render: (row) => (
+        <span className="text-xs text-content-secondary">
+          {CRISPR_EVIDENCE_LABEL[row.evidenceType ?? "natural_crispr_element"]}
+        </span>
+      ),
     },
     {
       key: "pam",

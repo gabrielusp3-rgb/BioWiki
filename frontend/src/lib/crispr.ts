@@ -1,5 +1,5 @@
 import { baseColors, type BaseKey } from "@/lib/design-tokens";
-import type { CasSystem, CrisprGuide } from "@/types/crispr";
+import type { CasSystem, CrisprEvidenceType, CrisprGuide } from "@/types/crispr";
 
 export const CAS_SYSTEM_OPTIONS: { value: CasSystem | "all"; label: string }[] = [
   { value: "all", label: "All systems" },
@@ -18,9 +18,24 @@ export const CAS_SYSTEM_LABEL: Record<CasSystem, string> = {
   other: "Other",
 };
 
+export const CRISPR_EVIDENCE_LABEL: Record<CrisprEvidenceType, string> = {
+  natural_crispr_element: "Natural CRISPR-Cas",
+  experimental_guide: "Experimental guide",
+  computational_target: "Computational / predicted",
+};
+
+export const CRISPR_EVIDENCE_OPTIONS: { value: CrisprEvidenceType | "all"; label: string }[] = [
+  { value: "all", label: "All evidence" },
+  { value: "natural_crispr_element", label: "Natural CRISPR-Cas" },
+  { value: "experimental_guide", label: "Experimental guide" },
+  { value: "computational_target", label: "Computational / predicted" },
+];
+
 export const CRISPR_SOURCE_OPTIONS: { value: string; label: string }[] = [
   { value: "all", label: "All sources" },
   { value: "ncbi_refseq", label: "NCBI RefSeq" },
+  { value: "ncbi_genbank", label: "NCBI GenBank" },
+  { value: "biowiki_computational", label: "Computational scan" },
   { value: "ensembl", label: "Ensembl" },
   { value: "ena", label: "ENA" },
 ];
@@ -42,7 +57,10 @@ export function baseColor(base: string): string {
 }
 
 export function toFasta(guide: CrisprGuide, lineWidth = 70): string {
-  const header = `>${guide.accession} ${guide.name} | ${CAS_SYSTEM_LABEL[guide.system]} | PAM:${guide.pam} | target:${guide.targetGene} [${guide.organism}]`;
+  const evidence = guide.evidenceType
+    ? CRISPR_EVIDENCE_LABEL[guide.evidenceType]
+    : "Natural CRISPR-Cas";
+  const header = `>${guide.accession} ${guide.name} | ${evidence} | ${CAS_SYSTEM_LABEL[guide.system]} | PAM:${guide.pam} | target:${guide.targetGene} [${guide.organism}]`;
   if (!guide.guideSequence) return header;
   const lines: string[] = [];
   for (let i = 0; i < guide.guideSequence.length; i += lineWidth) {
@@ -80,8 +98,8 @@ export interface CrisprPageStat {
  * No guides, targets or organisms are fabricated.
  */
 export const CRISPR_PAGE_STATS: CrisprPageStat[] = [
-  { id: "crispr", value: 150_000, suffix: "+", label: "Guide RNAs" },
-  { id: "organisms", value: 200, suffix: "+", label: "Organisms" },
+  { id: "crispr", value: 0, label: "CRISPR records" },
+  { id: "organisms", value: 0, label: "Organisms" },
   { id: "systems", value: 4, label: "Cas systems" },
   { id: "formats", value: 3, label: "Export formats" },
 ];

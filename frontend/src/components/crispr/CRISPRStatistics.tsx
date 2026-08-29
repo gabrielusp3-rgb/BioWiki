@@ -19,7 +19,7 @@ export function CRISPRStatistics() {
         if (!stats || controller.signal.aborted) return;
         const crispr = stats.categories.find((c) => c.key === "crispr")?.count ?? 0;
         setItems([
-          { id: "crispr", value: crispr, label: "Guide RNAs" },
+          { id: "crispr", value: crispr, label: "CRISPR records" },
           { id: "organisms", value: stats.organisms, label: "Organisms" },
           CRISPR_PAGE_STATS[2],
           CRISPR_PAGE_STATS[3],

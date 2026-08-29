@@ -48,6 +48,7 @@ export interface SequenceDetail {
   domains?: string[];
   // CRISPR
   system?: string;
+  evidenceType?: string | null;
   targetGene?: string;
   pam?: string;
   guideLength?: number;
@@ -55,6 +56,8 @@ export interface SequenceDetail {
   genomicTarget?: string | null;
   onTargetScore?: number | null;
   offTargetScore?: number | null;
+  targetSourceAccession?: string | null;
+  method?: string | null;
   // Virus
   family?: string;
   host?: string | null;

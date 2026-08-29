@@ -18,6 +18,7 @@ import { isApiConfigured } from "@/lib/api";
 import {
   baseColor,
   CAS_SYSTEM_LABEL,
+  CRISPR_EVIDENCE_LABEL,
   downloadText,
   formatNt,
   formatScore,
@@ -143,6 +144,9 @@ export function CRISPRViewer({ guide, open, onClose }: CRISPRViewerProps) {
                     CRISPR
                   </Badge>
                   <Badge category="crispr">{CAS_SYSTEM_LABEL[active.system]}</Badge>
+                  <Badge category="crispr">
+                    {CRISPR_EVIDENCE_LABEL[active.evidenceType ?? "natural_crispr_element"]}
+                  </Badge>
                 </div>
                 <h2 className="truncate font-display text-xl font-bold tracking-tightest" title={active.name}>
                   {active.name}
@@ -177,7 +181,13 @@ export function CRISPRViewer({ guide, open, onClose }: CRISPRViewerProps) {
             </div>
 
             <div className="flex flex-col gap-4 p-6">
-              <span className="eyebrow">Guide RNA · Spacer</span>
+              <span className="eyebrow">
+                {active.evidenceType === "computational_target"
+                  ? "Predicted spacer (computational)"
+                  : active.evidenceType === "experimental_guide"
+                    ? "Experimental guide"
+                    : "CRISPR sequence"}
+              </span>
               {loading ? (
                 <p className="text-sm text-content-secondary">Loading guide from the database…</p>
               ) : residues ? (
@@ -196,9 +206,20 @@ export function CRISPRViewer({ guide, open, onClose }: CRISPRViewerProps) {
                 </div>
               )}
 
+              {active.targetSourceAccession && (
+                <div className="flex flex-col gap-1.5 border-t border-glass-divider pt-4">
+                  <span className="eyebrow">Target accession</span>
+                  <span className="font-mono text-sm text-content-primary">
+                    {active.targetSourceAccession}
+                    {active.method ? ` · ${active.method}` : ""}
+                  </span>
+                </div>
+              )}
+
               <p className="text-xs text-content-muted">
-                Scores are provided by the source database. BIOWIKI does not compute or
-                estimate efficiency or off-target values on the client.
+                {active.evidenceType === "computational_target"
+                  ? "This site was predicted by a Cas9 NGG scan of an authentic stored sequence. It is not experimental validation and does not mean an organism was edited. Efficiency scores are not invented."
+                  : "Scores are provided by the source database. BIOWIKI does not compute or estimate efficiency or off-target values on the client."}
               </p>
             </div>
             </div>

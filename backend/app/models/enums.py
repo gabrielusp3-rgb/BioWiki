@@ -57,6 +57,19 @@ class CasSystem(str, enum.Enum):
     OTHER = "other"
 
 
+class CrisprEvidenceType(str, enum.Enum):
+    """How a CRISPR catalogue row was obtained.
+
+    These are not interchangeable biological entities:
+    a natural spacer is not an engineered guide, and a PAM scan is not
+    experimental validation.
+    """
+
+    NATURAL_CRISPR_ELEMENT = "natural_crispr_element"
+    EXPERIMENTAL_GUIDE = "experimental_guide"
+    COMPUTATIONAL_TARGET = "computational_target"
+
+
 class GenomeType(str, enum.Enum):
     DSDNA = "dsDNA"
     SSDNA = "ssDNA"
@@ -102,6 +115,7 @@ DNA_MOLECULE_TYPE_ENUM = pg_enum(DnaMoleculeType, "dna_molecule_type")
 STRAND_ENUM = pg_enum(Strand, "strand")
 RNA_CLASS_ENUM = pg_enum(RnaClass, "rna_class")
 CAS_SYSTEM_ENUM = pg_enum(CasSystem, "cas_system")
+CRISPR_EVIDENCE_TYPE_ENUM = pg_enum(CrisprEvidenceType, "crispr_evidence_type")
 GENOME_TYPE_ENUM = pg_enum(GenomeType, "genome_type")
 ORGANISM_GROUP_ENUM = pg_enum(OrganismGroup, "organism_group")
 ASSEMBLY_LEVEL_ENUM = pg_enum(AssemblyLevel, "assembly_level")

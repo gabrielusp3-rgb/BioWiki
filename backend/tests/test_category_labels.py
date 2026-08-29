@@ -7,5 +7,5 @@ def test_every_ui_category_has_a_label() -> None:
     assert set(CATEGORY_TYPES) == {"dna", "rna", "protein", "crispr", "virus", "genome"}
 
 
-def test_alembic_head_is_category_seed() -> None:
-    assert repo_alembic_head() == "0005_seed_categories"
+def test_alembic_head_is_crispr_evidence() -> None:
+    assert repo_alembic_head() == "0006_crispr_evidence"

@@ -16,7 +16,7 @@ export const SEARCH_TYPES: SearchTypeMeta[] = [
   { type: "dna", label: "DNA", category: "dna", hint: "Nucleotide sequences" },
   { type: "rna", label: "RNA", category: "rna", hint: "Transcripts and RNA classes" },
   { type: "virus", label: "Virus", category: "virus", hint: "Viral genomes and segments" },
-  { type: "crispr", label: "CRISPR", category: "crispr", hint: "Guide RNAs and targets" },
+  { type: "crispr", label: "CRISPR", category: "crispr", hint: "Natural, experimental, and computational CRISPR records" },
   { type: "genome", label: "Genome", category: "genome", hint: "Assembled genomes" },
   { type: "accession", label: "Accession", hint: "e.g. NM_000546, P04637" },
   { type: "taxonomy", label: "Taxonomy", hint: "Organisms and lineages" },

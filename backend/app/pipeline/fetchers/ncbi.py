@@ -22,7 +22,7 @@ from app.services.connectors.refseq import is_refseq_accession
 
 logger = get_logger("biowiki.pipeline.fetchers.ncbi")
 
-_EFETCH_CHUNK = 20
+_EFETCH_CHUNK = 40
 
 _DB_URL_PATH = {"nuccore": "nuccore", "protein": "protein"}
 _DB_RETTYPE = {"nuccore": "gb", "protein": "gp"}

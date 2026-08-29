@@ -7,9 +7,9 @@ import { CRISPRStatistics } from "@/components/crispr/CRISPRStatistics";
 import { CRISPRExplorer } from "@/components/crispr/CRISPRExplorer";
 
 export const metadata: Metadata = {
-  title: "CRISPR Guides",
+  title: "CRISPR",
   description:
-    "Search, filter and explore real CRISPR guide RNAs with PAM context, target genes, Cas systems and multi-format downloads.",
+    "Natural CRISPR-Cas elements, experimentally reported guides, and computational Cas9 targets, each labeled by evidence type. Scores are never invented on the client.",
   alternates: { canonical: "/crispr" },
 };
 
@@ -20,9 +20,9 @@ export default function CrisprPage() {
       <main id="main" className="pt-16">
         <Container width="wide">
           <Section
-            eyebrow="CRISPR · Guide RNAs"
-            title="CRISPR guide database"
-            description="Guide RNAs with PAM context, target genes and Cas system annotations. Efficiency and specificity scores are served directly from source databases — never computed on the client."
+            eyebrow="CRISPR · evidence types"
+            title="CRISPR catalogue"
+            description="Natural CRISPR-Cas elements, experimental guides, and computational / predicted Cas9 NGG sites. Computational records are never labeled experimental. Efficiency scores come from sources or stay empty — they are not invented here."
           >
             <div className="flex flex-col gap-10">
               <CRISPRStatistics />

@@ -56,6 +56,7 @@ export interface CrisprRead {
   taxId?: number | null;
   source: string;
   system: string;
+  evidenceType?: string | null;
   targetGene: string;
   pam: string;
   guideLength: number;
@@ -63,6 +64,8 @@ export interface CrisprRead {
   genomicTarget?: string | null;
   onTargetScore?: number | null;
   offTargetScore?: number | null;
+  targetSourceAccession?: string | null;
+  method?: string | null;
   updatedAt?: string | null;
   description?: string | null;
   sourceUrl?: string | null;

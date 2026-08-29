@@ -24,6 +24,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.cross_reference import SequenceCrossReference
 from app.models.enums import (
     CasSystem,
+    CrisprEvidenceType,
     DnaMoleculeType,
     GenomeType,
     Molecule,
@@ -271,11 +272,18 @@ class SequenceImporter:
         elif st == SequenceType.CRISPR:
             feat = await self.session.get(CrisprFeature, seq.id) or CrisprFeature(sequence_id=seq.id)
             feat.cas_system = CasSystem(ps.cas_system or "other")
+            feat.evidence_type = CrisprEvidenceType(
+                ps.evidence_type or CrisprEvidenceType.NATURAL_CRISPR_ELEMENT.value
+            )
             feat.target_gene = _clip(ps.target_gene, 120)
             feat.pam = _clip(ps.pam, 16)
             feat.genomic_target = _clip(ps.genomic_target, 120)
             feat.on_target_score = ps.on_target_score
             feat.off_target_score = ps.off_target_score
+            feat.target_source_accession = _clip(ps.target_source_accession, 64)
+            feat.target_tax_id = ps.target_tax_id
+            feat.source_pmid = ps.source_pmid
+            feat.method = _clip(ps.method, 80)
             await self._merge(feat)
         elif st == SequenceType.VIRUS:
             feat = await self.session.get(VirusFeature, seq.id) or VirusFeature(sequence_id=seq.id)

@@ -344,7 +344,7 @@ Run from `backend/` with the virtualenv active. None of these are HTTP routes.
 | --- | --- |
 | `python -m app.pipeline.cli` | Import real records from NCBI, UniProt, Ensembl, PDB, ENA, Rfam, PubMed, or a local file |
 | `python -m scripts.seed_initial` | First load of curated real accessions |
-| `python -m scripts.expand_dataset` | Broader import jobs (checkpoint file is local and not committed) |
+| `python -m scripts.expand_dataset --additional-sequences 10000 --publication-target 25000` | Configurable resumable import. Sequence flag is ADDITIONAL; publication flag is TOTAL. Checkpoint is local and not committed. |
 | `python -m scripts.backfill_empty_residues` | Fill empty `residues` from official NCBI FASTA when GenBank has CONTIG only |
 | `python -m scripts.backfill_organism_groups` | Dry-run NCBI Taxonomy lineage/group repair (add `--apply` to write) |
 | `python -m scripts.audit_catalogue` | Read-only catalogue matrix against the public API |

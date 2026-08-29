@@ -49,6 +49,8 @@ class BaseParser(ABC):
             ps.reviewed = context.reviewed
         if ps.cas_system is None:
             ps.cas_system = context.cas_system
+        if ps.evidence_type is None:
+            ps.evidence_type = context.evidence_type
         if ps.genome_type is None:
             ps.genome_type = context.genome_type
         if ps.family is None:

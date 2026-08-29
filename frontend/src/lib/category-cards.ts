@@ -61,7 +61,7 @@ export const CATEGORY_CARDS: CategoryCardData[] = [
   {
     key: "crispr",
     label: "CRISPR",
-    description: "Guide RNAs with PAM context and genomic target coordinates.",
+    description: "Natural CRISPR-Cas, experimental guides, and computational targets, labeled separately.",
     count: 150_000,
     href: "/crispr",
     Icon: CrisprIcon,

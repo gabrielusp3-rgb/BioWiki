@@ -208,6 +208,10 @@ async def list_crispr(session: AsyncSession, **kw: Any) -> dict[str, Any]:
         )
     if kw.get("pam"):
         stmt = stmt.join(CrisprFeature).where(CrisprFeature.pam == kw["pam"])
+    if kw.get("evidence_type"):
+        stmt = stmt.join(CrisprFeature).where(
+            CrisprFeature.evidence_type == kw["evidence_type"]
+        )
     return await _paginate(
         session,
         stmt,

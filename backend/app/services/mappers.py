@@ -116,7 +116,7 @@ def to_virus(seq: Sequence, *, with_residues: bool = True) -> VirusRead:
 
 def to_crispr(seq: Sequence, *, with_residues: bool = True) -> CrisprRead:
     feat = seq.crispr_feature
-    from app.models.enums import CasSystem
+    from app.models.enums import CasSystem, CrisprEvidenceType
 
     return CrisprRead(
         id=seq.id,
@@ -126,6 +126,9 @@ def to_crispr(seq: Sequence, *, with_residues: bool = True) -> CrisprRead:
         tax_id=_tax_id(seq),
         source=_source_name(seq),
         system=feat.cas_system if feat else CasSystem.OTHER,
+        evidence_type=(
+            feat.evidence_type if feat else CrisprEvidenceType.NATURAL_CRISPR_ELEMENT
+        ),
         target_gene=(feat.target_gene if feat and feat.target_gene else seq.gene_name or ""),
         pam=(feat.pam if feat and feat.pam else ""),
         guide_length=seq.length,
@@ -133,6 +136,10 @@ def to_crispr(seq: Sequence, *, with_residues: bool = True) -> CrisprRead:
         genomic_target=feat.genomic_target if feat else None,
         on_target_score=_f(feat.on_target_score) if feat else None,
         off_target_score=_f(feat.off_target_score) if feat else None,
+        target_source_accession=feat.target_source_accession if feat else None,
+        target_tax_id=feat.target_tax_id if feat else None,
+        source_pmid=feat.source_pmid if feat else None,
+        method=feat.method if feat else None,
         updated_at=seq.updated_at,
         description=seq.description,
         source_url=seq.source_url,

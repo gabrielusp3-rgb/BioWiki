@@ -11,7 +11,7 @@ import re
 from datetime import datetime, timezone
 from typing import Any
 
-from app.pipeline.fetchers.base import import_with_run
+from app.pipeline.fetchers.base import chunked, import_with_run
 from app.pipeline.logging import get_logger
 from app.pipeline.models import (
     ImportReport,
@@ -203,13 +203,42 @@ async def fetch_records(
                     break
             ids = list(dict.fromkeys(ids))
 
-        for accession in ids:
-            entry = await conn.get_entry_json(accession)
-            record = _entry_to_parsed(entry)
-            if record is not None:
-                parsed.append(record)
-            else:
-                logger.warning("uniprot entry %s lacks sequence/organism; skipped", accession)
+        seen: set[str] = set()
+        for group in chunked(ids, 50):
+            try:
+                payload = await conn.get_accessions(list(group))
+                entries = payload.get("results") if isinstance(payload, dict) else None
+                if not isinstance(entries, list):
+                    raise ValueError("UniProt accessions payload missing results")
+                for entry in entries:
+                    record = _entry_to_parsed(entry)
+                    if record is None:
+                        continue
+                    if record.accession in seen:
+                        continue
+                    seen.add(record.accession)
+                    parsed.append(record)
+            except Exception:
+                logger.exception(
+                    "uniprot batch lookup failed (%d ids); retrying one-by-one",
+                    len(group),
+                )
+                for accession in group:
+                    if accession in seen:
+                        continue
+                    try:
+                        entry = await conn.get_entry_json(accession)
+                        record = _entry_to_parsed(entry)
+                        if record is None:
+                            logger.warning(
+                                "uniprot entry %s lacks sequence/organism; skipped",
+                                accession,
+                            )
+                            continue
+                        seen.add(record.accession)
+                        parsed.append(record)
+                    except Exception:
+                        logger.exception("uniprot entry skipped %s", accession)
     finally:
         if owns:
             await conn.aclose()

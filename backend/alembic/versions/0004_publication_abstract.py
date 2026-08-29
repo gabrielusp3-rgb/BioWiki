@@ -21,6 +21,7 @@ from app.database.base import Base
 from app.models.enums import (
     AssemblyLevel,
     CasSystem,
+    CrisprEvidenceType,
     DnaMoleculeType,
     GenomeType,
     Molecule,
@@ -43,6 +44,7 @@ _ENUMS: tuple[tuple[str, type], ...] = (
     ("strand", Strand),
     ("rna_class", RnaClass),
     ("cas_system", CasSystem),
+    ("crispr_evidence_type", CrisprEvidenceType),
     ("genome_type", GenomeType),
     ("organism_group", OrganismGroup),
     ("assembly_level", AssemblyLevel),

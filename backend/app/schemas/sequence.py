@@ -4,7 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from app.models.enums import CasSystem, DnaMoleculeType, GenomeType, RnaClass, Strand
+from app.models.enums import CasSystem, CrisprEvidenceType, DnaMoleculeType, GenomeType, RnaClass, Strand
 from app.schemas.common import CamelModel
 
 
@@ -66,6 +66,7 @@ class CrisprRead(CamelModel):
     tax_id: int | None = None
     source: str
     system: CasSystem
+    evidence_type: CrisprEvidenceType = CrisprEvidenceType.NATURAL_CRISPR_ELEMENT
     target_gene: str
     pam: str
     guide_length: int
@@ -73,6 +74,10 @@ class CrisprRead(CamelModel):
     genomic_target: str | None = None
     on_target_score: float | None = None
     off_target_score: float | None = None
+    target_source_accession: str | None = None
+    target_tax_id: int | None = None
+    source_pmid: int | None = None
+    method: str | None = None
     updated_at: datetime | None = None
     description: str | None = None
     source_url: str | None = None
