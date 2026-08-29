@@ -32,6 +32,17 @@ class UniProtConnector(BaseConnector):
     async def get_entry_json(self, accession: str) -> dict[str, Any]:
         return await self.get_json(f"uniprotkb/{accession}.json")
 
+    async def get_accessions(self, accessions: list[str]) -> dict[str, Any]:
+        """Batch lookup via the official UniProtKB accessions endpoint."""
+        unique = list(dict.fromkeys(a.strip() for a in accessions if a and a.strip()))
+        if not unique:
+            return {"results": []}
+        params = {"accessions": ",".join(unique), "format": "json"}
+        payload = await self.get_json("uniprotkb/accessions", params=params)
+        if isinstance(payload, dict):
+            return payload
+        raise ConnectorParseError("Unexpected UniProt accessions payload.", source=self.source)
+
     async def get_entry_fasta(self, accession: str) -> RawRecord:
         content = await self.get_text(f"uniprotkb/{accession}.fasta")
         return RawRecord(source=self.source, accession=accession, fmt="fasta", content=content)

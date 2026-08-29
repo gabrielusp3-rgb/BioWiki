@@ -110,14 +110,63 @@ class NCBIConnector(BaseConnector):
         hits = [SearchHit(source=self.source, identifier=uid) for uid in ids]
         return SearchPage(source=self.source, hits=hits, total=total, next_cursor=next_cursor)
 
-    async def esummary(self, db: str, ids: list[str]) -> dict[str, Any]:
-        """Fetch document summaries for the given UIDs."""
-        params = {
+    async def epost(self, db: str, ids: list[str]) -> tuple[str, str]:
+        """Upload UIDs/accessions into the Entrez History server (EPost).
+
+        Returns ``(webenv, query_key)`` for subsequent ESummary/EFetch calls.
+        """
+        from urllib.parse import urlencode
+        import xml.etree.ElementTree as ET
+
+        if not ids:
+            raise ConnectorQueryError("EPost requires at least one identifier.", source=self.source)
+        params = {**self._common_params(), "db": db}
+        body = urlencode({"id": ",".join(ids)})
+        response = await self.request(
+            "POST",
+            "epost.fcgi",
+            params=params,
+            content=body,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        try:
+            root = ET.fromstring(response.text)
+        except ET.ParseError as exc:
+            raise ConnectorParseError("Unexpected EPost XML payload.", source=self.source) from exc
+        webenv = root.findtext("WebEnv")
+        query_key = root.findtext("QueryKey")
+        if not webenv or not query_key:
+            raise ConnectorParseError("EPost response missing WebEnv/QueryKey.", source=self.source)
+        return webenv, query_key
+
+    async def esummary(
+        self,
+        db: str,
+        ids: list[str] | None = None,
+        *,
+        webenv: str | None = None,
+        query_key: str | None = None,
+        retstart: int = 0,
+        retmax: int = 500,
+    ) -> dict[str, Any]:
+        """Fetch document summaries for UIDs or an Entrez History set."""
+        params: dict[str, Any] = {
             **self._common_params(),
             "db": db,
-            "id": ",".join(ids),
             "retmode": "json",
+            "retstart": retstart,
+            "retmax": retmax,
         }
+        if webenv and query_key:
+            params["WebEnv"] = webenv
+            params["query_key"] = query_key
+        elif ids:
+            params["id"] = ",".join(ids)
+        else:
+            raise ConnectorQueryError(
+                "ESummary requires identifiers or a WebEnv/query_key pair.",
+                source=self.source,
+            )
         return await self.get_json("esummary.fcgi", params=params)
 
     async def efetch(

@@ -203,6 +203,8 @@ async def get_sync_status(
 
 
 async def check_integrity(session: AsyncSession) -> IntegrityReport:
+    from app.services.integrity_checks import sql_integrity_checks
+
     checks: list[IntegrityCheck] = []
 
     live = await _category_live_counts(session)
@@ -224,62 +226,7 @@ async def check_integrity(session: AsyncSession) -> IntegrityReport:
             )
         )
 
-    pubs = int(
-        (await session.execute(select(func.count()).select_from(Publication))).scalar_one()
-    )
-    linked = int(
-        (
-            await session.execute(
-                select(func.count(func.distinct(SequenceReference.publication_id)))
-            )
-        ).scalar_one()
-    )
-    checks.append(
-        IntegrityCheck(
-            name="publications:linked_within_total",
-            ok=linked <= pubs,
-            detail="linked publications never exceed stored publications",
-            expected=pubs,
-            actual=linked,
-        )
-    )
-
-    orphan_refs = int(
-        (
-            await session.execute(
-                select(func.count())
-                .select_from(SequenceReference)
-                .outerjoin(Sequence, SequenceReference.sequence_id == Sequence.id)
-                .where(Sequence.id.is_(None))
-            )
-        ).scalar_one()
-    )
-    checks.append(
-        IntegrityCheck(
-            name="references:no_orphans",
-            ok=orphan_refs == 0,
-            detail="every sequence↔publication link points to a real sequence",
-            expected=0,
-            actual=orphan_refs,
-        )
-    )
-
-    genome_seq = int(
-        (
-            await session.execute(
-                select(func.count()).where(Sequence.seq_type == SequenceType.GENOME)
-            )
-        ).scalar_one()
-    )
-    checks.append(
-        IntegrityCheck(
-            name="genome:assemblies_not_duplicated_as_sequences",
-            ok=genome_seq == 0,
-            detail="genome catalogue is genome_records; SequenceType.GENOME stays unused",
-            expected=0,
-            actual=genome_seq,
-        )
-    )
+    checks.extend(await sql_integrity_checks(session))
 
     return IntegrityReport(
         ok=all(c.ok for c in checks),

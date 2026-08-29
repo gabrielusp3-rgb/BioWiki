@@ -15,7 +15,7 @@ from app.pipeline.logging import get_logger
 from app.pipeline.models import ImportReport, ParsedGenome, ParsedOrganism
 from app.pipeline.run_log import record_run
 from app.database.session import get_sessionmaker
-from app.pipeline.taxonomy import group_from_taxonomy, parse_ncbi_taxonomy_xml
+from app.pipeline.taxonomy import group_from_taxonomy, index_taxonomy_for_requested
 from app.services.connectors.datasets import NCBIDatasetsConnector
 
 logger = get_logger("biowiki.pipeline.fetchers.datasets")
@@ -146,7 +146,8 @@ async def _annotate_taxonomy(genomes: list[ParsedGenome]) -> None:
                 xml = await conn.efetch(
                     "taxonomy", list(group), rettype="xml", retmode="xml"
                 )
-                lookup.update(parse_ncbi_taxonomy_xml(xml))
+                requested = [int(t) for t in group if str(t).isdigit()]
+                lookup.update(index_taxonomy_for_requested(xml, requested))
             except Exception:
                 logger.exception("taxonomy efetch failed for %d tax id(s)", len(group))
                 continue

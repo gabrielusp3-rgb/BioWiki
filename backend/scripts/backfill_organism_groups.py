@@ -25,7 +25,7 @@ from app.models.enums import OrganismGroup
 from app.models.organism import Organism
 from app.pipeline.fetchers.base import chunked
 from app.pipeline.logging import get_logger
-from app.pipeline.taxonomy import group_from_taxonomy, parse_ncbi_taxonomy_xml
+from app.pipeline.taxonomy import group_from_taxonomy, index_taxonomy_for_requested
 from app.services.connectors.ncbi import NCBIConnector
 
 logger = get_logger("biowiki.pipeline.backfill_organisms")
@@ -78,7 +78,8 @@ async def _fetch_taxonomy(tax_ids: list[int]) -> dict[int, dict]:
         for group in chunked([str(t) for t in tax_ids], 40):
             try:
                 xml = await conn.efetch("taxonomy", list(group), rettype="xml", retmode="xml")
-                lookup.update(parse_ncbi_taxonomy_xml(xml))
+                requested = [int(t) for t in group if str(t).isdigit()]
+                lookup.update(index_taxonomy_for_requested(xml, requested))
             except Exception:
                 logger.exception("taxonomy efetch failed for %s", group)
     return lookup

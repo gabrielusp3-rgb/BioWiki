@@ -1,0 +1,57 @@
+{
+  "label": "PRE-10K VERIFIED BASELINE",
+  "recorded_at": "2026-08-29T00:00:05Z",
+  "git_commit": "3a62fa8ec4f77d3569d1327e9a6e2be0fd9357a0",
+  "catalogue": {
+    "sequences_total": 1542,
+    "dna": 689,
+    "rna": 307,
+    "protein": 327,
+    "peptide": 0,
+    "crispr": 79,
+    "virus": 140,
+    "genome_sequence_rows": 0,
+    "genome_assemblies": 32,
+    "organisms": 454,
+    "unique_tax_ids": 454,
+    "publications": 5838,
+    "unique_pmids": 5495,
+    "directly_linked_publications": 4416,
+    "standalone_legitimate_publications": 1422,
+    "residue_count": 11116118,
+    "checksum_clusters_same_residues_distinct_provenance": 41,
+    "database_bytes": 43106304,
+    "data_sources": {
+      "UniProt": 303,
+      "NCBI GenBank": 667,
+      "NCBI RefSeq": 548,
+      "RCSB PDB": 24
+    }
+  },
+  "external_verification": {
+    "sequences_verified": 1542,
+    "sequences_temporarily_unverified": 0,
+    "sequences_superseded": 0,
+    "sequences_mismatch": 0,
+    "sequences_invalid": 0,
+    "organisms_verified": 454,
+    "organism_group_mismatch": 0,
+    "empty_lineage": 0,
+    "merged_tax_ids": 0,
+    "valid_names": 428,
+    "valid_synonyms_preserved": 2,
+    "updated_canonical_names": 24,
+    "publications_verified": 5838,
+    "invalid_pmids": 0,
+    "orphaned_import_artifacts": 0,
+    "genomes_verified": 32
+  },
+  "integrity_ok": true,
+  "notes": [
+    "Checksum clusters are SAME_BIOLOGICAL_CONTENT_BUT_DISTINCT_PROVENANCE; not duplicates.",
+    "1422 unlinked publications are LEGITIMATE_STANDALONE from PubMed ELink/search; SequenceReference was not invented.",
+    "24 organism names were updated to NCBI Taxonomy ScientificName (UniProt-style strain formatting). Two VALID_SYNONYM names were preserved.",
+    "Two names are VALID_SYNONYM and were preserved.",
+    "Silent bacteria fallback remains rejected by validator/importer."
+  ]
+}
