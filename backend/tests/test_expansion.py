@@ -10,7 +10,11 @@ from app.models.enums import CrisprEvidenceType
 from app.pipeline.errors import ValidationError
 from app.pipeline.expansion.cas9_ngg import find_cas9_ngg_sites
 from app.pipeline.expansion.checkpoint import load_checkpoint, save_checkpoint
-from app.pipeline.expansion.diversity import build_sequence_jobs, summarize_plan
+from app.pipeline.expansion.diversity import (
+    build_sequence_jobs,
+    build_shortfall_jobs,
+    summarize_plan,
+)
 from app.pipeline.expansion.targets import (
     publication_remaining,
     sequence_ceiling,
@@ -46,7 +50,19 @@ def test_jobs_scale_with_additional_sequences() -> None:
     large = summarize_plan(build_sequence_jobs(10000))
     assert large["jobs"] >= small["jobs"]
     assert large["estimated_fetch_ceiling"] > small["estimated_fetch_ceiling"]
-    assert large["taxa_seeded"] >= 100
+    assert large["taxa_seeded"] >= 170
+    assert large["estimated_fetch_ceiling"] >= 18000
+    assert large["virus_families"] >= 35
+
+
+def test_shortfall_jobs_do_not_repeat_main_plan() -> None:
+    main_ids = {job["id"] for job in build_sequence_jobs(10000)}
+    fill = build_shortfall_jobs(2500)
+    fill_ids = {job["id"] for job in fill}
+    assert fill
+    assert fill_ids.isdisjoint(main_ids)
+    assert any(job.get("category") == "dna" for job in fill)
+    assert any(job.get("category") == "protein" for job in fill)
 
 
 def test_category_filter_limits_plan() -> None:

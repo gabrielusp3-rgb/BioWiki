@@ -53,7 +53,7 @@ test("catalogue sections render without crashing", async ({ page }) => {
   const routes: Array<{ path: string; heading: string }> = [
     { path: "/rna", heading: "RNA sequence database" },
     { path: "/proteins", heading: "Protein sequence database" },
-    { path: "/crispr", heading: "CRISPR guide database" },
+    { path: "/crispr", heading: "CRISPR catalogue" },
     { path: "/genomes", heading: "Genome sequence database" },
     { path: "/virus", heading: "Virus sequence database" },
     { path: "/organisms", heading: "Organism catalogue" },

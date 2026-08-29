@@ -88,6 +88,18 @@ ANIMALS: list[tuple[str, int, str]] = [
     ("Amphimedon queenslandica", 400682, "animal"),
     ("Octopus vulgaris", 6645, "animal"),
     ("Crassostrea gigas", 29159, "animal"),
+    ("Xenopus laevis", 8355, "animal"),
+    ("Ciona intestinalis", 7719, "animal"),
+    ("Branchiostoma floridae", 7739, "animal"),
+    ("Petromyzon marinus", 7757, "animal"),
+    ("Ornithorhynchus anatinus", 9258, "animal"),
+    ("Monodelphis domestica", 13616, "animal"),
+    ("Hydra vulgaris", 6087, "animal"),
+    ("Daphnia pulex", 6669, "animal"),
+    ("Ixodes scapularis", 6945, "animal"),
+    ("Aplysia californica", 6500, "animal"),
+    ("Helobdella robusta", 6412, "animal"),
+    ("Capitella teleta", 283909, "animal"),
 ]
 
 PLANTS: list[tuple[str, int, str]] = [
@@ -109,6 +121,13 @@ PLANTS: list[tuple[str, int, str]] = [
     ("Cyanidioschyzon merolae", 45157, "plant"),
     ("Medicago truncatula", 3880, "plant"),
     ("Brassica rapa", 3711, "plant"),
+    ("Sorghum bicolor", 4558, "plant"),
+    ("Cucumis sativus", 3659, "plant"),
+    ("Malus domestica", 3750, "plant"),
+    ("Theobroma cacao", 3641, "plant"),
+    ("Marchantia polymorpha", 3197, "plant"),
+    ("Volvox carteri", 3067, "plant"),
+    ("Porphyra umbilicalis", 2788, "plant"),
 ]
 
 FUNGI: list[tuple[str, int, str]] = [
@@ -124,6 +143,10 @@ FUNGI: list[tuple[str, int, str]] = [
     ("Yarrowia lipolytica", 4952, "fungus"),
     ("Pichia pastoris", 4922, "fungus"),
     ("Fusarium graminearum", 5518, "fungus"),
+    ("Coprinopsis cinerea", 5346, "fungus"),
+    ("Batrachochytrium dendrobatidis", 109871, "fungus"),
+    ("Rhizopus oryzae", 64495, "fungus"),
+    ("Laccaria bicolor", 29883, "fungus"),
 ]
 
 PROTISTS: list[tuple[str, int, str]] = [
@@ -141,6 +164,10 @@ PROTISTS: list[tuple[str, int, str]] = [
     ("Phytophthora infestans", 4787, "protozoan"),
     ("Emiliania huxleyi", 2903, "protozoan"),
     ("Naegleria gruberi", 5762, "protozoan"),
+    ("Thalassiosira pseudonana", 35128, "protozoan"),
+    ("Bigelowiella natans", 227086, "protozoan"),
+    ("Trichomonas vaginalis", 5722, "protozoan"),
+    ("Cryptosporidium parvum", 5807, "protozoan"),
 ]
 
 BACTERIA: list[tuple[str, int, str]] = [
@@ -186,6 +213,16 @@ BACTERIA: list[tuple[str, int, str]] = [
     ("Xanthomonas campestris", 339, "bacteria"),
     ("Erwinia amylovora", 552, "bacteria"),
     ("Paenibacillus polymyxa", 1406, "bacteria"),
+    ("Frankia alni", 106370, "bacteria"),
+    ("Nostoc punctiforme", 272131, "bacteria"),
+    ("Bifidobacterium longum", 216816, "bacteria"),
+    ("Enterococcus faecalis", 1351, "bacteria"),
+    ("Acidithiobacillus ferrooxidans", 920, "bacteria"),
+    ("Nitrosomonas europaea", 915, "bacteria"),
+    ("Flavobacterium johnsoniae", 986, "bacteria"),
+    ("Chlorobium tepidum", 1097, "bacteria"),
+    ("Gemmata obscuriglobus", 36818, "bacteria"),
+    ("Mesorhizobium loti", 381, "bacteria"),
 ]
 
 ARCHAEA: list[tuple[str, int, str]] = [
@@ -207,6 +244,11 @@ ARCHAEA: list[tuple[str, int, str]] = [
     ("Haloarcula marismortui", 2238, "archaea"),
     ("Methanococcus maripaludis", 39152, "archaea"),
     ("Ignicoccus hospitalis", 12989, "archaea"),
+    ("Methanopyrus kandleri", 2326, "archaea"),
+    ("Ferroplasma acidarmanus", 144129, "archaea"),
+    ("Cenarchaeum symbiosum", 41404, "archaea"),
+    ("Pyrococcus abyssi", 29292, "archaea"),
+    ("Methanospirillum hungatei", 145411, "archaea"),
 ]
 
 VIRUS_FAMILIES: list[tuple[str, str]] = [
@@ -239,6 +281,18 @@ VIRUS_FAMILIES: list[tuple[str, str]] = [
     ("Leviviridae", "rna-phage"),
     ("Tectiviridae", "phage"),
     ("Inoviridae", "phage"),
+    ("Iridoviridae", "dsDNA"),
+    ("Polyomaviridae", "dsDNA"),
+    ("Anelloviridae", "ssDNA"),
+    ("Partitiviridae", "dsRNA"),
+    ("Tombusviridae", "ssRNA+"),
+    ("Bromoviridae", "ssRNA+"),
+    ("Caliciviridae", "ssRNA+"),
+    ("Nodaviridae", "ssRNA+"),
+    ("Astroviridae", "ssRNA+"),
+    ("Phycodnaviridae", "dsDNA"),
+    ("Mimiviridae", "dsDNA"),
+    ("Picobirnaviridae", "dsRNA"),
 ]
 
 RFAM_FAMILIES: list[tuple[str, str, int]] = [
@@ -254,6 +308,12 @@ RFAM_FAMILIES: list[tuple[str, str, int]] = [
     ("RF00008", "Hammerhead", 6),
     ("RF00162", "SAM riboswitch", 6),
     ("RF00059", "TPP riboswitch", 6),
+    ("RF00013", "6S RNA", 6),
+    ("RF00017", "SRP RNA", 6),
+    ("RF00020", "U5 spliceosomal", 6),
+    ("RF00050", "FMN riboswitch", 6),
+    ("RF00167", "Purine riboswitch", 6),
+    ("RF00234", "glmS ribozyme", 6),
 ]
 
 PDB_IDS: list[str] = [
@@ -300,6 +360,28 @@ PUBMED_SEARCHES: list[tuple[str, str, int]] = [
     ("pm-plant-virus", "(Potyvirus[Title] OR Geminivirus[Title]) AND genome[Title]", 80),
     ("pm-rna-family", "(rRNA[Title] OR tRNA[Title] OR lncRNA[Title] OR microRNA[Title]) AND (genome[Title] OR family[Title])", 200),
     ("pm-uniprot", "UniProt[Title] AND (annotation[Title] OR proteome[Title])", 80),
+    ("pm-elephant", "(Loxodonta africana[Title] OR Elephas maximus[Title]) AND (genome[Title] OR DNA[Title])", 60),
+    ("pm-canis", "Canis lupus[Title] AND (genome[Title] OR gene[Title])", 80),
+    ("pm-felis", "Felis catus[Title] AND (genome[Title] OR gene[Title])", 60),
+    ("pm-bos", "Bos taurus[Title] AND (genome[Title] OR gene[Title])", 80),
+    ("pm-wheat", "Triticum aestivum[Title] AND (genome[Title] OR gene[Title])", 80),
+    ("pm-soybean", "Glycine max[Title] AND (genome[Title] OR gene[Title])", 80),
+    ("pm-tomato", "Solanum lycopersicum[Title] AND (genome[Title] OR gene[Title])", 60),
+    ("pm-neurospora", "Neurospora crassa[Title] AND (genome[Title] OR gene[Title])", 60),
+    ("pm-candida", "Candida albicans[Title] AND (genome[Title] OR gene[Title])", 80),
+    ("pm-haloferax", "Haloferax[Title] AND (genome[Title] OR CRISPR[Title])", 60),
+    ("pm-pyrococcus", "Pyrococcus[Title] AND (genome[Title] OR CRISPR[Title])", 60),
+    ("pm-methanogen", "(Methanocaldococcus[Title] OR Methanosarcina[Title]) AND genome[Title]", 60),
+    ("pm-cyanobacteria2", "(Anabaena[Title] OR Nostoc[Title] OR Synechococcus[Title]) AND genome[Title]", 80),
+    ("pm-mycobacterium", "Mycobacterium smegmatis[Title] AND genome[Title]", 40),
+    ("pm-pseudomonas", "Pseudomonas aeruginosa[Title] AND (genome[Title] OR CRISPR[Title])", 80),
+    ("pm-cas12", "Cas12[Title] AND CRISPR[Title]", 150),
+    ("pm-cas13", "Cas13[Title] AND CRISPR[Title]", 120),
+    ("pm-rfam2", "(Rfam[Title] OR non-coding RNA[Title]) AND (family[Title] OR annotation[Title])", 80),
+    ("pm-ensembl", "Ensembl[Title] AND (genome[Title] OR annotation[Title])", 80),
+    ("pm-refseq", "RefSeq[Title] AND (annotation[Title] OR genome[Title])", 80),
+    ("pm-chloroplast2", "(rbcL[Title] OR matK[Title]) AND (chloroplast[Title] OR plant[Title])", 80),
+    ("pm-barcode", "(COI[Title] OR cox1[Title] OR DNA barcode[Title]) AND (taxonomy[Title] OR species[Title])", 120),
 ]
 
 
@@ -372,7 +454,7 @@ def build_sequence_jobs(
     extra = max(0, additional_sequences)
     # Fetch more candidates than the insert target: many hits already exist,
     # fail validation, or are skipped for length/diversity.
-    oversample = 2.2
+    oversample = 3.5
     jobs: list[dict[str, Any]] = []
 
     def allow(kind: str, category: str) -> bool:
@@ -391,7 +473,7 @@ def build_sequence_jobs(
     crispr_quota = int(extra * CATEGORY_SHARES["crispr"] * oversample)
 
     if allow("ncbi", "dna"):
-        dna_limit = _limit(dna_quota, len(cellular), min_n=8, max_n=28)
+        dna_limit = _limit(dna_quota, len(cellular), min_n=8, max_n=40)
         for name, tax_id, _group in cellular:
             jobs.append(
                 {
@@ -434,11 +516,65 @@ def build_sequence_jobs(
                     "category": "dna",
                     "reason": "clade-level fill after named taxa",
                 },
+                {
+                    "id": "dna-cox1-metazoa",
+                    "kind": "ncbi",
+                    "term": "cox1[Gene] AND Metazoa[Organism] AND biomol_genomic[PROP] AND 500:1700[SLEN]",
+                    "limit": min(160, max(40, dna_quota // 12)),
+                    "seq_type": "dna",
+                    "category": "dna",
+                    "reason": "COI barcode diversity across animals",
+                },
+                {
+                    "id": "dna-cytb-vertebrata",
+                    "kind": "ncbi",
+                    "term": "cytb[Gene] AND Vertebrata[Organism] AND biomol_genomic[PROP] AND 800:1300[SLEN]",
+                    "limit": min(80, max(24, dna_quota // 20)),
+                    "seq_type": "dna",
+                    "category": "dna",
+                    "reason": "cytochrome b vertebrate diversity",
+                },
+                {
+                    "id": "dna-rbcl-plants",
+                    "kind": "ncbi",
+                    "term": "rbcL[Gene] AND Viridiplantae[Organism] AND biomol_genomic[PROP] AND 500:1600[SLEN]",
+                    "limit": min(80, max(24, dna_quota // 20)),
+                    "seq_type": "dna",
+                    "category": "dna",
+                    "reason": "rbcL plant barcode diversity",
+                },
+                {
+                    "id": "dna-matk-plants",
+                    "kind": "ncbi",
+                    "term": "matK[Gene] AND Viridiplantae[Organism] AND biomol_genomic[PROP] AND 600:1600[SLEN]",
+                    "limit": min(60, max(16, dna_quota // 24)),
+                    "seq_type": "dna",
+                    "category": "dna",
+                    "reason": "matK plant barcode diversity",
+                },
+                {
+                    "id": "dna-rpob-bacteria",
+                    "kind": "ncbi",
+                    "term": "rpoB[Gene] AND Bacteria[Organism] AND biomol_genomic[PROP] AND 800:4000[SLEN]",
+                    "limit": min(80, max(24, dna_quota // 20)),
+                    "seq_type": "dna",
+                    "category": "dna",
+                    "reason": "rpoB bacterial marker diversity",
+                },
+                {
+                    "id": "dna-rpob-archaea",
+                    "kind": "ncbi",
+                    "term": "rpoB[Gene] AND Archaea[Organism] AND biomol_genomic[PROP] AND 800:4000[SLEN]",
+                    "limit": min(40, max(12, dna_quota // 30)),
+                    "seq_type": "dna",
+                    "category": "dna",
+                    "reason": "rpoB archaeal marker diversity",
+                },
             ]
         )
 
     if allow("ncbi", "rna"):
-        rna_euk_limit = _limit(int(rna_quota * 0.55), len(eukaryotes), min_n=6, max_n=22)
+        rna_euk_limit = _limit(int(rna_quota * 0.55), len(eukaryotes), min_n=6, max_n=28)
         for name, tax_id, _group in eukaryotes:
             jobs.append(
                 {
@@ -483,6 +619,21 @@ def build_sequence_jobs(
                 "biomol_ncrna[PROP] AND (U1[Title] OR U2[Title] OR U6[Title]) AND refseq[filter]",
                 min(20, max(6, rna_quota // 30)),
             ),
+            (
+                "rna-18s",
+                '"18S ribosomal RNA"[Title] AND refseq[filter] AND 1400:2000[SLEN]',
+                min(40, max(12, rna_quota // 18)),
+            ),
+            (
+                "rna-its-fungi",
+                '"internal transcribed spacer"[Title] AND Fungi[Organism] AND 200:900[SLEN]',
+                min(40, max(12, rna_quota // 18)),
+            ),
+            (
+                "rna-16s-archaea",
+                '"16S ribosomal RNA"[Title] AND Archaea[Organism] AND 1200:1800[SLEN]',
+                min(30, max(10, rna_quota // 24)),
+            ),
         ]
         for job_id, term, limit in class_jobs:
             jobs.append(
@@ -511,7 +662,7 @@ def build_sequence_jobs(
             )
 
     if allow("uniprot", "protein"):
-        prot_limit = _limit(prot_quota, len(cellular), min_n=8, max_n=30)
+        prot_limit = _limit(prot_quota, len(cellular), min_n=8, max_n=40)
         for name, tax_id, _group in cellular:
             jobs.append(
                 {
@@ -558,6 +709,30 @@ def build_sequence_jobs(
                     "category": "protein",
                     "reason": "transcription factors",
                 },
+                {
+                    "id": "prot-cas9",
+                    "kind": "uniprot",
+                    "query": "(reviewed:true) AND (gene:cas9) AND (length:[800 TO 1600])",
+                    "limit": min(24, max(8, prot_quota // 40)),
+                    "category": "protein",
+                    "reason": "reviewed Cas9 proteins, not CRISPR arrays",
+                },
+                {
+                    "id": "prot-cas12",
+                    "kind": "uniprot",
+                    "query": "(reviewed:true) AND (gene:cas12) AND (length:[400 TO 1600])",
+                    "limit": min(16, max(6, prot_quota // 50)),
+                    "category": "protein",
+                    "reason": "reviewed Cas12 proteins",
+                },
+                {
+                    "id": "prot-cas13",
+                    "kind": "uniprot",
+                    "query": "(reviewed:true) AND (gene:cas13) AND (length:[400 TO 1400])",
+                    "limit": min(12, max(4, prot_quota // 60)),
+                    "category": "protein",
+                    "reason": "reviewed Cas13 proteins",
+                },
             ]
         )
 
@@ -573,7 +748,7 @@ def build_sequence_jobs(
         )
 
     if allow("ncbi", "virus"):
-        vlimit = _limit(virus_quota, len(VIRUS_FAMILIES), min_n=6, max_n=20)
+        vlimit = _limit(virus_quota, len(VIRUS_FAMILIES), min_n=8, max_n=36)
         for family, bucket in VIRUS_FAMILIES:
             jobs.append(
                 {
@@ -588,7 +763,7 @@ def build_sequence_jobs(
             )
 
     if allow("ncbi", "crispr"):
-        climit = _limit(crispr_quota, len(prokaryotes), min_n=6, max_n=24)
+        climit = _limit(crispr_quota, len(prokaryotes), min_n=6, max_n=28)
         for name, tax_id, _group in prokaryotes:
             jobs.append(
                 {
@@ -685,3 +860,183 @@ def summarize_plan(jobs: list[dict[str, Any]]) -> dict[str, Any]:
         "virus_families": len(VIRUS_FAMILIES),
         "computational_tax_ids": sorted(COMPUTATIONAL_TAX_IDS),
     }
+
+
+def build_shortfall_jobs(remaining: int) -> list[dict[str, Any]]:
+    """Extra clade/marker jobs if named-taxon discovery finishes below the ceiling.
+
+    Distinct Entrez/UniProt terms — not a second pass over the same first-N hits.
+    """
+    extra = max(40, remaining)
+    per = min(180, max(40, extra // 12))
+    jobs: list[dict[str, Any]] = [
+        {
+            "id": "fill2-dna-actinopterygii",
+            "kind": "ncbi",
+            "term": f'Actinopterygii[Organism] AND biomol_genomic[PROP] AND "complete cds"[Title] AND {_DNA_SLEN}',
+            "limit": per,
+            "seq_type": "dna",
+            "category": "dna",
+            "reason": "teleost CDS shortfall fill",
+        },
+        {
+            "id": "fill2-dna-insecta",
+            "kind": "ncbi",
+            "term": f'Insecta[Organism] AND biomol_genomic[PROP] AND "complete cds"[Title] AND {_DNA_SLEN}',
+            "limit": per,
+            "seq_type": "dna",
+            "category": "dna",
+            "reason": "insect CDS shortfall fill",
+        },
+        {
+            "id": "fill2-dna-streptophyta",
+            "kind": "ncbi",
+            "term": f'Streptophyta[Organism] AND biomol_genomic[PROP] AND "complete cds"[Title] AND {_DNA_SLEN}',
+            "limit": per,
+            "seq_type": "dna",
+            "category": "dna",
+            "reason": "land-plant CDS shortfall fill",
+        },
+        {
+            "id": "fill2-dna-ascomycota",
+            "kind": "ncbi",
+            "term": f'Ascomycota[Organism] AND biomol_genomic[PROP] AND "complete cds"[Title] AND {_DNA_SLEN}',
+            "limit": per,
+            "seq_type": "dna",
+            "category": "dna",
+            "reason": "ascomycete CDS shortfall fill",
+        },
+        {
+            "id": "fill2-dna-actinobacteria",
+            "kind": "ncbi",
+            "term": f'Actinomycetota[Organism] AND biomol_genomic[PROP] AND "complete cds"[Title] AND {_DNA_SLEN}',
+            "limit": per,
+            "seq_type": "dna",
+            "category": "dna",
+            "reason": "actinobacterial CDS shortfall fill",
+        },
+        {
+            "id": "fill2-dna-bacillota",
+            "kind": "ncbi",
+            "term": f'Bacillota[Organism] AND biomol_genomic[PROP] AND "complete cds"[Title] AND {_DNA_SLEN}',
+            "limit": per,
+            "seq_type": "dna",
+            "category": "dna",
+            "reason": "Bacillota CDS shortfall fill",
+        },
+        {
+            "id": "fill2-dna-pseudomonadota",
+            "kind": "ncbi",
+            "term": f'Pseudomonadota[Organism] AND biomol_genomic[PROP] AND "complete cds"[Title] AND {_DNA_SLEN}',
+            "limit": per,
+            "seq_type": "dna",
+            "category": "dna",
+            "reason": "Pseudomonadota CDS shortfall fill",
+        },
+        {
+            "id": "fill2-dna-euryarchaeota",
+            "kind": "ncbi",
+            "term": f'Euryarchaeota[Organism] AND biomol_genomic[PROP] AND "complete cds"[Title] AND {_DNA_SLEN}',
+            "limit": min(80, per),
+            "seq_type": "dna",
+            "category": "dna",
+            "reason": "euryarchaeal CDS shortfall fill",
+        },
+        {
+            "id": "fill2-rna-alveolata",
+            "kind": "ncbi",
+            "term": f'Alveolata[Organism] AND biomol_mrna[PROP] AND refseq[filter] AND {_RNA_SLEN}',
+            "limit": min(80, per),
+            "seq_type": "rna",
+            "category": "rna",
+            "reason": "alveolate mRNA shortfall fill",
+        },
+        {
+            "id": "fill2-rna-basidiomycota",
+            "kind": "ncbi",
+            "term": f'Basidiomycota[Organism] AND biomol_mrna[PROP] AND refseq[filter] AND {_RNA_SLEN}',
+            "limit": min(80, per),
+            "seq_type": "rna",
+            "category": "rna",
+            "reason": "basidiomycete mRNA shortfall fill",
+        },
+        {
+            "id": "fill2-prot-bacteria",
+            "kind": "uniprot",
+            "query": "(taxonomy_id:2) AND (reviewed:true) AND (length:[80 TO 500])",
+            "limit": min(200, max(50, extra // 8)),
+            "category": "protein",
+            "reason": "Swiss-Prot bacteria clade fill",
+        },
+        {
+            "id": "fill2-prot-archaea",
+            "kind": "uniprot",
+            "query": "(taxonomy_id:2157) AND (reviewed:true) AND (length:[80 TO 500])",
+            "limit": min(120, max(30, extra // 12)),
+            "category": "protein",
+            "reason": "Swiss-Prot archaea clade fill",
+        },
+        {
+            "id": "fill2-prot-viridiplantae",
+            "kind": "uniprot",
+            "query": "(taxonomy_id:33090) AND (reviewed:true) AND (length:[80 TO 500])",
+            "limit": min(120, max(30, extra // 12)),
+            "category": "protein",
+            "reason": "Swiss-Prot plant clade fill",
+        },
+        {
+            "id": "fill2-prot-fungi",
+            "kind": "uniprot",
+            "query": "(taxonomy_id:4751) AND (reviewed:true) AND (length:[80 TO 500])",
+            "limit": min(120, max(30, extra // 12)),
+            "category": "protein",
+            "reason": "Swiss-Prot fungal clade fill",
+        },
+        {
+            "id": "fill2-prot-refseq-archaea",
+            "kind": "ncbi",
+            "term": "Archaea[Organism] AND srcdb_refseq[PROP] AND 80:600[SLEN]",
+            "limit": min(80, per),
+            "seq_type": "protein",
+            "db": "protein",
+            "category": "protein",
+            "reason": "RefSeq archaeal proteins (distinct provenance from UniProt)",
+        },
+        {
+            "id": "fill2-virus-genbank",
+            "kind": "ncbi",
+            "term": f'Viruses[Organism] AND "complete genome"[Title] AND srcdb_genbank[PROP] AND {_VIRUS_SLEN}',
+            "limit": min(120, per),
+            "seq_type": "virus",
+            "category": "virus",
+            "reason": "GenBank complete viral genomes beyond RefSeq-only family jobs",
+        },
+        {
+            "id": "fill2-crispr-bacteria-not-ecoli",
+            "kind": "ncbi",
+            "term": f'CRISPR[Title] AND Bacteria[Organism] NOT "Escherichia coli"[Organism] AND {_CRISPR_SLEN}',
+            "limit": min(120, per),
+            "seq_type": "crispr",
+            "category": "crispr",
+            "reason": "natural CRISPR loci outside E. coli",
+            "evidence_type": "natural_crispr_element",
+        },
+        {
+            "id": "fill2-crispr-archaea",
+            "kind": "ncbi",
+            "term": f'CRISPR[Title] AND Archaea[Organism] AND {_CRISPR_SLEN}',
+            "limit": min(80, per),
+            "seq_type": "crispr",
+            "category": "crispr",
+            "reason": "additional archaeal CRISPR loci",
+            "evidence_type": "natural_crispr_element",
+        },
+        {
+            "id": "fill2-crispr-computational-ngg",
+            "kind": "computational_ngg",
+            "limit": 80,
+            "category": "crispr",
+            "reason": "second Cas9 NGG pass after newly ingested allowlisted DNA",
+        },
+    ]
+    return jobs

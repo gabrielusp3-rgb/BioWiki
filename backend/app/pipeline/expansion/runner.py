@@ -33,6 +33,7 @@ from app.pipeline.expansion.diversity import (
     DEFAULT_MAX_LENGTHS,
     PUBMED_SEARCHES,
     build_sequence_jobs,
+    build_shortfall_jobs,
     summarize_plan,
 )
 from app.pipeline.expansion.targets import (
@@ -618,20 +619,23 @@ async def run_pubmed(
                 .all()
             )
         print(f"\n[{elink_id}] {len(accessions)} NCBI accession(s)")
+        elink_ok = dry_run
         if dry_run:
             print("      dry-run skip PubMed ELink persist")
         else:
             try:
                 report = await _retry(
-                    lambda: pubmed.ingest_elinks(accessions, dbfrom="nuccore", max_pmids=12000)
+                    lambda: pubmed.ingest_elinks(accessions, dbfrom="nuccore", max_pmids=20000)
                 )
                 _show(elink_id, report)
                 _merge(combined, report)
+                elink_ok = True
             except Exception as exc:  # noqa: BLE001
                 checkpoint.setdefault("failed", {})[elink_id] = str(exc)
                 print(f"      FAILED {elink_id}: {exc}")
-        completed.add(elink_id)
-        checkpoint["completed"] = sorted(completed)
+        if elink_ok:
+            completed.add(elink_id)
+            checkpoint["completed"] = sorted(completed)
         checkpoint["last_stats"] = await snapshot()
         save_checkpoint(path, checkpoint)
 
@@ -654,7 +658,7 @@ async def run_pubmed(
         retstart = 0
         pages = 0
         try:
-            while remaining > 0 and pages < 8:
+            while remaining > 0 and pages < 12:
                 chunk = min(page_limit, remaining + 25, 400)
                 report = await _retry(
                     lambda t=term, n=chunk, s=retstart: pubmed.ingest_search(
@@ -792,6 +796,27 @@ async def run_expansion(
                 global_cap=max_record_length,
             ),
         )
+        stats_mid = await snapshot()
+        remaining = ceiling - int(stats_mid["sequences"])
+        if remaining > 0:
+            fill_jobs = build_shortfall_jobs(remaining)
+            print(
+                f"\n--- shortfall fill ({remaining} below ceiling, "
+                f"{len(fill_jobs)} extra discovery jobs) ---"
+            )
+            _merge(
+                seq_report,
+                await run_sequence_jobs(
+                    checkpoint,
+                    path,
+                    fill_jobs,
+                    additional=additional_sequences,
+                    ceiling=ceiling,
+                    batch_size=batch_size,
+                    dry_run=dry_run,
+                    global_cap=max_record_length,
+                ),
+            )
     if not sequences_only:
         print("\n--- PubMed expansion (total target) ---")
         _merge(
