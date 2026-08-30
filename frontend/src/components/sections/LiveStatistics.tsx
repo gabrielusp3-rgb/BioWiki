@@ -2,26 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Container, Section, StatCard } from "@/components/ui";
+import { Container, Section, Skeleton, StatCard } from "@/components/ui";
+import { LiveCountsUnavailable } from "@/components/stats/LiveCountsUnavailable";
 import { SyncStatusBadge } from "@/components/sections/SyncStatusBadge";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { isApiConfigured } from "@/lib/api";
-import { INSTITUTIONAL_STATISTICS, type Statistic } from "@/lib/statistics";
+import type { Statistic } from "@/lib/statistics";
 import { getStatistics, type SyncInfo } from "@/services/statisticsService";
 
 export interface LiveStatisticsProps {
-  /** Defaults to live database aggregates; institutional figures otherwise. */
+  /** Optional preloaded live aggregates. Never pass fabricated scale figures. */
   statistics?: Statistic[];
 }
 
 /**
- * When the backend is connected the section shows REAL aggregates from
- * `/statistics` — even small ones. The institutional capacity figures are only
- * shown while no database is configured, never on top of real counts.
+ * Real aggregates from `/statistics`. When the API is unreachable the section
+ * states that counts are unavailable instead of inventing catalogue scale.
  */
 export function LiveStatistics({ statistics }: LiveStatisticsProps) {
-  const [live, setLive] = useState<Statistic[] | null>(null);
+  const [live, setLive] = useState<Statistic[] | null>(statistics ?? null);
   const [sync, setSync] = useState<SyncInfo | null>(null);
+  const [unavailable, setUnavailable] = useState(!statistics && !isApiConfigured);
 
   useEffect(() => {
     if (statistics || !isApiConfigured) return;
@@ -44,13 +45,15 @@ export function LiveStatistics({ statistics }: LiveStatisticsProps) {
         ]);
       })
       .catch(() => {
-        if (!controller.signal.aborted) setSync({ status: "offline", activeImports: 0, countsInSync: false, lastRun: null });
+        if (!controller.signal.aborted) {
+          setUnavailable(true);
+          setSync({ status: "offline", activeImports: 0, countsInSync: false, lastRun: null });
+        }
       });
     return () => controller.abort();
   }, [statistics]);
 
-  const items = statistics ?? live ?? (isApiConfigured ? [] : INSTITUTIONAL_STATISTICS);
-  const isLive = !statistics && live !== null;
+  const isLive = !statistics && live !== null && !unavailable;
 
   return (
     <Container width="wide">
@@ -59,25 +62,35 @@ export function LiveStatistics({ statistics }: LiveStatisticsProps) {
         title="Scale of the Database"
         action={isApiConfigured && !statistics ? <SyncStatusBadge sync={sync} /> : undefined}
       >
-        <motion.div
-          variants={staggerContainer(0.08, 0.05)}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.2 }}
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {items.map((stat, i) => (
-            <motion.div key={stat.id} variants={fadeInUp}>
-              <StatCard
-                value={stat.value}
-                suffix={stat.suffix}
-                label={stat.label}
-                category={stat.category}
-                index={i + 1}
-              />
-            </motion.div>
-          ))}
-        </motion.div>
+        {unavailable ? (
+          <LiveCountsUnavailable />
+        ) : live === null ? (
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 9 }, (_, i) => (
+              <Skeleton key={i} height={140} />
+            ))}
+          </div>
+        ) : (
+          <motion.div
+            variants={staggerContainer(0.08, 0.05)}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {live.map((stat, i) => (
+              <motion.div key={stat.id} variants={fadeInUp}>
+                <StatCard
+                  value={stat.value}
+                  suffix={stat.suffix}
+                  label={stat.label}
+                  category={stat.category}
+                  index={i + 1}
+                />
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
       </Section>
     </Container>
   );

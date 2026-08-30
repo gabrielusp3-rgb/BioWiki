@@ -32,7 +32,6 @@ const COLUMNS: FooterColumn[] = [
     links: [
       { label: "Search", href: "/search" },
       { label: "Organisms", href: "/organisms" },
-      { label: "Paleogenomics", href: "/paleogenomics" },
       { label: "Downloads", href: "/downloads" },
     ],
   },

@@ -96,21 +96,3 @@ export function downloadText(filename: string, content: string, mime = "text/pla
   URL.revokeObjectURL(url);
 }
 
-export interface ProteinPageStat {
-  id: string;
-  value: number;
-  suffix?: string;
-  label: string;
-}
-
-/**
- * INSTITUTIONAL PROTEIN FIGURES — interface only.
- * Isolated headline numbers, replaced by real `/statistics/proteins` values
- * later. No sequences, accessions or organisms are fabricated.
- */
-export const PROTEIN_PAGE_STATS: ProteinPageStat[] = [
-  { id: "proteins", value: 500_000, suffix: "+", label: "Proteins" },
-  { id: "organisms", value: 200, suffix: "+", label: "Organisms" },
-  { id: "sources", value: 3, label: "Public sources" },
-  { id: "formats", value: 3, label: "Export formats" },
-];

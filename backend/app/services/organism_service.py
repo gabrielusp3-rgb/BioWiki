@@ -13,9 +13,12 @@ from app.services.pagination import decode_cursor, encode_cursor
 
 
 async def _with_paleo_slugs(session: AsyncSession, rows: list[Organism]) -> list:
-    slugs = await paleogenomics_service.slugs_by_organism_ids(
-        session, [row.id for row in rows]
-    )
+    try:
+        slugs = await paleogenomics_service.slugs_by_organism_ids(
+            session, [row.id for row in rows]
+        )
+    except Exception:
+        slugs = {}
     return [mappers.to_organism(row, paleogenomic_slug=slugs.get(row.id)) for row in rows]
 
 

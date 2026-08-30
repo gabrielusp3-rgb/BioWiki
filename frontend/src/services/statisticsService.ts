@@ -62,7 +62,7 @@ export interface IntegrityReport {
 /**
  * Live aggregates from `/statistics` — every figure is computed from the real
  * database. Returns `null` when the API is not configured so the UI can show
- * its capacity figures instead of pretending to know live counts.
+ * an unavailable state instead of invented catalogue counts.
  */
 let statisticsInflight: Promise<DatabaseStatistics | null> | null = null;
 let statisticsCache: { at: number; data: DatabaseStatistics | null } | null = null;

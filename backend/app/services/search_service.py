@@ -140,7 +140,10 @@ async def search(
     ]
 
     publications, pub_total = await _search_publications(session, q)
-    paleo_profiles = await paleogenomics_service.search_profiles(session, q, limit=8)
+    try:
+        paleo_profiles = await paleogenomics_service.search_profiles(session, q, limit=8)
+    except Exception:
+        paleo_profiles = []
 
     return {
         "query": q,
@@ -218,7 +221,10 @@ async def suggest(session: AsyncSession, *, q: str, limit: int = 8) -> dict[str,
         .limit(limit)
     )
     rows = list((await session.execute(stmt)).scalars().all())
-    profile_hits = await paleogenomics_service.search_profiles(session, q, limit=min(3, limit))
+    try:
+        profile_hits = await paleogenomics_service.search_profiles(session, q, limit=min(3, limit))
+    except Exception:
+        profile_hits = []
     seq_slots = max(0, limit - len(profile_hits))
     rows = rows[:seq_slots]
     suggestions = [

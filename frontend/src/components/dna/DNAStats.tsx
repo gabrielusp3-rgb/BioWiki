@@ -1,59 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
-import { Skeleton, StatCard } from "@/components/ui";
-import { fadeInUp, staggerContainer } from "@/lib/animations";
-import { isApiConfigured } from "@/lib/api";
-import { DNA_PAGE_STATS } from "@/lib/dna";
-import { getStatistics } from "@/services/statisticsService";
+import { CategoryLiveStats } from "@/components/stats/CategoryLiveStats";
+
+const DNA_META_STATS = [
+  { id: "sources", value: 5, label: "Public sources" },
+  { id: "formats", value: 3, label: "Export formats" },
+];
 
 export function DNAStats() {
-  const [items, setItems] = useState(isApiConfigured ? null : DNA_PAGE_STATS);
-
-  useEffect(() => {
-    if (!isApiConfigured) return;
-    const controller = new AbortController();
-    getStatistics(controller.signal)
-      .then((stats) => {
-        if (!stats || controller.signal.aborted) return;
-        const dna = stats.categories.find((c) => c.key === "dna")?.count ?? 0;
-        setItems([
-          { id: "dna", value: dna, label: "DNA sequences" },
-          { id: "organisms", value: stats.organisms, label: "Organisms" },
-          DNA_PAGE_STATS[2],
-          DNA_PAGE_STATS[3],
-        ]);
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) setItems(DNA_PAGE_STATS);
-      });
-    return () => controller.abort();
-  }, []);
-
   return (
-    <motion.div
-      variants={staggerContainer(0.08, 0.04)}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, amount: 0.3 }}
-      className="grid grid-cols-2 gap-4 lg:grid-cols-4"
-    >
-      {(items ?? DNA_PAGE_STATS).map((stat, i) => (
-        <motion.div key={stat.id} variants={fadeInUp}>
-          {items === null ? (
-            <Skeleton height={140} />
-          ) : (
-            <StatCard
-              value={stat.value}
-              suffix={stat.suffix}
-              label={stat.label}
-              category="dna"
-              index={i + 1}
-            />
-          )}
-        </motion.div>
-      ))}
-    </motion.div>
+    <CategoryLiveStats
+      category="dna"
+      primaryKey="dna"
+      primaryId="dna"
+      primaryLabel="DNA sequences"
+      extraStats={DNA_META_STATS}
+    />
   );
 }

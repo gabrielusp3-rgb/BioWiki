@@ -27,16 +27,15 @@ function CategoryCard({
   data,
   liveCount,
   awaitingLive,
+  unavailable,
 }: {
   data: CategoryCardData;
-  /** Real database count; undefined while the API is not configured. */
   liveCount?: number;
   awaitingLive?: boolean;
+  unavailable?: boolean;
 }) {
   const meta = CATEGORY_META[data.key];
   const { Icon } = data;
-  const count = liveCount ?? data.count;
-  const suffix = liveCount === undefined ? "+" : "";
 
   return (
     <motion.div variants={fadeInUp} className="h-full">
@@ -66,9 +65,13 @@ function CategoryCard({
             <span className="flex flex-col">
               {awaitingLive ? (
                 <Skeleton width={96} height={28} />
+              ) : unavailable || liveCount === undefined ? (
+                <span className="font-display text-sm font-semibold uppercase tracking-wide text-content-muted">
+                  Unavailable
+                </span>
               ) : (
                 <span className="font-display text-2xl font-bold tracking-tightest tabular-nums text-content-primary">
-                  {formatStatistic(count, suffix)}
+                  {formatStatistic(liveCount)}
                 </span>
               )}
               <span className="text-[11px] uppercase tracking-wider text-content-muted">
@@ -134,8 +137,8 @@ function PaleogenomicsHomeLink() {
 }
 
 export function Categories() {
-  // Real per-category counts from the database; null until (and unless) served.
   const [liveCounts, setLiveCounts] = useState<Record<string, number> | null>(null);
+  const [unavailable, setUnavailable] = useState(!isApiConfigured);
 
   useEffect(() => {
     if (!isApiConfigured) return;
@@ -146,9 +149,10 @@ export function Categories() {
         setLiveCounts(
           Object.fromEntries(stats.categories.map((c) => [c.key, c.count])),
         );
+        setUnavailable(false);
       })
       .catch(() => {
-        /* keep capacity figures when live counts are unreachable */
+        if (!controller.signal.aborted) setUnavailable(true);
       });
     return () => controller.abort();
   }, []);
@@ -172,11 +176,11 @@ export function Categories() {
               key={data.key}
               data={data}
               liveCount={liveCounts == null ? undefined : (liveCounts[data.key] ?? 0)}
-              awaitingLive={isApiConfigured && liveCounts === null}
+              awaitingLive={isApiConfigured && liveCounts === null && !unavailable}
+              unavailable={unavailable}
             />
           ))}
         </motion.div>
-        <PaleogenomicsHomeLink />
         <PaleogenomicsHomeLink />
       </Section>
     </Container>

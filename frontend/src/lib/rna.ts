@@ -78,21 +78,3 @@ export function downloadText(filename: string, content: string, mime = "text/pla
   URL.revokeObjectURL(url);
 }
 
-export interface RnaPageStat {
-  id: string;
-  value: number;
-  suffix?: string;
-  label: string;
-}
-
-/**
- * INSTITUTIONAL RNA FIGURES — interface only.
- * Isolated headline numbers, replaced by real `/statistics/rna` values later.
- * No sequences, accessions or organisms are fabricated.
- */
-export const RNA_PAGE_STATS: RnaPageStat[] = [
-  { id: "rna", value: 400_000, suffix: "+", label: "RNA sequences" },
-  { id: "organisms", value: 200, suffix: "+", label: "Organisms" },
-  { id: "classes", value: 6, label: "RNA classes" },
-  { id: "formats", value: 3, label: "Export formats" },
-];

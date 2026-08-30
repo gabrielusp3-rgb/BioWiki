@@ -80,21 +80,3 @@ export function downloadText(filename: string, content: string, mime = "text/pla
   URL.revokeObjectURL(url);
 }
 
-export interface DnaPageStat {
-  id: string;
-  value: number;
-  suffix?: string;
-  label: string;
-}
-
-/**
- * INSTITUTIONAL DNA FIGURES — interface only.
- * Isolated headline numbers, replaced by real `/statistics/dna` values later.
- * No sequences, accessions or organisms are fabricated.
- */
-export const DNA_PAGE_STATS: DnaPageStat[] = [
-  { id: "dna", value: 500_000, suffix: "+", label: "DNA sequences" },
-  { id: "organisms", value: 200, suffix: "+", label: "Organisms" },
-  { id: "sources", value: 5, label: "Public sources" },
-  { id: "formats", value: 3, label: "Export formats" },
-];

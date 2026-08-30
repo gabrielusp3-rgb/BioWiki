@@ -62,21 +62,3 @@ export function downloadText(filename: string, content: string, mime = "text/pla
   URL.revokeObjectURL(url);
 }
 
-export interface VirusPageStat {
-  id: string;
-  value: number;
-  suffix?: string;
-  label: string;
-}
-
-/**
- * INSTITUTIONAL VIRUS FIGURES — interface only.
- * Isolated headline numbers, replaced by real `/statistics/virus` values later.
- * No sequences, accessions or organisms are fabricated.
- */
-export const VIRUS_PAGE_STATS: VirusPageStat[] = [
-  { id: "virus", value: 120_000, suffix: "+", label: "Viral sequences" },
-  { id: "families", value: 100, suffix: "+", label: "Viral families" },
-  { id: "sources", value: 4, label: "Public sources" },
-  { id: "formats", value: 3, label: "Export formats" },
-];

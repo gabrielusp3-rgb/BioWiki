@@ -85,21 +85,3 @@ export function downloadText(filename: string, content: string, mime = "text/pla
   URL.revokeObjectURL(url);
 }
 
-export interface CrisprPageStat {
-  id: string;
-  value: number;
-  suffix?: string;
-  label: string;
-}
-
-/**
- * INSTITUTIONAL CRISPR FIGURES — interface only.
- * Isolated headline numbers, replaced by real `/statistics/crispr` values later.
- * No guides, targets or organisms are fabricated.
- */
-export const CRISPR_PAGE_STATS: CrisprPageStat[] = [
-  { id: "crispr", value: 0, label: "CRISPR records" },
-  { id: "organisms", value: 0, label: "Organisms" },
-  { id: "systems", value: 4, label: "Cas systems" },
-  { id: "formats", value: 3, label: "Export formats" },
-];

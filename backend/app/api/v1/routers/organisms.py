@@ -47,5 +47,8 @@ async def get_organism(
     org = await organism_service.get_by_identifier(session, identifier)
     if org is None:
         raise HTTPException(status_code=404, detail="Organism not found")
-    slugs = await paleogenomics_service.slugs_by_organism_ids(session, [org.id])
+    try:
+        slugs = await paleogenomics_service.slugs_by_organism_ids(session, [org.id])
+    except Exception:
+        slugs = {}
     return mappers.to_organism(org, paleogenomic_slug=slugs.get(org.id))

@@ -19,7 +19,6 @@ from app.models.paleogenomics import (
 )
 from app.models.publication import Publication
 from app.models.sequence import Sequence
-from app.pipeline.paleogenomics.catalogue import species_by_slug
 from app.schemas.paleogenomics import (
     PaleogenomicClaimRead,
     PaleogenomicClaimSourceRead,
@@ -38,6 +37,17 @@ _NO_DNA_NOTES = [
     "established in this catalogue. Absence of a page is not a claim about fossils.",
     "Introgression regions in living Homo sapiens are not ancient specimen DNA.",
 ]
+
+
+def _preferred_sequence_target(slug: str) -> int:
+    """Optional catalogue metadata. Must not break API import if pipeline is absent."""
+    try:
+        from app.pipeline.paleogenomics.catalogue import species_by_slug
+
+        row = species_by_slug().get(slug)
+        return int(row.preferred_sequence_target) if row else 0
+    except Exception:
+        return 0
 
 
 async def _count_map(session: AsyncSession, stmt) -> dict:
@@ -275,7 +285,6 @@ async def get_species(session: AsyncSession, slug: str) -> dict[str, Any] | None
         return None
     counts = await _profile_counts(session)
     card = _card(profile, counts)
-    catalogue = species_by_slug().get(slug)
     claims = [
         PaleogenomicClaimRead(
             section_key=c.section_key,
@@ -331,7 +340,7 @@ async def get_species(session: AsyncSession, slug: str) -> dict[str, Any] | None
         "paleogenomic_data_available": profile.paleogenomic_data_available,
         "taxonomic_uncertainty": profile.taxonomic_uncertainty,
         "last_reviewed_on": profile.last_reviewed_on,
-        "preferred_sequence_target": catalogue.preferred_sequence_target if catalogue else 0,
+        "preferred_sequence_target": _preferred_sequence_target(profile.slug),
         "sequence_count": card.sequence_count,
         "assembly_count": card.assembly_count,
         "publication_count": card.publication_count,

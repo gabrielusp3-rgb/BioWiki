@@ -2,12 +2,6 @@
 
 from __future__ import annotations
 
-import os
-import subprocess
-import sys
-from contextlib import asynccontextmanager
-from pathlib import Path
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -20,34 +14,9 @@ from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.rate_limit import RateLimitMiddleware
 
-BACKEND_ROOT = Path(__file__).resolve().parents[1]
-
-
-def _migrate_if_hosted() -> None:
-    """Optional startup migrate. Default off on Vercel so cold starts can serve.
-
-    Schema changes are applied by the operator CLI (`alembic upgrade head`).
-    Set BIOWIKI_MIGRATE_ON_START=1 only when a deploy must stamp a new revision
-    and the function timeout can absorb Alembic.
-    """
-    if os.environ.get("PYTEST_CURRENT_TEST") or "pytest" in sys.modules:
-        return
-    if os.environ.get("BIOWIKI_MIGRATE_ON_START", "").lower() not in {"1", "true", "yes"}:
-        return
-    try:
-        subprocess.check_call(
-            [sys.executable, "-m", "alembic", "upgrade", "head"],
-            cwd=str(BACKEND_ROOT),
-            timeout=60,
-        )
-    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError):
-        return
-
-
-@asynccontextmanager
-async def lifespan(_app: FastAPI):
-    _migrate_if_hosted()
-    yield
+# Schema changes are operator CLI only (`alembic upgrade head`). Never run
+# Alembic inside the Vercel request path: a nested event loop / Neon hang
+# takes down /health and the entire catalogue with FUNCTION_INVOCATION_FAILED.
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -115,7 +84,6 @@ def create_app() -> FastAPI:
         description=_description(settings),
         version=settings.api_version,
         openapi_tags=TAGS_METADATA,
-        lifespan=lifespan,
         servers=[
             {"url": "https://biowiki-api.vercel.app", "description": "Production"},
             {"url": "http://127.0.0.1:8000", "description": "Local development"},
