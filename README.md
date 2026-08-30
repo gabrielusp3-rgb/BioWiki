@@ -51,21 +51,26 @@ cd BioWiki
 
 **Stack:** Next.js 15, React 19, TypeScript, FastAPI, SQLAlchemy, PostgreSQL. The UI background uses Three.js. Application code is MIT-licensed; sequence records remain under the terms of their originating databases.
 
-A populated local instance (not Git, not production unless you import the same records) may look like:
+Production catalogue (Neon, 30 August 2026). Live integrity `ok: true`. Duplicate natural keys, TaxIDs, and PMIDs: none.
 
 | Resource | Count |
 | --- | ---: |
-| Sequences | 1542 |
-| — DNA | 689 |
-| — RNA | 307 |
-| — Protein | 327 |
-| — CRISPR | 79 |
-| — Virus | 140 |
-| Publications | 5838 |
-| Organisms | 454 |
-| Genome assemblies | 32 |
+| Sequences | 15437 |
+| — DNA | 6450 |
+| — RNA | 2863 |
+| — Protein | 4352 |
+| — CRISPR | 443 |
+| — Virus | 1329 |
+| Publications | 35428 |
+| Unique PMIDs | 33420 |
+| Organisms | 1866 |
+| Genome assemblies | 103 |
 
-Those counts are from one live database. They change when the CLI imports more records.
+Genome assemblies live in `genome_records`. They are not `SequenceType.GENOME` rows and do not store chromosome residues.
+
+CRISPR records keep three evidence classes: **natural CRISPR element**, **experimental guide**, and **computational target**. A spacer is not an engineered guide. A Cas protein is not a guide. Computational Cas9 NGG sites (72 in this catalogue) are copied from authentic stored DNA, labeled predicted, and are not experimental edits.
+
+Those counts are from the live production database. They change when the CLI imports more records.
 
 ### Features
 
