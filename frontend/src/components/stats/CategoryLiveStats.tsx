@@ -16,8 +16,6 @@ export interface PageMetaStat {
   label: string;
 }
 
-interface LiveStat extends PageMetaStat {}
-
 export function CategoryLiveStats({
   category,
   primaryKey,
@@ -34,7 +32,7 @@ export function CategoryLiveStats({
 }) {
   const extraRef = useRef(extraStats);
   extraRef.current = extraStats;
-  const [items, setItems] = useState<LiveStat[] | null>(null);
+  const [items, setItems] = useState<PageMetaStat[] | null>(null);
   const [unavailable, setUnavailable] = useState(!isApiConfigured);
 
   useEffect(() => {

@@ -8,12 +8,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.enums import OrganismGroup
 from app.models.organism import Organism
-from app.services import mappers, paleogenomics_service
+from app.services import mappers
 from app.services.pagination import decode_cursor, encode_cursor
 
 
 async def _with_paleo_slugs(session: AsyncSession, rows: list[Organism]) -> list:
     try:
+        from app.services import paleogenomics_service
+
         slugs = await paleogenomics_service.slugs_by_organism_ids(
             session, [row.id for row in rows]
         )

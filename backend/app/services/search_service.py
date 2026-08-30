@@ -11,7 +11,6 @@ from app.models.organism import Organism
 from app.models.publication import Publication
 from app.models.sequence import Sequence
 from app.models.source import DataSource
-from app.services import paleogenomics_service
 from app.services.pagination import decode_cursor, encode_cursor
 
 _FTS = text("sequences.search_vector @@ websearch_to_tsquery('english', :q)")
@@ -141,6 +140,8 @@ async def search(
 
     publications, pub_total = await _search_publications(session, q)
     try:
+        from app.services import paleogenomics_service
+
         paleo_profiles = await paleogenomics_service.search_profiles(session, q, limit=8)
     except Exception:
         paleo_profiles = []
@@ -222,6 +223,8 @@ async def suggest(session: AsyncSession, *, q: str, limit: int = 8) -> dict[str,
     )
     rows = list((await session.execute(stmt)).scalars().all())
     try:
+        from app.services import paleogenomics_service
+
         profile_hits = await paleogenomics_service.search_profiles(session, q, limit=min(3, limit))
     except Exception:
         profile_hits = []

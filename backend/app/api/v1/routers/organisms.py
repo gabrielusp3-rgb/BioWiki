@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import OrganismIdPath, api_key_guard, get_session
 from app.schemas.organism import OrganismListResponse, OrganismRead
-from app.services import mappers, organism_service, paleogenomics_service
+from app.services import mappers, organism_service
 
 router = APIRouter(tags=["organisms"], dependencies=[Depends(api_key_guard)])
 
@@ -48,6 +48,8 @@ async def get_organism(
     if org is None:
         raise HTTPException(status_code=404, detail="Organism not found")
     try:
+        from app.services import paleogenomics_service
+
         slugs = await paleogenomics_service.slugs_by_organism_ids(session, [org.id])
     except Exception:
         slugs = {}
