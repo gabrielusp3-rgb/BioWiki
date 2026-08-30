@@ -41,6 +41,7 @@ from app.pipeline.paleogenomics.catalogue import (
 from app.pipeline.paleogenomics.discover import discover_accessions
 from app.pipeline.paleogenomics.narratives import NARRATIVES
 from app.pipeline.paleogenomics.seed import (
+    backfill_membership_source_metadata,
     classify_record_kind,
     fetch_taxonomy_docs,
     link_publication,
@@ -53,6 +54,7 @@ from app.pipeline.paleogenomics.semantics import (
     extract_project_accessions,
     is_complete_mitogenome,
     sequence_length_allowed_for_catalogue,
+    specimen_label_from_definition,
     species_search_names,
     sra_run_is_not_a_sequence_accession,
 )
@@ -120,6 +122,7 @@ async def _tag_parsed(
         ).scalar_one_or_none()
         if exists:
             continue
+        projects, samples = extract_project_accessions(seq.name, seq.description, seq.source_url)
         session.add(
             PaleogenomicSequenceMembership(
                 sequence_id=seq.id,
@@ -128,6 +131,9 @@ async def _tag_parsed(
                 is_complete_mitogenome=is_complete_mitogenome(
                     definition=seq.name or seq.description, length=seq.length
                 ),
+                specimen_label=specimen_label_from_definition(seq.name, seq.description),
+                biosample=samples[0] if samples else None,
+                bioproject=projects[0] if projects else None,
             )
         )
         tagged += 1
@@ -192,6 +198,95 @@ async def ingest_sequences_for_species(
         "discovery": discovery,
         "skipped_reasons": skipped_reasons[:40],
         "tagged": tagged,
+    }
+
+
+async def ingest_remaining_sequences_for_species(
+    species: PaleogenomicSpecies,
+    *,
+    current: int,
+) -> dict[str, Any]:
+    """Additive nuccore fill after a completed job, still bounded by the discovery goal.
+
+    Does not reset the original nuccore checkpoint. Already-tagged accessions are skipped.
+    """
+    remaining = max(0, species.preferred_sequence_target - current)
+    if remaining <= 0:
+        return {"created": 0, "reason": "at_or_above_target"}
+    keep = min(400, max(species.preferred_sequence_target, current + remaining))
+    discovery = await discover_accessions(
+        species,
+        db="nuccore",
+        search_limit=min(400, max(species.preferred_sequence_target * 4, 40)),
+        keep=keep,
+        molecule="dna",
+        dedupe_titles=False,
+    )
+    accessions = list(discovery.get("accessions") or [])
+    async with get_sessionmaker()() as session:
+        profile = await _profile_for(session, species.slug)
+        already = set(
+            (
+                await session.execute(
+                    select(Sequence.accession)
+                    .join(
+                        PaleogenomicSequenceMembership,
+                        PaleogenomicSequenceMembership.sequence_id == Sequence.id,
+                    )
+                    .where(PaleogenomicSequenceMembership.profile_id == profile.id)
+                )
+            )
+            .scalars()
+            .all()
+        )
+    new_accessions = [acc for acc in accessions if acc not in already][:remaining]
+    if not new_accessions:
+        return {
+            "created": 0,
+            "reason": "source_exhausted",
+            "discovery_hits": discovery.get("total_hits"),
+            "already_tagged": len(already),
+            "discovery": {"term": discovery.get("term"), "total_hits": discovery.get("total_hits")},
+        }
+    parsed = await ncbi.fetch_records(new_accessions, db="nuccore", seq_type="dna")
+    kept = []
+    skipped_reasons: list[str] = []
+    for ps in parsed:
+        if sra_run_is_not_a_sequence_accession(ps.accession):
+            skipped_reasons.append(f"{ps.accession}:sra")
+            continue
+        if not ps.organism or ps.organism.tax_id != species.tax_id:
+            skipped_reasons.append(f"{ps.accession}:tax_mismatch")
+            continue
+        length = ps.effective_length()
+        if not sequence_length_allowed_for_catalogue(length, molecule="dna"):
+            skipped_reasons.append(f"{ps.accession}:length")
+            continue
+        if not ps.residues:
+            skipped_reasons.append(f"{ps.accession}:no_residues")
+            continue
+        kept.append(ps)
+    report = await import_with_run(
+        kept,
+        source_key="ncbi",
+        kind=f"paleo-{species.slug}-nuccore-remainder",
+        params={"tax_id": species.tax_id, "db": "nuccore", "kept": len(kept)},
+        batch_size=40,
+    )
+    async with get_sessionmaker()() as session:
+        profile = await _profile_for(session, species.slug)
+        tagged = await _tag_parsed(session, profile, [ps.accession for ps in kept])
+        await session.commit()
+    return {
+        "created": report.created,
+        "updated": report.updated,
+        "skipped": report.skipped + len(skipped_reasons),
+        "failed": report.failed,
+        "tagged": tagged,
+        "reason": "remainder",
+        "new_accessions": [ps.accession for ps in kept],
+        "discovery_hits": discovery.get("total_hits"),
+        "skipped_reasons": skipped_reasons[:40],
     }
 
 
@@ -481,31 +576,36 @@ async def run_paleogenomics(
     chosen = [species_by_slug()[s] for s in slugs] if slugs else list(SPECIES)
     species_report: dict[str, Any] = checkpoint.setdefault("species", {})
 
-    if not job_is_done(checkpoint, "paleo-seed"):
-        set_job_status(checkpoint, "paleo-seed", "RUNNING", category="paleogenomics")
-        save_checkpoint(path, checkpoint)
+    if seed_only or not job_is_done(checkpoint, "paleo-seed"):
+        if not seed_only:
+            set_job_status(checkpoint, "paleo-seed", "RUNNING", category="paleogenomics")
+            save_checkpoint(path, checkpoint)
         try:
             tax_ids = [row.tax_id for row in SPECIES] + [9606]
             taxonomy = await fetch_taxonomy_docs(tax_ids)
             async with get_sessionmaker()() as session:
                 await seed_profiles(session, taxonomy=taxonomy)
                 await session.commit()
-            set_job_status(checkpoint, "paleo-seed", COMPLETED_SUCCESSFULLY, category="paleogenomics")
+            if not job_is_done(checkpoint, "paleo-seed"):
+                set_job_status(
+                    checkpoint, "paleo-seed", COMPLETED_SUCCESSFULLY, category="paleogenomics"
+                )
             save_checkpoint(path, checkpoint)
         except Exception as exc:
             logger.exception("paleo-seed failed")
-            set_job_status(
-                checkpoint,
-                "paleo-seed",
-                TEMPORARY_FAILURE,
-                category="paleogenomics",
-                reason=str(exc)[:300],
-            )
-            save_checkpoint(path, checkpoint)
+            if not seed_only:
+                set_job_status(
+                    checkpoint,
+                    "paleo-seed",
+                    TEMPORARY_FAILURE,
+                    category="paleogenomics",
+                    reason=str(exc)[:300],
+                )
+                save_checkpoint(path, checkpoint)
             raise
 
     if seed_only:
-        return {"checkpoint": str(path), "seed_only": True}
+        return {"checkpoint": str(path), "seed_only": True, "upserted": True}
 
     if relink_literature or ingest_projects:
         out: dict[str, Any] = {"checkpoint": str(path), "species": {}}
@@ -539,6 +639,7 @@ async def run_paleogenomics(
             out["species"][slug] = bucket
         async with get_sessionmaker()() as session:
             out["mitogenome_flags_updated"] = await retag_complete_mitogenome_flags(session)
+            out["membership_metadata_updated"] = await backfill_membership_source_metadata(session)
             await session.commit()
         save_checkpoint(path, checkpoint)
         return out
@@ -631,6 +732,42 @@ async def run_paleogenomics(
                         checkpoint, prot_job, TEMPORARY_FAILURE, reason=str(exc)[:300]
                     )
                 save_checkpoint(path, checkpoint)
+
+        remainder_job = f"paleo-{slug}-nuccore-remainder"
+        if (
+            not discover_only
+            and not skip_sequences
+            and remaining > 0
+            and job_is_done(checkpoint, nuc_job)
+            and not job_is_done(checkpoint, remainder_job)
+        ):
+            set_job_status(checkpoint, remainder_job, "RUNNING", category="paleogenomics")
+            save_checkpoint(path, checkpoint)
+            try:
+                remainder = await ingest_remaining_sequences_for_species(
+                    species, current=current
+                )
+                bucket["nuccore_remainder"] = remainder
+                set_job_status(
+                    checkpoint,
+                    remainder_job,
+                    COMPLETED_SUCCESSFULLY,
+                    category="paleogenomics",
+                    records_created=int(remainder.get("created") or 0),
+                    reason=str(remainder.get("reason") or "")[:300] or None,
+                )
+            except Exception as exc:
+                logger.exception("%s failed", remainder_job)
+                set_job_status(
+                    checkpoint, remainder_job, TEMPORARY_FAILURE, reason=str(exc)[:300]
+                )
+            save_checkpoint(path, checkpoint)
+            async with get_sessionmaker()() as session:
+                profile = await _profile_for(session, slug)
+                current = await _membership_count(session, profile.id)
+            remaining = max(0, species.preferred_sequence_target - current)
+            bucket["current_sequences"] = current
+            bucket["remaining"] = remaining
 
         genome_job = f"paleo-{slug}-genomes"
         if not discover_only and not skip_genomes and not job_is_done(checkpoint, genome_job):

@@ -72,6 +72,7 @@ async def discover_accessions(
     search_limit: int,
     keep: int,
     molecule: str = "dna",
+    dedupe_titles: bool = True,
 ) -> dict[str, Any]:
     term = (NUCCORE_TERM if db == "nuccore" else PROTEIN_TERM).format(tax_id=species.tax_id)
     rejected: list[dict[str, str]] = []
@@ -135,7 +136,11 @@ async def discover_accessions(
     diverse: list[dict[str, Any]] = []
     for row in candidates:
         key = title_key(str(row["title"]))
-        if key in seen_titles and len(diverse) >= max(8, keep // 4):
+        if (
+            dedupe_titles
+            and key in seen_titles
+            and len(diverse) >= max(8, keep // 4)
+        ):
             continue
         seen_titles.add(key)
         diverse.append(row)

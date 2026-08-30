@@ -171,3 +171,16 @@ def test_extract_project_accessions_does_not_invent() -> None:
     assert "Thylacine" in names
     assert "Tasmanian tiger" in names
     assert names.count("Thylacine") == 1
+
+
+def test_specimen_label_requires_an_explicit_voucher_or_isolate() -> None:
+    from app.pipeline.paleogenomics.semantics import specimen_label_from_definition
+
+    assert specimen_label_from_definition(
+        "Smilodon populator voucher ZMA20.042 mitochondrion, complete genome"
+    ) == "ZMA20.042"
+    assert specimen_label_from_definition(
+        "Equus burchellii quagga isolate QUAGGA mitochondrion, complete genome"
+    ) == "QUAGGA"
+    assert specimen_label_from_definition("museum specimen from a cave") is None
+    assert specimen_label_from_definition("two similar titles are not the same specimen") is None

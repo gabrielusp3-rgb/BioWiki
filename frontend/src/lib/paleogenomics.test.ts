@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { doiUrl, EVIDENCE_LABEL, labelOf, SUBSECTION_LABEL } from "./paleogenomics";
+import { doiUrl, DEEXTINCTION_LABEL, EVIDENCE_LABEL, labelOf, SUBSECTION_LABEL } from "./paleogenomics";
 
 describe("paleogenomics labels", () => {
   it("keeps paleogenomics as a collection, not a molecule type", () => {
@@ -7,6 +7,8 @@ describe("paleogenomics labels", () => {
     expect(SUBSECTION_LABEL.archaic_hominin).toBe("Archaic hominins");
     expect(EVIDENCE_LABEL.unknown).toMatch(/insufficient evidence/i);
     expect(labelOf(EVIDENCE_LABEL, "research_discussion")).toBe("research discussion");
+    expect(DEEXTINCTION_LABEL.active_research_program).toBe("Active research program");
+    expect(DEEXTINCTION_LABEL.no_active_program).toBe("No active program");
   });
 
   it("builds publisher DOI links without inventing identifiers", () => {

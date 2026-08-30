@@ -61,6 +61,19 @@ def sra_run_is_not_a_sequence_accession(accession: str) -> bool:
 
 _BIOPROJECT_RE = re.compile(r"\b(PRJ[A-Z]{2}\d+)\b", re.I)
 _BIOSAMPLE_RE = re.compile(r"\b((?:SAMN|SAMD|SAMEA|SAME)\d+)\b", re.I)
+_VOUCHER_RE = re.compile(
+    r"\b(?:voucher|isolate)\s+([A-Za-z0-9][A-Za-z0-9._/-]{1,48})",
+    re.I,
+)
+
+
+def specimen_label_from_definition(*texts: str | None) -> str | None:
+    """Copy an explicit voucher/isolate token from source text. Never infers one."""
+    blob = " ".join(part for part in texts if part)
+    match = _VOUCHER_RE.search(blob)
+    if not match:
+        return None
+    return match.group(1)[:160]
 
 
 def extract_project_accessions(*texts: str | None) -> tuple[list[str], list[str]]:

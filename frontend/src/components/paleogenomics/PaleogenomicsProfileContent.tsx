@@ -297,15 +297,28 @@ export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
               <Link
                 key={row.id}
                 href={`/sequences/${encodeURIComponent(row.accession)}`}
-                className="glass hairline flex items-center gap-4 px-5 py-3.5 hover:border-white/20"
+                className="glass hairline flex flex-col gap-1 px-5 py-3.5 hover:border-white/20"
               >
-                <Badge category={row.seqType === "protein" ? "protein" : row.seqType === "rna" ? "rna" : "dna"} />
-                <span className="min-w-0 flex-1 truncate text-sm">{row.name}</span>
-                <span className="hidden font-mono text-xs text-content-muted sm:block">
-                  {row.accession}
+                <span className="flex items-center gap-4">
+                  <Badge category={row.seqType === "protein" ? "protein" : row.seqType === "rna" ? "rna" : "dna"} />
+                  <span className="min-w-0 flex-1 truncate text-sm">{row.name}</span>
+                  <span className="hidden font-mono text-xs text-content-muted sm:block">
+                    {row.accession}
+                  </span>
+                  {row.isCompleteMitogenome && (
+                    <span className="font-mono text-[10px] uppercase text-content-muted">complete mt</span>
+                  )}
                 </span>
-                {row.isCompleteMitogenome && (
-                  <span className="font-mono text-[10px] uppercase text-content-muted">complete mt</span>
+                {(row.specimenLabel || row.biosample || row.bioproject) && (
+                  <span className="font-mono text-[10px] text-content-muted">
+                    {[
+                      row.specimenLabel ? `specimen ${row.specimenLabel}` : null,
+                      row.biosample,
+                      row.bioproject,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </span>
                 )}
               </Link>
             ))}
@@ -392,7 +405,7 @@ export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
       </section>
 
       {(detail.introgressionCount !== null || introgression.length > 0) && (
-        <section>
+        <section id="introgression">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="eyebrow">Archaic introgression in living humans</h2>
             <span className="font-mono text-[11px] text-content-muted">
@@ -400,7 +413,9 @@ export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
             </span>
           </div>
           <p className="mb-4 text-sm text-content-secondary">
-            {detail.introgressionNote ?? introNote}
+            {detail.introgressionNote ?? introNote} These are{" "}
+            <em>Homo sapiens</em> genomic loci with evidence of archaic ancestry, not DNA
+            physically extracted from a Neanderthal or Denisovan specimen.
           </p>
           {introgression.length === 0 ? (
             <div className="glass hairline p-8 text-sm text-content-secondary">

@@ -28,8 +28,10 @@ from app.pipeline.paleogenomics.catalogue import (
 from app.pipeline.paleogenomics.introgression import INTROGRESSION_LOCI
 from app.pipeline.paleogenomics.narratives import NARRATIVES, REVIEWED
 from app.pipeline.paleogenomics.semantics import (
+    extract_project_accessions,
     is_complete_mitogenome,
     normalize_doi,
+    specimen_label_from_definition,
 )
 from app.pipeline.taxonomy import group_from_taxonomy, index_taxonomy_for_requested
 
@@ -154,11 +156,13 @@ async def upsert_claims(session: AsyncSession, profile: PaleogenomicProfile) -> 
         claim.last_reviewed_on = date.fromisoformat(str(reviewed)) if reviewed else REVIEWED
         await session.flush()
 
-        wanted: list[tuple[int | None, str | None]] = []
+        wanted: list[tuple[int | None, str | None, str | None]] = []
         for pmid in payload.get("pubmed_ids") or []:
-            wanted.append((int(pmid), None))
+            wanted.append((int(pmid), None, None))
         for doi in payload.get("dois") or []:
-            wanted.append((None, normalize_doi(str(doi))))
+            wanted.append((None, normalize_doi(str(doi)), None))
+        for url in payload.get("urls") or []:
+            wanted.append((None, None, str(url).strip() or None))
 
         existing_sources = list(
             (
@@ -171,9 +175,13 @@ async def upsert_claims(session: AsyncSession, profile: PaleogenomicProfile) -> 
             .scalars()
             .all()
         )
-        have = {(s.pubmed_id, normalize_doi(s.doi)) for s in existing_sources}
-        for pmid, doi in wanted:
-            key = (pmid, doi)
+        have = {
+            (s.pubmed_id, normalize_doi(s.doi), s.url) for s in existing_sources
+        }
+        for pmid, doi, url in wanted:
+            if pmid is None and doi is None and not url:
+                continue
+            key = (pmid, doi, url)
             if key in have:
                 continue
             publication_id = None
@@ -195,6 +203,7 @@ async def upsert_claims(session: AsyncSession, profile: PaleogenomicProfile) -> 
                     publication_id=publication_id,
                     pubmed_id=pmid,
                     doi=doi,
+                    url=url,
                 )
             )
             have.add(key)
@@ -310,12 +319,16 @@ async def tag_existing_sequences(session: AsyncSession, profile: PaleogenomicPro
             continue
         kind = classify_record_kind(seq.name, seq.description)
         complete = is_complete_mitogenome(definition=seq.name or seq.description, length=seq.length)
+        projects, samples = extract_project_accessions(seq.name, seq.description, seq.source_url)
         session.add(
             PaleogenomicSequenceMembership(
                 sequence_id=seq.id,
                 profile_id=profile.id,
                 record_kind=kind,
                 is_complete_mitogenome=complete,
+                specimen_label=specimen_label_from_definition(seq.name, seq.description),
+                biosample=samples[0] if samples else None,
+                bioproject=projects[0] if projects else None,
             )
         )
         tagged += 1
@@ -341,6 +354,36 @@ async def retag_complete_mitogenome_flags(session: AsyncSession) -> int:
         )
         if membership.is_complete_mitogenome != flag:
             membership.is_complete_mitogenome = flag
+            updated += 1
+    await session.flush()
+    return updated
+
+
+async def backfill_membership_source_metadata(session: AsyncSession) -> int:
+    """Fill specimen/BioSample/BioProject only when the stored record states them."""
+    updated = 0
+    rows = (
+        await session.execute(
+            select(PaleogenomicSequenceMembership, Sequence).join(
+                Sequence, Sequence.id == PaleogenomicSequenceMembership.sequence_id
+            )
+        )
+    ).all()
+    for membership, seq in rows:
+        changed = False
+        if not membership.specimen_label:
+            label = specimen_label_from_definition(seq.name, seq.description)
+            if label:
+                membership.specimen_label = label
+                changed = True
+        projects, samples = extract_project_accessions(seq.name, seq.description, seq.source_url)
+        if not membership.bioproject and projects:
+            membership.bioproject = projects[0]
+            changed = True
+        if not membership.biosample and samples:
+            membership.biosample = samples[0]
+            changed = True
+        if changed:
             updated += 1
     await session.flush()
     return updated
@@ -375,5 +418,6 @@ async def seed_profiles(session: AsyncSession, *, taxonomy: dict[int, dict[str, 
         mapping[species.slug] = str(profile.id)
     sapiens = await ensure_homo_sapiens(session, taxonomy.get(HOMO_SAPIENS_TAX_ID))
     await upsert_introgression(session, sapiens)
+    await backfill_membership_source_metadata(session)
     await session.flush()
     return mapping

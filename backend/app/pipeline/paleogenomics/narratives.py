@@ -12,13 +12,16 @@ from app.pipeline.paleogenomics import citations as C
 
 REVIEWED = date(2026, 8, 30)
 
-# section_key, title, evidence_level, body, pmids, dois
+# section_key, title, evidence_level, body, pmids, dois [, urls]
 Claim = tuple[str, str, str, str, tuple[int, ...], tuple[str, ...]]
+ClaimRow = tuple
 
 
-def _claims(*rows: Claim) -> list[dict[str, object]]:
+def _claims(*rows: ClaimRow) -> list[dict[str, object]]:
     out: list[dict[str, object]] = []
-    for order, (key, title, evidence, body, pmids, dois) in enumerate(rows):
+    for order, row in enumerate(rows):
+        key, title, evidence, body, pmids, dois = row[:6]
+        urls = row[6] if len(row) > 6 else ()
         out.append(
             {
                 "section_key": key,
@@ -27,6 +30,7 @@ def _claims(*rows: Claim) -> list[dict[str, object]]:
                 "body": body.strip(),
                 "pubmed_ids": list(pmids),
                 "dois": list(dois),
+                "urls": list(urls),
                 "sort_order": order,
                 "last_reviewed_on": REVIEWED.isoformat(),
             }
@@ -139,9 +143,31 @@ and the history of contact with Homo sapiens.
             """
 Archaic ancestry in living people is a population-genetic estimate. It varies
 among individuals and datasets. It is not an ethnic classification and is not
-“exactly 2% in all non-Africans.”
+“exactly 2% in all non-Africans.” Main Neanderthal–modern-human admixture is
+generally placed tens of thousands of years ago, commonly around ~50–60 ka
+depending on study and model. The ~550–765 ka scale concerns deeper lineage
+divergence, not that main introgression pulse. Phenotype associations reported
+for archaic haplotypes (for example Simonti et al. 2016) are statistical and
+must not be read as medical diagnosis or a deterministic trait.
 """,
-            (C.SANKARARAMAN_2014_NEANDERTHAL_ANCESTRY, C.VERNOT_2016_COMBINED_ARCHAIC),
+            (
+                C.SANKARARAMAN_2014_NEANDERTHAL_ANCESTRY,
+                C.VERNOT_2016_COMBINED_ARCHAIC,
+                C.SIMONTI_2016_PHENOTYPIC_LEGACY,
+            ),
+            (),
+        ),
+        (
+            "uncertainty",
+            "Uncertainties / debates",
+            "debated",
+            """
+Last-occurrence chronology is site-dependent. Behavioural reconstructions
+(language, symbolism) remain active research. Introgression maps differ by
+reference panel, method and cohort. Direct specimen genomes (TaxID 63221) must
+not be conflated with living-human ancestry segments (TaxID 9606).
+""",
+            (C.PRUFER_2017_VINDIJA, C.SANKARARAMAN_2014_NEANDERTHAL_ANCESTRY),
             (),
         ),
         (
@@ -337,9 +363,13 @@ the evidence.
             "strong_evidence",
             """
 Museum specimens have yielded mitochondrial sequences used to place the dodo
-in the columbid tree. Public GenBank diversity for this TaxID is small.
-Absence of a record in BioWiki means it was not ingested, not that no museum
-specimen exists.
+in the columbid tree. Public GenBank/RefSeq nuccore for TaxID 187135 comprises
+four validated records: complete mitogenomes KX902236 and RefSeq NC_031864
+(the same mitochondrial genome in two INSDC representations) plus partial
+cytb AF483338 and 12S AF483301. That is source-limited public curation, not a
+catalogue failure. A BioProject may exist without a chromosome-scale NCBI
+Assembly. Absence of further Sequence rows does not mean no museum specimen
+exists.
 """,
             (C.SHAPIRO_2002_FLIGHT_OF_THE_DODO,),
             (),
@@ -363,9 +393,13 @@ genomics to place an extinct bird in the columbid tree.
 It informs island conservation (introduced predators, rapid human impact) and
 museum DNA methods. Company de-extinction language about “bringing back the
 dodo” describes trait engineering in living pigeons if pursued, not a
-demonstration that Raphus cucullatus has been recreated.
+demonstration that Raphus cucullatus has been recreated. Nature Biotechnology
+(2025) notes that resulting organisms would not be exact copies of the
+historical species. A May 2026 Nature news article on synthetic-egg technology
+explicitly urged caution about what company-reported avian incubation
+demonstrates.
 """,
-            (),
+            (C.NATURE_BIOTECH_2025_COLOSSAL_DODO, C.NATURE_2026_SYNTHETIC_EGG),
             (),
         ),
         (
@@ -374,12 +408,34 @@ demonstration that Raphus cucullatus has been recreated.
             "supported_hypothesis",
             """
 Colossal Biosciences has publicly described a dodo project using the Nicobar
-pigeon as a genomic model. That is organization-reported progress toward a
-proxy, not peer-reviewed evidence that the historical species has been
-resurrected. A modified living relative is not automatically the original taxon.
+pigeon as a genomic model. Nature Biotechnology 2025 reported that fundraising
+and programme language covering mammoth, thylacine and dodo, and stated that
+resulting organisms would not be exact copies of the historical species. A
+May 2026 Nature news article discussed synthetic-egg technology in the context
+of extinct birds including dodo/moa and urged caution. That is journal news
+and organization-reported progress toward a proxy, not peer-reviewed evidence
+that Raphus cucullatus has been resurrected. A modified living relative is not
+automatically the original taxon.
 """,
-            (C.SHAPIRO_2002_FLIGHT_OF_THE_DODO,),
-            (),
+            (
+                C.SHAPIRO_2002_FLIGHT_OF_THE_DODO,
+                C.NATURE_BIOTECH_2025_COLOSSAL_DODO,
+                C.NATURE_2026_SYNTHETIC_EGG,
+            ),
+            (C.NATURE_BIOTECH_2025_DOI, C.NATURE_2026_SYNTHETIC_EGG_DOI),
+        ),
+        (
+            "uncertainty",
+            "Uncertainties / debates",
+            "debated",
+            """
+Last-occurrence year within the late 17th century remains uncertain. Relative
+contributions of hunting, habitat change and introduced mammals cannot be
+partitioned with experimental precision from the historical record. Popular
+caricatures of intelligence are not data.
+""",
+            (C.ANGELES_2017_DODO_HISTOLOGY,),
+            (C.CHEKE_2006_IBIS_DOI, C.HUME_2006_HIST_BIOL_DOI),
         ),
     ),
 }
@@ -485,9 +541,28 @@ evaluating de-extinction claims.
         "supported_hypothesis",
         """
 Colossal Biosciences and academic collaborators have described thylacine genome
-engineering using dasyurid models. Published genomes are peer-reviewed;
-resurrection of Thylacinus cynocephalus has not been demonstrated. Proxy
+engineering using dasyurid models. Published genomes (Miller 2009; Feigin 2018)
+are peer-reviewed. Nature Biotechnology 2025 reported company fundraising and
+programme language covering mammoth, thylacine and dodo, and stated that
+resulting organisms would not be exact copies of the historical species.
+Resurrection of Thylacinus cynocephalus has not been demonstrated. Proxy
 neonates would not automatically be the historical species.
+""",
+        (
+            C.FEIGIN_2018_THYLACINE_GENOME,
+            C.NATURE_BIOTECH_2025_COLOSSAL_DODO,
+        ),
+        (C.NATURE_BIOTECH_2025_DOI,),
+    ),
+    (
+        "uncertainty",
+        "Uncertainties / debates",
+        "debated",
+        """
+Disease and ecological change as cofactors in Tasmanian extinction remain
+discussed. Post-1936 sightings are not occurrence records here. De-extinction
+timelines and trait lists from companies are organization-reported, not
+independent proof of a living thylacine.
 """,
         (C.FEIGIN_2018_THYLACINE_GENOME,),
         (),
@@ -548,9 +623,19 @@ vegetation.
 Lord et al. 2020 reported genomic evidence of relatively stable demography until
 close to extinction and argued that rapid warming during the Bølling–Allerød
 is a major hypothesis, while human hunting may have contributed regionally.
-BioWiki does not assign a single cause.
+Guðjónsdóttir et al. 2026 analysed a high-coverage genome from tissue about
+14,400 years old recovered from the stomach contents of an ancient wolf
+(Tumat, northeastern Siberia) and compared it with other Late Pleistocene
+woolly-rhinoceros genomes. They reported no evidence of major recent inbreeding
+or genomic erosion in that near-extinction specimen, which they interpret as
+supporting a relatively rapid final collapse rather than long-term inbreeding
+depression immediately before extinction. Those results apply to the sampled
+lineage and time slice. BioWiki does not assign a single universal cause:
+climate, metapopulation structure and regional human presence remain part of
+the published discussion.
 """,
-        (C.LORD_2020_WOOLLY_RHINO,),
+        (C.LORD_2020_WOOLLY_RHINO, C.GUDJONSDOTTIR_2026_WOOLLY_RHINO_INBREEDING),
+        (C.GUDJONSDOTTIR_2026_GBE_DOI,),
         (),
     ),
     (
@@ -558,11 +643,15 @@ BioWiki does not assign a single cause.
         "Paleogenomics",
         "consensus",
         """
-A complete nuclear genome and multiple mitogenomes have been reported. Nuclear
-assemblies, when public, belong in genome_records rather than as gigabase
-Sequence rows.
+A complete nuclear genome and multiple mitogenomes have been reported, including
+the 2026 high-coverage Tumat specimen preserved in ancient wolf stomach
+contents. Nuclear assemblies, when public, belong in genome_records rather than
+as gigabase Sequence rows. Public nuccore for TaxID 222863 is source-limited
+relative to the preferred discovery goal; that is not a reason to invent
+accessions.
 """,
-        (C.LORD_2020_WOOLLY_RHINO,),
+        (C.LORD_2020_WOOLLY_RHINO, C.GUDJONSDOTTIR_2026_WOOLLY_RHINO_INBREEDING),
+        (C.GUDJONSDOTTIR_2026_GBE_DOI,),
         (),
     ),
     (
@@ -594,9 +683,23 @@ conservation genomics.
         """
 No high-profile commercial de-extinction programme currently targets this
 species with the visibility of mammoth, dodo or thylacine. Status: no active
-programme documented here.
+programme documented here. Genomic work on extinction process is not a
+restoration programme.
 """,
-        (),
+        (C.GUDJONSDOTTIR_2026_WOOLLY_RHINO_INBREEDING,),
+        (C.GUDJONSDOTTIR_2026_GBE_DOI,),
+    ),
+    (
+        "uncertainty",
+        "Uncertainties / debates",
+        "debated",
+        """
+Whether climate warming, humans, or both drove the final loss likely varied by
+region. The 2026 Tumat genome argues against recent inbreeding as a necessary
+prelude in that specimen; it does not by itself prove a single-cause extinction
+across the species’ range.
+""",
+        (C.LORD_2020_WOOLLY_RHINO, C.GUDJONSDOTTIR_2026_WOOLLY_RHINO_INBREEDING),
         (),
     ),
 )
@@ -703,10 +806,24 @@ chassis.
         """
 Colossal Biosciences reports multiplex editing of Asian elephants toward
 mammoth-like traits. That is organization-reported genome-engineering research.
-A cold-adapted elephant proxy would not automatically be Mammuthus primigenius
-under current taxonomy.
+Nature Biotechnology 2025 stated that resulting organisms would not be exact
+copies of the historical species. A cold-adapted elephant proxy would not
+automatically be Mammuthus primigenius under current taxonomy.
 """,
-        (),
+        (C.NATURE_BIOTECH_2025_COLOSSAL_DODO,),
+        (C.NATURE_BIOTECH_2025_DOI,),
+    ),
+    (
+        "uncertainty",
+        "Uncertainties / debates",
+        "debated",
+        """
+Relative roles of climate, humans and ecological feedbacks differ by population
+and millennium. Wrangel Island survival into the Holocene shows extinction was
+not globally synchronous. Company birth-date roadmaps are not peer-reviewed
+timelines.
+""",
+        (C.PALKOPOULOU_2015_MAMMOTH_GENOMES,),
         (),
     ),
 )
@@ -1094,7 +1211,7 @@ NARRATIVES["dinornis-robustus"] = _claims(
         "overview",
         "Overview",
         "consensus",
-        "Dinornis robustus is the South Island giant moa, a flightless palaeognath of New Zealand (NCBI TaxID 314500). Other moa genera existed; this profile is this taxon, not all moa.",
+        "Dinornis robustus is the South Island giant moa, a flightless palaeognath of New Zealand (NCBI TaxID 314500). Other moa genera existed; this profile is this taxon, not all moa, and not a claim that Dinornis has been returned to life.",
         (C.BUNCE_2003_DINORNIS,),
         (),
     ),
@@ -1102,7 +1219,7 @@ NARRATIVES["dinornis-robustus"] = _claims(
         "evolution",
         "Evolution",
         "strong_evidence",
-        "Ancient DNA demonstrated extreme reversed sexual size dimorphism in Dinornis: large and small morphs were sexes, not separate species.",
+        "Ancient DNA demonstrated extreme reversed sexual size dimorphism in Dinornis: large and small morphs were sexes, not separate species. Flightlessness evolved in the New Zealand palaeognath radiation, not as a designed outcome.",
         (C.BUNCE_2003_DINORNIS,),
         (),
     ),
@@ -1110,15 +1227,15 @@ NARRATIVES["dinornis-robustus"] = _claims(
         "range",
         "Time and geographic range",
         "strong_evidence",
-        "South Island, New Zealand. Extinction followed Polynesian settlement.",
-        (C.BUNCE_2003_DINORNIS,),
+        "South Island, New Zealand. Extinction followed Polynesian settlement in the late Holocene.",
+        (C.BUNCE_2003_DINORNIS, C.HOLDAWAY_2000_MOA_EXTINCTION),
         (),
     ),
     (
         "ecology",
         "Life and ecology",
         "strong_evidence",
-        "They were herbivores. Extreme sexual size dimorphism is genetically confirmed.",
+        "They were herbivores whose browsing is reconstructed from palaeoecology and morphology. Extreme sexual size dimorphism is genetically confirmed. Hypothesized ecosystem roles if an analogue were introduced today are not observations of living Dinornis.",
         (C.BUNCE_2003_DINORNIS,),
         (),
     ),
@@ -1126,21 +1243,72 @@ NARRATIVES["dinornis-robustus"] = _claims(
         "extinction",
         "Extinction",
         "strong_evidence",
-        "Polynesian settlement, hunting, and associated landscape fire are the supported drivers. Extinction was rapid on archaeological timescales after first arrival.",
-        (C.BUNCE_2003_DINORNIS,),
+        "Polynesian settlement, hunting, and associated landscape fire are the supported drivers. Holdaway and Jacomb 2000 modelled rapid extinction after human arrival. Allentoft et al. 2014 argued that a low-density human population was sufficient to exterminate moa. Present the literature rather than a slogan; timing and kill-rate models remain refined, but human-driven loss is strongly supported.",
+        (C.BUNCE_2003_DINORNIS, C.HOLDAWAY_2000_MOA_EXTINCTION, C.ALLENTOFT_2014_MOA_EXTERMINATION),
         (),
     ),
     (
         "paleogenomics",
         "Paleogenomics",
         "consensus",
-        "Excellent preservation in New Zealand caves yielded mitochondrial and nuclear data for moa.",
+        "Excellent preservation in New Zealand caves yielded mitochondrial and nuclear data for moa. Public nuccore for TaxID 314500 is larger than this collection’s preferred discovery goal; BioWiki stored a curated subset as Sequence rows and does not treat extra fragments as a quota to fill.",
         (C.BUNCE_2003_DINORNIS,),
         (),
     ),
-    ("significance", "Scientific importance", "consensus", "Moa DNA rebuilt palaeognath taxonomy of size morphs and documented human-driven megafaunal loss on islands.", (C.BUNCE_2003_DINORNIS,), ()),
-    ("modern", "Why it matters now", "consensus", "New Zealand restoration ecology uses moa as a missing herbivore guild; that is ecological history, not de-extinction.", (), ()),
-    ("deextinction", "De-extinction / restoration", "consensus", "No scientifically demonstrated return of Dinornis exists.", (), ()),
+    (
+        "significance",
+        "Scientific importance",
+        "consensus",
+        "Moa DNA rebuilt palaeognath taxonomy of size morphs and documented human-driven megafaunal loss on islands.",
+        (C.BUNCE_2003_DINORNIS,),
+        (),
+    ),
+    (
+        "modern",
+        "Why it matters now",
+        "consensus",
+        "New Zealand restoration ecology uses moa as a missing herbivore guild; that is palaeoecological history, not proof that a proxy bird would restore pre-human vegetation. Company de-extinction language must be separated from that ecological literature.",
+        (C.ALLENTOFT_2014_MOA_EXTERMINATION,),
+        (),
+    ),
+    (
+        "deextinction",
+        "De-extinction / restoration",
+        "supported_hypothesis",
+        """
+Independent news (including AP) and Colossal Biosciences’ own programme pages
+report an announced South Island giant moa research effort with partners in
+New Zealand, using living palaeognaths as genomic chassis. That is an active
+research programme as organization-reported and as covered by independent news.
+It is not peer-reviewed evidence that Dinornis robustus has been resurrected.
+A May 2026 Nature news article discussed synthetic-egg / avian incubation
+technology in the context of extinct birds including dodo and moa and explicitly
+urged caution about what the demonstration shows. Company-reported hatching of
+chickens in an artificial eggshell is not independent proof of a moa embryo,
+nor of a returned historical species. BioWiki therefore records status as an
+active research programme, not reproductive-technology demonstration at moa
+scale, and never as resurrection.
+""",
+        (C.NATURE_2026_SYNTHETIC_EGG,),
+        (C.NATURE_2026_SYNTHETIC_EGG_DOI,),
+        (
+            C.COLOSSAL_MOA_PROGRAMME_URL,
+            C.AP_2025_MOA_PROGRAMME_URL,
+        ),
+    ),
+    (
+        "uncertainty",
+        "Uncertainties / debates",
+        "debated",
+        """
+Kill-rate and duration-of-extinction models differ among papers even where
+human causation is agreed. Company avian reproductive milestones remain
+organization-reported until independently published. A genetically modified
+living relative would not automatically be Dinornis robustus.
+""",
+        (C.HOLDAWAY_2000_MOA_EXTINCTION, C.NATURE_2026_SYNTHETIC_EGG),
+        (),
+    ),
 )
 
 NARRATIVES["megaloceros-giganteus"] = _claims(

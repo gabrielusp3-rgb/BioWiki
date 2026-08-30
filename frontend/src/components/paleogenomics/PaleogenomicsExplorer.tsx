@@ -195,6 +195,35 @@ export function PaleogenomicsExplorer() {
         <em>Homo sapiens</em> are listed separately and are not bones.
         Counts are live database aggregates.
       </p>
+      <p className="text-sm">
+        <Link
+          href="/paleogenomics/introgression"
+          className="text-content-secondary underline-offset-4 hover:text-content-primary hover:underline"
+        >
+          Archaic introgression in living humans
+        </Link>
+        {" · "}
+        <Link
+          href="/paleogenomics/raphus-cucullatus"
+          className="text-content-secondary underline-offset-4 hover:text-content-primary hover:underline"
+        >
+          Dodo
+        </Link>
+        {" · "}
+        <Link
+          href="/paleogenomics/thylacinus-cynocephalus"
+          className="text-content-secondary underline-offset-4 hover:text-content-primary hover:underline"
+        >
+          Thylacine
+        </Link>
+        {" · "}
+        <Link
+          href="/paleogenomics/coelodonta-antiquitatis"
+          className="text-content-secondary underline-offset-4 hover:text-content-primary hover:underline"
+        >
+          Woolly rhinoceros
+        </Link>
+      </p>
 
       {landing?.featured && landing.featured.length > 0 && (
         <section>

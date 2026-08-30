@@ -243,7 +243,7 @@ SPECIES: tuple[PaleogenomicSpecies, ...] = (
         geographic_region="New Zealand (South Island)",
         preferred_sequence_target=40,
         featured_rank=None,
-        deextinction_status=DeextinctionStatus.NO_ACTIVE_PROGRAM,
+        deextinction_status=DeextinctionStatus.ACTIVE_RESEARCH_PROGRAM,
         synonyms=("giant moa",),
     ),
     PaleogenomicSpecies(

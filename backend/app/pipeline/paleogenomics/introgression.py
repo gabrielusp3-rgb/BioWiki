@@ -34,10 +34,13 @@ INTROGRESSION_LOCI: tuple[dict[str, object], ...] = (
         "method": "published Neanderthal ancestry scan",
         "evidence_notes": (
             "Innate-immunity OAS genes are among loci reported in ancestry scans of "
-            "present-day humans. This row records the gene-level published association, "
-            "not a bone-derived Neanderthal sequence."
+            "present-day humans (Sankararaman et al. 2014). Zhou et al. 2021 (PMID "
+            "33633408) further reported a Neanderthal OAS1 isoform associated with "
+            "COVID-19 susceptibility/severity in people of European ancestry. This row "
+            "is gene-level introgression inference in Homo sapiens, not a bone-derived "
+            "Neanderthal sequence. Coordinates are omitted."
         ),
-        "source_dataset": "Sankararaman et al. 2014 Nature PMID 24476815",
+        "source_dataset": "Sankararaman et al. 2014 Nature PMID 24476815; Zhou et al. 2021 PNAS PMID 33633408",
     },
     {
         "archaic_source": "neanderthal",
@@ -125,6 +128,36 @@ INTROGRESSION_LOCI: tuple[dict[str, object], ...] = (
             "are Homo sapiens; the archaic source is Denisovan, not Neanderthal."
         ),
         "source_dataset": "Huerta-Sánchez et al. 2014 Nature PMID 25043035",
+    },
+    {
+        "archaic_source": "neanderthal",
+        "gene_name": "LZTFL1",
+        "locus_name": "3p21.31 COVID-19 risk haplotype (LZTFL1 region)",
+        "pubmed_id": C.ZEBERG_2020_COVID_RISK_HAPLOTYPE,
+        "method": "haplotype sharing with the Vindija Neanderthal genome",
+        "evidence_notes": (
+            "Zeberg and Pääbo 2020 reported that a 3p21.31 haplotype associated with "
+            "risk of severe COVID-19 is inherited from Neanderthals. Several genes "
+            "overlap that haplotype; LZTFL1 is recorded here as the named gene-level "
+            "entry. This is ancestry in living Homo sapiens, not DNA extracted from a "
+            "Neanderthal specimen. Coordinates are omitted because this catalogue does "
+            "not invent genome-build intervals."
+        ),
+        "source_dataset": "Zeberg and Pääbo 2020 Nature PMID 32998156",
+    },
+    {
+        "archaic_source": "denisovan",
+        "gene_name": "WARS2",
+        "locus_name": "WARS2 Denisovan-ancestry interval",
+        "pubmed_id": C.SANKARARAMAN_2016_COMBINED_LANDSCAPE,
+        "method": "published scan of Denisovan ancestry in present-day humans",
+        "evidence_notes": (
+            "Sankararaman et al. 2016 mapped Denisovan ancestry in present-day humans "
+            "and reported WARS2 among high-ranking Denisovan-ancestry loci, particularly "
+            "in Oceanian populations. Modern carriers are Homo sapiens. Gene-level only; "
+            "no invented coordinates."
+        ),
+        "source_dataset": "Sankararaman et al. 2016 Curr Biol PMID 27032491",
     },
 )
 

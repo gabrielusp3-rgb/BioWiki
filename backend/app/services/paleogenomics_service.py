@@ -36,6 +36,9 @@ _NO_DNA_NOTES = [
     "sequence taxa here because authentic public ancient DNA for those species is not "
     "established in this catalogue. Absence of a page is not a claim about fossils.",
     "Introgression regions in living Homo sapiens are not ancient specimen DNA.",
+    "Preferred sequence targets are discovery goals, not quotas. Several historic "
+    "extinctions have fewer public nuccore records than the original goal "
+    "(for example dodo, quagga, Smilodon populator).",
 ]
 
 

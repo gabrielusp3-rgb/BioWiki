@@ -60,6 +60,7 @@ test("catalogue sections render without crashing", async ({ page }) => {
     { path: "/publications", heading: "Publication catalogue" },
     { path: "/downloads", heading: "Downloads" },
     { path: "/paleogenomics", heading: "Paleogenomics" },
+    { path: "/paleogenomics/introgression", heading: "Archaic introgression in living humans" },
   ];
   for (const route of routes) {
     await page.goto(route.path);
