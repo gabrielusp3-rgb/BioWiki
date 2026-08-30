@@ -8,8 +8,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.enums import OrganismGroup
 from app.models.organism import Organism
-from app.services import mappers
+from app.services import mappers, paleogenomics_service
 from app.services.pagination import decode_cursor, encode_cursor
+
+
+async def _with_paleo_slugs(session: AsyncSession, rows: list[Organism]) -> list:
+    slugs = await paleogenomics_service.slugs_by_organism_ids(
+        session, [row.id for row in rows]
+    )
+    return [mappers.to_organism(row, paleogenomic_slug=slugs.get(row.id)) for row in rows]
 
 
 async def list_organisms(
@@ -30,7 +37,7 @@ async def list_organisms(
     has_more = len(rows) > limit
     rows = rows[:limit]
     return {
-        "organisms": [mappers.to_organism(o) for o in rows],
+        "organisms": await _with_paleo_slugs(session, rows),
         "total": total,
         "next_cursor": encode_cursor(offset + limit) if has_more else None,
     }
@@ -45,7 +52,7 @@ async def featured(session: AsyncSession, *, limit: int) -> dict[str, Any]:
     )
     rows = list((await session.execute(stmt)).scalars().all())
     return {
-        "organisms": [mappers.to_organism(o) for o in rows],
+        "organisms": await _with_paleo_slugs(session, rows),
         "total": len(rows),
         "next_cursor": None,
     }

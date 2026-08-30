@@ -13,7 +13,31 @@ import { SEARCH_TYPES } from "@/lib/search-config";
 import { CATEGORY_META } from "@/lib/categories";
 import { formatStatistic } from "@/lib/statistics";
 import { pathForSearchType, searchUrl } from "@/lib/search-routes";
-import type { SearchResult, SearchType } from "@/types/search";
+import type { SearchPaleogenomicsProfile, SearchResult, SearchSuggestion, SearchType } from "@/types/search";
+
+function PaleoRow({
+  profile,
+  onNavigate,
+}: {
+  profile: Pick<SearchPaleogenomicsProfile, "slug" | "title" | "scientificName">;
+  onNavigate: () => void;
+}) {
+  return (
+    <Link
+      href={`/paleogenomics/${encodeURIComponent(profile.slug)}`}
+      onClick={onNavigate}
+      className="flex w-full items-center gap-4 border-b border-glass-divider/60 px-4 py-3 text-left transition-colors hover:bg-white/[0.04]"
+    >
+      <span className="shrink-0 font-display text-[10px] uppercase tracking-wider text-content-muted">
+        Paleo
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate font-body text-sm text-content-primary">{profile.title}</span>
+        <span className="truncate text-xs italic text-content-secondary">{profile.scientificName}</span>
+      </span>
+    </Link>
+  );
+}
 
 function ResultRow({ result, onNavigate }: { result: SearchResult; onNavigate: () => void }) {
   return (
@@ -83,6 +107,7 @@ export function SearchBar({ initialQuery = "" }: SearchBarProps = {}) {
     status,
     results,
     suggestions,
+    paleogenomicsProfiles,
     total,
   } = useSearch({ initialQuery });
 
@@ -219,6 +244,21 @@ export function SearchBar({ initialQuery = "" }: SearchBarProps = {}) {
               </div>
             )}
 
+            {status === "success" && paleogenomicsProfiles.length > 0 && (
+              <>
+                <span className="eyebrow block px-4 pt-4">Paleogenomics</span>
+                <div className="mt-2">
+                  {paleogenomicsProfiles.map((profile) => (
+                    <PaleoRow
+                      key={profile.id}
+                      profile={profile}
+                      onNavigate={() => setOpen(false)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+
             {status === "success" && results.length > 0 && (
               <>
                 <div className="flex items-center justify-between px-4 pt-4">
@@ -239,20 +279,35 @@ export function SearchBar({ initialQuery = "" }: SearchBarProps = {}) {
               <>
                 <span className="eyebrow block px-4 pt-4">Suggestions</span>
                 <div className="mb-2 mt-2">
-                  {suggestions.map((s) => (
-                    <IntentRow
-                      key={s.id}
-                      label={s.label}
-                      type={s.type}
-                      query={s.label}
-                      onNavigate={() => setOpen(false)}
-                    />
-                  ))}
+                  {suggestions.map((s: SearchSuggestion) =>
+                    s.type === "paleogenomics" && s.slug ? (
+                      <PaleoRow
+                        key={s.id}
+                        profile={{
+                          slug: s.slug,
+                          title: s.label,
+                          scientificName: s.label,
+                        }}
+                        onNavigate={() => setOpen(false)}
+                      />
+                    ) : (
+                      <IntentRow
+                        key={s.id}
+                        label={s.label}
+                        type={s.type as SearchType}
+                        query={s.label}
+                        onNavigate={() => setOpen(false)}
+                      />
+                    ),
+                  )}
                 </div>
               </>
             )}
 
-            {status === "success" && results.length === 0 && suggestions.length === 0 && (
+            {status === "success" &&
+              results.length === 0 &&
+              suggestions.length === 0 &&
+              paleogenomicsProfiles.length === 0 && (
               <div className="p-8 text-center text-sm text-content-secondary">
                 No matches found in the database for “{query.trim()}”.
               </div>

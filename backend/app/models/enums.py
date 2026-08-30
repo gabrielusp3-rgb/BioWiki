@@ -98,6 +98,55 @@ class AssemblyLevel(str, enum.Enum):
     CONTIG = "contig"
 
 
+class ExtinctionStatus(str, enum.Enum):
+    """Optional organism status. Living taxa keep this NULL."""
+
+    EXTINCT = "extinct"
+    EXTINCT_PREHISTORIC = "extinct_prehistoric"
+    EXTINCT_HISTORIC = "extinct_historic"
+    ARCHAIC_HOMININ = "archaic_hominin"
+
+
+class PaleogenomicSubsection(str, enum.Enum):
+    EXTINCT_SPECIES = "extinct_species"
+    ARCHAIC_HOMININ = "archaic_hominin"
+    ANCIENT_DNA = "ancient_dna"
+    ARCHAIC_INTROGRESSION = "archaic_introgression"
+
+
+class EvidenceLevel(str, enum.Enum):
+    CONSENSUS = "consensus"
+    STRONG_EVIDENCE = "strong_evidence"
+    SUPPORTED_HYPOTHESIS = "supported_hypothesis"
+    DEBATED = "debated"
+    UNKNOWN = "unknown"
+
+
+class DeextinctionStatus(str, enum.Enum):
+    NO_ACTIVE_PROGRAM = "no_active_program"
+    RESEARCH_DISCUSSION = "research_discussion"
+    ACTIVE_RESEARCH_PROGRAM = "active_research_program"
+    GENOME_ENGINEERING_RESEARCH = "genome_engineering_research"
+    REPRODUCTIVE_TECHNOLOGY_RESEARCH = "reproductive_technology_research"
+    PROXY_TRAIT_ENGINEERING = "proxy_trait_engineering"
+    REINTRODUCTION_PLANNING = "reintroduction_planning"
+    UNKNOWN = "unknown"
+
+
+class ArchaicSource(str, enum.Enum):
+    NEANDERTHAL = "neanderthal"
+    DENISOVAN = "denisovan"
+    UNKNOWN_ARCHAIC = "unknown_archaic"
+
+
+class PaleogenomicRecordKind(str, enum.Enum):
+    MITOCHONDRIAL = "mitochondrial"
+    NUCLEAR = "nuclear"
+    GENE = "gene"
+    CONTIG = "contig"
+    OTHER = "other"
+
+
 def pg_enum(python_enum: type[enum.Enum], name: str) -> SAEnum:
     """Bind a Python enum to an existing PostgreSQL ENUM type (never recreated)."""
     return SAEnum(

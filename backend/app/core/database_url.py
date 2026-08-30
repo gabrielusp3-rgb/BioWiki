@@ -20,6 +20,7 @@ def normalize_database_url(url: str) -> str:
         raw = "postgresql+asyncpg://" + raw[len("postgresql://") :]
     parsed = urlparse(raw)
     query = dict(parse_qsl(parsed.query, keep_blank_values=True))
+    query.pop("channel_binding", None)
     sslmode = query.pop("sslmode", None)
     if sslmode and "ssl" not in query:
         if sslmode.lower() in {"require", "verify-ca", "verify-full", "true", "1"}:

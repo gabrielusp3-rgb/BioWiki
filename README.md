@@ -74,7 +74,7 @@ Those counts are from the live production database. They change when the CLI imp
 
 ### Features
 
-- Browse DNA, RNA, proteins, CRISPR guides, viruses, organisms, genome assemblies, and publications (`/publications`)
+- Browse DNA, RNA, proteins, CRISPR guides, viruses, organisms, genome assemblies, publications (`/publications`), and the Paleogenomics collection (`/paleogenomics`)
 - Record pages by accession, with residues and source metadata
 - Publication pages by PubMed ID (`/publications/{pmid}`), linked to stored sequences
 - Full-text search and autocomplete (`/search`)
@@ -287,6 +287,8 @@ JSON uses camelCase. Sequence, protein, virus, genome and publication lists retu
 | GET | `/proteins`, `/proteins/{accession}` | |
 | GET | `/viruses`, `/viruses/{accession}` | |
 | GET | `/organisms`, `/organisms/featured`, `/organisms/{identifier}` | |
+| GET | `/paleogenomics`, `/paleogenomics/statistics`, `/paleogenomics/species`, `/paleogenomics/species/{slug}` | Paleogenomics collection |
+| GET | `/paleogenomics/introgression` | Archaic ancestry in living *Homo sapiens* (not ancient specimen DNA) |
 | GET | `/genomes`, `/genomes/{accession}` | |
 | GET | `/publications`, `/publications/{pubmed_id}` | |
 | GET | `/search`, `/search/suggest` | PostgreSQL full-text search |

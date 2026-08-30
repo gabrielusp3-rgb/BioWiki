@@ -142,6 +142,19 @@ async def _cmd_sync(_: argparse.Namespace) -> dict:
     return {"refreshed": refreshed, "status": status.model_dump(by_alias=True)}
 
 
+async def _cmd_paleogenomics(args: argparse.Namespace) -> dict:
+    from app.pipeline.paleogenomics.runner import run_paleogenomics
+
+    return await run_paleogenomics(
+        slugs=args.species,
+        seed_only=args.seed_only,
+        discover_only=args.discover_only,
+        skip_sequences=args.skip_sequences,
+        skip_genomes=args.skip_genomes,
+        skip_literature=args.skip_literature,
+    )
+
+
 async def _cmd_integrity(_: argparse.Namespace) -> dict:
     """Run every UI/DB/reference integrity check and report pass/fail."""
     from app.database.session import get_sessionmaker
@@ -260,6 +273,18 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("integrity", help="Check UI/DB/reference consistency.")
     p.set_defaults(func=_cmd_integrity)
+
+    p = sub.add_parser(
+        "paleogenomics",
+        help="Seed and ingest the Paleogenomics collection (additive, resumable).",
+    )
+    p.add_argument("--species", nargs="*", default=None, help="Optional slugs, e.g. raphus-cucullatus.")
+    p.add_argument("--seed-only", action="store_true")
+    p.add_argument("--discover-only", action="store_true")
+    p.add_argument("--skip-sequences", action="store_true")
+    p.add_argument("--skip-genomes", action="store_true")
+    p.add_argument("--skip-literature", action="store_true")
+    p.set_defaults(func=_cmd_paleogenomics)
 
     return parser
 

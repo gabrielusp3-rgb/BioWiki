@@ -11,6 +11,7 @@ from app.models.organism import Organism
 from app.models.publication import Publication
 from app.models.sequence import Sequence
 from app.models.source import DataSource
+from app.services import paleogenomics_service
 from app.services.pagination import decode_cursor, encode_cursor
 
 _FTS = text("sequences.search_vector @@ websearch_to_tsquery('english', :q)")
@@ -139,6 +140,7 @@ async def search(
     ]
 
     publications, pub_total = await _search_publications(session, q)
+    paleo_profiles = await paleogenomics_service.search_profiles(session, q, limit=8)
 
     return {
         "query": q,
@@ -147,6 +149,7 @@ async def search(
         "next_cursor": encode_cursor(offset + limit) if has_more else None,
         "publications": publications,
         "publications_total": pub_total,
+        "paleogenomics_profiles": paleo_profiles,
     }
 
 
@@ -215,7 +218,20 @@ async def suggest(session: AsyncSession, *, q: str, limit: int = 8) -> dict[str,
         .limit(limit)
     )
     rows = list((await session.execute(stmt)).scalars().all())
+    profile_hits = await paleogenomics_service.search_profiles(session, q, limit=min(3, limit))
+    seq_slots = max(0, limit - len(profile_hits))
+    rows = rows[:seq_slots]
     suggestions = [
+        {
+            "id": item["id"],
+            "label": f"{item['title']} ({item['scientific_name']})",
+            "type": "paleogenomics",
+            "slug": item["slug"],
+            "accession": None,
+        }
+        for item in profile_hits
+    ]
+    suggestions.extend(
         {
             "id": str(s.id),
             "label": s.name,
@@ -223,5 +239,5 @@ async def suggest(session: AsyncSession, *, q: str, limit: int = 8) -> dict[str,
             "accession": s.accession,
         }
         for s in rows
-    ]
+    )
     return {"query": q, "suggestions": suggestions}

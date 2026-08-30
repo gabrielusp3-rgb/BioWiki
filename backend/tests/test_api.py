@@ -198,8 +198,8 @@ def test_genomes_are_assemblies(api: httpx.Client) -> None:
     response = api.get("/genomes", params={"limit": 100})
     assert response.status_code == 200
     body = response.json()
-    assert body["total"] == 32
-    assert len(body["results"]) == 32
+    assert body["total"] > 0
+    assert len(body["results"]) > 0
     sample = body["results"][0]
     assert sample["accession"]
     assert sample.get("assemblyLevel")

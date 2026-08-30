@@ -17,5 +17,8 @@ Do not point Alembic at a database that already holds scientific rows unless
 it is already stamped at `0004_publication_abstract` or a later revision.
 `0005_seed_categories` only inserts missing UI category rows.
 `0006_crispr_evidence` adds CRISPR evidence type (natural / experimental /
-computational) plus optional target provenance columns. Never dump the
-live corpus into git.
+computational) plus optional target provenance columns.
+`0007_paleogenomics` adds optional organism extinction fields and collection
+tables for extinct-species profiles, ancient-DNA membership, introgression
+in living *Homo sapiens*, and publication membership. Paleogenomics is not a
+molecule type. Never dump the live corpus into git.

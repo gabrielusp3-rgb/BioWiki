@@ -17,6 +17,10 @@ class OrganismRead(CamelModel):
     group: OrganismGroup
     image_url: str | None = None
     sequence_count: int | None = None
+    extinction_status: str | None = None
+    extinction_date_text: str | None = None
+    geologic_period: str | None = None
+    paleogenomic_slug: str | None = None
 
 
 class OrganismListResponse(CamelModel):

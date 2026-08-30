@@ -7,6 +7,7 @@ import { isApiConfigured, readNextCursor } from "@/lib/api";
 import {
   DEFAULT_FILTERS,
   type SearchFilters,
+  type SearchPaleogenomicsProfile,
   type SearchPublication,
   type SearchResult,
   type SearchSuggestion,
@@ -32,6 +33,7 @@ export function useSearch({
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([]);
   const [publications, setPublications] = useState<SearchPublication[]>([]);
   const [publicationsTotal, setPublicationsTotal] = useState(0);
+  const [paleogenomicsProfiles, setPaleogenomicsProfiles] = useState<SearchPaleogenomicsProfile[]>([]);
   const [total, setTotal] = useState(0);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -61,6 +63,7 @@ export function useSearch({
       setSuggestions([]);
       setPublications([]);
       setPublicationsTotal(0);
+      setPaleogenomicsProfiles([]);
       setTotal(0);
       setNextCursor(null);
       return;
@@ -72,6 +75,7 @@ export function useSearch({
       setSuggestions([]);
       setPublications([]);
       setPublicationsTotal(0);
+      setPaleogenomicsProfiles([]);
       setTotal(0);
       setNextCursor(null);
       return;
@@ -92,6 +96,7 @@ export function useSearch({
         setNextCursor(readNextCursor(searchResponse));
         setPublications(searchResponse.publications ?? []);
         setPublicationsTotal(searchResponse.publicationsTotal ?? 0);
+        setPaleogenomicsProfiles(searchResponse.paleogenomicsProfiles ?? []);
         setSuggestions(suggestResponse.suggestions);
         setStatus("success");
       })
@@ -103,6 +108,7 @@ export function useSearch({
         setSuggestions([]);
         setPublications([]);
         setPublicationsTotal(0);
+        setPaleogenomicsProfiles([]);
         setTotal(0);
         setNextCursor(null);
       });
@@ -141,6 +147,7 @@ export function useSearch({
     suggestions,
     publications,
     publicationsTotal,
+    paleogenomicsProfiles,
     total,
     nextCursor,
     loadMore,

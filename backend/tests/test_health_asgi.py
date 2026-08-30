@@ -44,6 +44,8 @@ def test_openapi_documents_optional_api_key() -> None:
     paths = schema.get("paths") or {}
     sequence_list = paths.get("/api/v1/sequences") or paths.get("/sequences")
     assert sequence_list, list(paths)[:8]
+    paleo = paths.get("/api/v1/paleogenomics") or paths.get("/paleogenomics")
+    assert paleo, list(paths)[:12]
     assert "nextCursor" in json.dumps(sequence_list)
     assert "`nextCursor`" not in description
     assert "`cursor`" not in description

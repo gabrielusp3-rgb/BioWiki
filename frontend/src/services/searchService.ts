@@ -41,6 +41,7 @@ const EMPTY_RESPONSE = (query: string): SearchResponse => ({
   nextCursor: null,
   publications: [],
   publicationsTotal: 0,
+  paleogenomicsProfiles: [],
 });
 
 export async function search(

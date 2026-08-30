@@ -23,3 +23,6 @@ class Organism(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
     image_url: Mapped[str | None] = mapped_column(String(500))
     sequence_count: Mapped[int | None] = mapped_column(BigInteger)
+    extinction_status: Mapped[str | None] = mapped_column(String(40), index=True)
+    extinction_date_text: Mapped[str | None] = mapped_column(String(160))
+    geologic_period: Mapped[str | None] = mapped_column(String(80))

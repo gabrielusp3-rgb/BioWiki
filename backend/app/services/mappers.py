@@ -164,7 +164,7 @@ def to_sequence(seq: Sequence, *, with_residues: bool = True) -> SequenceBase:
     return fn(seq, with_residues=with_residues)
 
 
-def to_organism(org: Organism) -> OrganismRead:
+def to_organism(org: Organism, paleogenomic_slug: str | None = None) -> OrganismRead:
     return OrganismRead(
         id=org.id,
         slug=org.slug,
@@ -176,6 +176,10 @@ def to_organism(org: Organism) -> OrganismRead:
         group=org.group,
         image_url=org.image_url,
         sequence_count=org.sequence_count,
+        extinction_status=org.extinction_status,
+        extinction_date_text=org.extinction_date_text,
+        geologic_period=org.geologic_period,
+        paleogenomic_slug=paleogenomic_slug,
     )
 
 

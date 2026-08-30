@@ -17,6 +17,15 @@ from app.models.gene import Gene
 from app.models.genome import GenomeRecord
 from app.models.ingestion import IngestionRun
 from app.models.organism import Organism
+from app.models.paleogenomics import (
+    PaleogenomicClaim,
+    PaleogenomicClaimSource,
+    PaleogenomicIntrogressionRegion,
+    PaleogenomicProfile,
+    PaleogenomicProject,
+    PaleogenomicPublicationMembership,
+    PaleogenomicSequenceMembership,
+)
 from app.models.publication import Publication, SequenceReference
 from app.models.sequence import Sequence
 from app.models.source import DataSource
@@ -38,6 +47,13 @@ __all__ = [
     "GenomeRecord",
     "IngestionRun",
     "Organism",
+    "PaleogenomicClaim",
+    "PaleogenomicClaimSource",
+    "PaleogenomicIntrogressionRegion",
+    "PaleogenomicProfile",
+    "PaleogenomicProject",
+    "PaleogenomicPublicationMembership",
+    "PaleogenomicSequenceMembership",
     "Publication",
     "SequenceReference",
     "Sequence",

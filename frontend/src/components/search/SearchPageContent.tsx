@@ -10,7 +10,26 @@ import { useSearch } from "@/hooks/useSearch";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { SEARCH_TYPES } from "@/lib/search-config";
 import { formatStatistic } from "@/lib/statistics";
-import type { SearchPublication, SearchResult } from "@/types/search";
+import type { SearchPaleogenomicsProfile, SearchPublication, SearchResult } from "@/types/search";
+
+function PaleogenomicsRow({ profile }: { profile: SearchPaleogenomicsProfile }) {
+  return (
+    <Link
+      href={`/paleogenomics/${encodeURIComponent(profile.slug)}`}
+      className="glass hairline group flex w-full items-center gap-4 px-5 py-4 transition-colors hover:border-white/20"
+    >
+      <span className="shrink-0 border border-glass-border px-2 py-1 font-display text-[10px] font-semibold uppercase tracking-wider text-content-muted">
+        Paleo
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate font-body text-sm text-content-primary">{profile.title}</span>
+        <span className="truncate text-xs italic text-content-secondary">
+          {profile.scientificName}
+        </span>
+      </span>
+    </Link>
+  );
+}
 
 function ResultRow({ result }: { result: SearchResult }) {
   return (
@@ -85,6 +104,7 @@ export function SearchPageContent() {
     results,
     publications,
     publicationsTotal,
+    paleogenomicsProfiles,
     total,
     nextCursor,
     loadMore,
@@ -178,11 +198,31 @@ export function SearchPageContent() {
         </div>
       )}
 
-      {status === "success" && results.length === 0 && publications.length === 0 && (
+      {status === "success" &&
+        results.length === 0 &&
+        publications.length === 0 &&
+        paleogenomicsProfiles.length === 0 && (
         <div className="glass hairline p-10 text-center text-sm text-content-secondary">
           No matches found in the database for “{trimmed}”. Nothing is shown
           that does not exist — try another accession, gene or organism.
         </div>
+      )}
+
+      {status === "success" && paleogenomicsProfiles.length > 0 && (
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <span className="eyebrow">Paleogenomics</span>
+            <span className="font-mono text-[11px] text-content-muted">
+              {paleogenomicsProfiles.length} profile
+              {paleogenomicsProfiles.length === 1 ? "" : "s"}
+            </span>
+          </div>
+          <div className="flex flex-col gap-3">
+            {paleogenomicsProfiles.map((profile) => (
+              <PaleogenomicsRow key={profile.id} profile={profile} />
+            ))}
+          </div>
+        </section>
       )}
 
       {/* Sequence results */}

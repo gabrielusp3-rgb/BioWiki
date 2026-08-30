@@ -13,8 +13,11 @@ from app.database.session import get_session  # re-exported for routers
 # Length caps block oversized-URL DoS without rejecting real NCBI/UniProt IDs.
 AccessionPath = Annotated[str, Path(min_length=1, max_length=64)]
 OrganismIdPath = Annotated[str, Path(min_length=1, max_length=128)]
+PaleogenomicSlugPath = Annotated[
+    str, Path(min_length=3, max_length=160, pattern=r"^[a-z0-9-]+$")
+]
 
-__all__ = ["get_session", "api_key_guard", "AccessionPath", "OrganismIdPath"]
+__all__ = ["get_session", "api_key_guard", "AccessionPath", "OrganismIdPath", "PaleogenomicSlugPath"]
 
 
 async def api_key_guard(x_api_key: str | None = Header(default=None, alias="X-API-Key")) -> None:

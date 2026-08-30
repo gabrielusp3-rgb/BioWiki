@@ -14,6 +14,11 @@ from app.models.features import (
     VirusFeature,
 )
 from app.models.organism import Organism
+from app.models.paleogenomics import (
+    PaleogenomicIntrogressionRegion,
+    PaleogenomicProfile,
+    PaleogenomicSequenceMembership,
+)
 from app.models.publication import Publication, SequenceReference
 from app.models.sequence import Sequence
 from app.pipeline.validation import infer_group_from_lineage
@@ -253,6 +258,101 @@ async def sql_integrity_checks(session: AsyncSession) -> list[IntegrityCheck]:
             detail="publications without SequenceReference are counted, not failed",
             expected=pubs,
             actual=pubs - linked,
+        )
+    )
+
+    paleo_genome_seq = int(
+        (
+            await session.execute(
+                select(func.count())
+                .select_from(PaleogenomicSequenceMembership)
+                .join(Sequence, Sequence.id == PaleogenomicSequenceMembership.sequence_id)
+                .where(Sequence.seq_type == SequenceType.GENOME)
+            )
+        ).scalar_one()
+    )
+    checks.append(
+        IntegrityCheck(
+            name="paleogenomics:membership_not_genome_sequences",
+            ok=paleo_genome_seq == 0,
+            detail="Paleogenomics membership never marks SequenceType.GENOME rows",
+            expected=0,
+            actual=paleo_genome_seq,
+        )
+    )
+
+    paleo_bad_type = int(
+        (
+            await session.execute(
+                select(func.count())
+                .select_from(PaleogenomicSequenceMembership)
+                .join(Sequence, Sequence.id == PaleogenomicSequenceMembership.sequence_id)
+                .where(
+                    Sequence.seq_type.notin_(
+                        [SequenceType.DNA, SequenceType.RNA, SequenceType.PROTEIN]
+                    )
+                )
+            )
+        ).scalar_one()
+    )
+    checks.append(
+        IntegrityCheck(
+            name="paleogenomics:membership_molecule_types",
+            ok=paleo_bad_type == 0,
+            detail="collection membership does not change molecule type; only DNA/RNA/protein",
+            expected=0,
+            actual=paleo_bad_type,
+        )
+    )
+
+    intro_wrong_host = int(
+        (
+            await session.execute(
+                select(func.count())
+                .select_from(PaleogenomicIntrogressionRegion)
+                .join(Organism, Organism.id == PaleogenomicIntrogressionRegion.modern_organism_id)
+                .where(Organism.tax_id != 9606)
+            )
+        ).scalar_one()
+    )
+    checks.append(
+        IntegrityCheck(
+            name="paleogenomics:introgression_modern_is_homo_sapiens",
+            ok=intro_wrong_host == 0,
+            detail="introgression regions belong to living Homo sapiens (TaxID 9606), not archaic specimens",
+            expected=0,
+            actual=intro_wrong_host,
+        )
+    )
+
+    sapiens_extinct = int(
+        (
+            await session.execute(
+                select(func.count()).where(
+                    Organism.tax_id == 9606,
+                    Organism.extinction_status.is_not(None),
+                )
+            )
+        ).scalar_one()
+    )
+    checks.append(
+        IntegrityCheck(
+            name="paleogenomics:living_homo_sapiens_not_marked_extinct",
+            ok=sapiens_extinct == 0,
+            detail="Homo sapiens is not marked extinct because archaic hominins exist",
+            expected=0,
+            actual=sapiens_extinct,
+        )
+    )
+
+    dup_profile_slug = await _count_group_having(session, PaleogenomicProfile.slug)
+    checks.append(
+        IntegrityCheck(
+            name="paleogenomics:unique_profile_slug",
+            ok=dup_profile_slug == 0,
+            detail="each Paleogenomics profile slug is unique",
+            expected=0,
+            actual=dup_profile_slug,
         )
     )
 

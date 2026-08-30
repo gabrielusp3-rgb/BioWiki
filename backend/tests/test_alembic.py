@@ -260,6 +260,13 @@ async def _assert_upgraded_schema(test_url: str) -> None:
                 "taxonomy",
                 "ingestion_runs",
                 "categories",
+                "paleogenomic_profiles",
+                "paleogenomic_claims",
+                "paleogenomic_claim_sources",
+                "paleogenomic_sequence_membership",
+                "paleogenomic_projects",
+                "paleogenomic_introgression_regions",
+                "paleogenomic_publication_membership",
             }
             assert required <= tables
             category_keys = set(

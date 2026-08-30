@@ -21,6 +21,7 @@ import { CATEGORY_CARDS, type CategoryCardData } from "@/lib/category-cards";
 import { CATEGORY_META } from "@/lib/categories";
 import { formatStatistic } from "@/lib/statistics";
 import { getStatistics } from "@/services/statisticsService";
+import { getPaleogenomicsStatistics } from "@/services/paleogenomicsService";
 
 function CategoryCard({
   data,
@@ -88,6 +89,50 @@ function CategoryCard({
   );
 }
 
+function PaleogenomicsHomeLink() {
+  const [species, setSpecies] = useState<number | null>(null);
+  const [sequences, setSequences] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isApiConfigured) return;
+    const controller = new AbortController();
+    getPaleogenomicsStatistics(controller.signal)
+      .then((stats) => {
+        if (!stats || controller.signal.aborted) return;
+        setSpecies(stats.speciesCount);
+        setSequences(stats.sequenceCount);
+      })
+      .catch(() => {
+        /* keep the collection entry even if counts are unreachable */
+      });
+    return () => controller.abort();
+  }, []);
+
+  return (
+    <Link
+      href="/paleogenomics"
+      className="glass hairline mt-4 flex flex-col gap-3 p-6 transition-colors hover:border-white/20 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <div>
+        <p className="eyebrow mb-2">Collection</p>
+        <p className="font-display text-xl font-semibold text-content-primary">Paleogenomics</p>
+        <p className="mt-2 max-w-2xl text-sm text-content-secondary">
+          Extinct species, ancient DNA, archaic hominins, and introgression in living humans —
+          authentic records inside this catalogue, not a second product.
+        </p>
+      </div>
+      <div className="flex shrink-0 gap-8 font-mono text-xs text-content-muted">
+        <span>
+          {species === null ? "—" : formatStatistic(species)} species
+        </span>
+        <span>
+          {sequences === null ? "—" : formatStatistic(sequences)} sequences
+        </span>
+      </div>
+    </Link>
+  );
+}
+
 export function Categories() {
   // Real per-category counts from the database; null until (and unless) served.
   const [liveCounts, setLiveCounts] = useState<Record<string, number> | null>(null);
@@ -131,6 +176,8 @@ export function Categories() {
             />
           ))}
         </motion.div>
+        <PaleogenomicsHomeLink />
+        <PaleogenomicsHomeLink />
       </Section>
     </Container>
   );

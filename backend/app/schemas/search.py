@@ -25,6 +25,14 @@ class SearchPublication(CamelModel):
     url: str | None = None
 
 
+class SearchPaleogenomicsProfile(CamelModel):
+    id: str
+    slug: str
+    title: str
+    scientific_name: str
+    type: str = "paleogenomics"
+
+
 class SearchResponse(CamelModel):
     query: str
     total: int
@@ -32,6 +40,7 @@ class SearchResponse(CamelModel):
     next_cursor: str | None = None
     publications: list[SearchPublication] = []
     publications_total: int = 0
+    paleogenomics_profiles: list[SearchPaleogenomicsProfile] = []
 
 
 class SearchSuggestion(CamelModel):
@@ -39,6 +48,7 @@ class SearchSuggestion(CamelModel):
     label: str
     type: str
     accession: str | None = None
+    slug: str | None = None
 
 
 class SuggestResponse(CamelModel):

@@ -41,8 +41,9 @@ export interface SearchResult {
 export interface SearchSuggestion {
   id: string;
   label: string;
-  type: SearchType;
+  type: SearchType | "paleogenomics";
   accession?: string;
+  slug?: string;
 }
 
 /** A publication hit — real PubMed / REFERENCE records, never fabricated. */
@@ -66,6 +67,15 @@ export interface SearchResponse {
   /** Publication hits related to the query (optional, additive). */
   publications?: SearchPublication[];
   publicationsTotal?: number;
+  paleogenomicsProfiles?: SearchPaleogenomicsProfile[];
+}
+
+export interface SearchPaleogenomicsProfile {
+  id: string;
+  slug: string;
+  title: string;
+  scientificName: string;
+  type: "paleogenomics";
 }
 
 export interface SuggestResponse {

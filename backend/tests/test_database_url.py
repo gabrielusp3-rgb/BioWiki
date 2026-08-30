@@ -24,6 +24,14 @@ def test_sslmode_require_maps_to_asyncpg_ssl() -> None:
     assert "sslmode" not in out
 
 
+def test_channel_binding_is_stripped_for_asyncpg() -> None:
+    out = normalize_database_url(
+        "postgres://u:p@db.example/biowiki?sslmode=require&channel_binding=require"
+    )
+    assert "channel_binding" not in out
+    assert "ssl=require" in out
+
+
 def test_empty_stays_empty() -> None:
     assert normalize_database_url("") == ""
     assert normalize_database_url("   ") == ""

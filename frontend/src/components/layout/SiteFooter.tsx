@@ -23,6 +23,7 @@ const COLUMNS: FooterColumn[] = [
       { label: "CRISPR", href: "/crispr" },
       { label: "Genomes", href: "/genomes" },
       { label: "Viruses", href: "/virus" },
+      { label: "Paleogenomics", href: "/paleogenomics" },
       { label: "Publications", href: "/publications" },
     ],
   },
@@ -31,6 +32,7 @@ const COLUMNS: FooterColumn[] = [
     links: [
       { label: "Search", href: "/search" },
       { label: "Organisms", href: "/organisms" },
+      { label: "Paleogenomics", href: "/paleogenomics" },
       { label: "Downloads", href: "/downloads" },
     ],
   },

@@ -35,4 +35,8 @@ export interface Organism {
   /** Provided by the backend/media service; null renders the abstract emblem. */
   imageUrl?: string | null;
   links: OrganismLink[];
+  extinctionStatus?: string | null;
+  extinctionDateText?: string | null;
+  geologicPeriod?: string | null;
+  paleogenomicSlug?: string | null;
 }

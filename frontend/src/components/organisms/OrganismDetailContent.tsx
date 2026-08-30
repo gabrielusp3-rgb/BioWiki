@@ -196,6 +196,11 @@ export function OrganismDetailContent({ identifier }: { identifier: string }) {
                 {organism.rank}
               </span>
             )}
+            {organism.extinctionStatus && (
+              <span className="font-mono text-xs uppercase tracking-wider text-content-muted">
+                {organism.extinctionStatus.replaceAll("_", " ")}
+              </span>
+            )}
             <a
               href={ncbiTaxonomyUrl(organism.taxId)}
               target="_blank"
@@ -235,13 +240,21 @@ export function OrganismDetailContent({ identifier }: { identifier: string }) {
                 Sequences in database
               </span>
             </div>
+          <Link
+            href={`/search?q=${encodeURIComponent(organism.scientificName)}`}
+            className="ml-auto border px-4 py-2 font-display text-[11px] font-semibold uppercase tracking-wide transition-colors"
+            style={{ color, borderColor: `${color}59` }}
+          >
+            Search all records
+          </Link>
+          {organism.paleogenomicSlug && (
             <Link
-              href={`/search?q=${encodeURIComponent(organism.scientificName)}`}
-              className="ml-auto border px-4 py-2 font-display text-[11px] font-semibold uppercase tracking-wide transition-colors"
-              style={{ color, borderColor: `${color}59` }}
+              href={`/paleogenomics/${organism.paleogenomicSlug}`}
+              className="border border-glass-border px-4 py-2 font-display text-[11px] font-semibold uppercase tracking-wide text-content-secondary hover:text-content-primary"
             >
-              Search all records
+              Paleogenomics profile
             </Link>
+          )}
           </div>
         </div>
       </div>
