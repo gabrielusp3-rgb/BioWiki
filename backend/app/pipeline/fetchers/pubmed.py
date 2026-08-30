@@ -62,6 +62,32 @@ async def fetch_articles(
     return articles
 
 
+async def search_pmids(
+    term: str,
+    *,
+    limit: int = 200,
+    retstart: int = 0,
+) -> list[int]:
+    """Return real PubMed IDs for an Entrez term. Empty if the search has no hits."""
+    conn = PubMedConnector()
+    try:
+        page = await conn.esearch(term, retmax=max(1, min(limit, 500)), retstart=retstart)
+    finally:
+        await conn.aclose()
+    pmids: list[int] = []
+    seen: set[int] = set()
+    for hit in page.hits:
+        token = str(hit.identifier).strip()
+        if not token.isdigit():
+            continue
+        pmid = int(token)
+        if pmid in seen:
+            continue
+        seen.add(pmid)
+        pmids.append(pmid)
+    return pmids
+
+
 async def ingest_pmids(pmids: list[int | str]) -> ImportReport:
     """Persist real PubMed records (upsert by PMID)."""
     articles = await fetch_articles(pmids)
@@ -168,15 +194,7 @@ async def ingest_search(
     retstart: int = 0,
 ) -> ImportReport:
     """Search PubMed with a real Entrez term and persist matching articles."""
-    owns = True
-    conn = PubMedConnector()
-    try:
-        page = await conn.esearch(term, retmax=max(1, min(limit, 500)), retstart=retstart)
-        pmids = [hit.identifier for hit in page.hits if hit.identifier]
-    finally:
-        if owns:
-            await conn.aclose()
-
+    pmids = [str(pmid) for pmid in await search_pmids(term, limit=limit, retstart=retstart)]
     if not pmids:
         logger.info("pubmed search: no hits for term=%r retstart=%s", term, retstart)
         return ImportReport()

@@ -12,7 +12,8 @@ from app.pipeline.paleogenomics.semantics import (
 from app.services.connectors.ncbi import NCBIConnector
 
 NUCCORE_TERM = (
-    "txid{tax_id}[Organism:noexp] NOT wgs[filter] NOT tsa[filter] NOT sra[filter]"
+    "txid{tax_id}[Organism:noexp] NOT wgs[filter] NOT tsa[filter] NOT sra[filter] "
+    "NOT gss[filter] NOT pat[filter]"
 )
 PROTEIN_TERM = "txid{tax_id}[Organism:noexp]"
 
@@ -49,6 +50,12 @@ def score_candidate(title: str, length: int | None) -> int:
         score += 25
     if "shotgun" in text or "wgs" in text:
         score -= 50
+    if "genome survey" in text or "gss" in text or "genomic library" in text:
+        score -= 80
+    if "clone" in text and "complete" not in text:
+        score -= 25
+    if length and length < 200:
+        score -= 15
     if length and length > 80000:
         score -= 20
     return score
@@ -108,6 +115,10 @@ async def discover_accessions(
                     continue
                 if "shotgun" in title.lower() and (length or 0) > 50000:
                     rejected.append({"reason": "wgs_like", "accession": accession})
+                    continue
+                lowered = title.lower()
+                if "genomic survey sequence" in lowered or "genome survey sequence" in lowered:
+                    rejected.append({"reason": "gss_fragment", "accession": accession})
                     continue
                 candidates.append(
                     {

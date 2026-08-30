@@ -55,20 +55,22 @@ Production catalogue (Neon, 30 August 2026). Live integrity `ok: true`. Duplicat
 
 | Resource | Count |
 | --- | ---: |
-| Sequences | 15437 |
-| — DNA | 6450 |
-| — RNA | 2863 |
+| Sequences | 16421 |
+| — DNA | 7430 |
+| — RNA | 2867 |
 | — Protein | 4352 |
 | — CRISPR | 443 |
 | — Virus | 1329 |
-| Publications | 35428 |
-| Unique PMIDs | 33420 |
-| Organisms | 1866 |
-| Genome assemblies | 103 |
+| Publications | 36182 |
+| Unique PMIDs | 34132 |
+| Organisms | 1881 |
+| Genome assemblies | 107 |
 
 Genome assemblies live in `genome_records`. They are not `SequenceType.GENOME` rows and do not store chromosome residues.
 
 CRISPR records keep three evidence classes: **natural CRISPR element**, **experimental guide**, and **computational target**. A spacer is not an engineered guide. A Cas protein is not a guide. Computational Cas9 NGG sites (72 in this catalogue) are copied from authentic stored DNA, labeled predicted, and are not experimental edits.
+
+**Paleogenomics** (`/paleogenomics`) is a scientific collection inside this catalogue, not a molecule type. After the 30 August 2026 ingest: 16 extinct or archaic profiles, 1005 palaeogenomic sequence memberships (21 of those were already in the catalogue and were tagged, not duplicated), 4 genome assemblies on collection organisms, 87 BioProject metadata rows (no SRA reads as Sequence rows), 729 profile–publication links, and 9 gene-level archaic introgression loci in living *Homo sapiens*. Preferred nuccore targets are discovery goals, not quotas: *Raphus cucullatus* has 4 validated public nuccore records, not 50 invented ones. NCBI Assembly has no entries for most of these TaxIDs; that absence is reported, not filled with fake GCA accessions.
 
 Those counts are from the live production database. They change when the CLI imports more records.
 

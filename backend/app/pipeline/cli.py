@@ -152,6 +152,8 @@ async def _cmd_paleogenomics(args: argparse.Namespace) -> dict:
         skip_sequences=args.skip_sequences,
         skip_genomes=args.skip_genomes,
         skip_literature=args.skip_literature,
+        relink_literature=args.relink_literature,
+        ingest_projects=args.ingest_projects,
     )
 
 
@@ -284,6 +286,16 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--skip-sequences", action="store_true")
     p.add_argument("--skip-genomes", action="store_true")
     p.add_argument("--skip-literature", action="store_true")
+    p.add_argument(
+        "--relink-literature",
+        action="store_true",
+        help="Attach existing publications to profiles by name/PMID (no sequence ingest).",
+    )
+    p.add_argument(
+        "--ingest-projects",
+        action="store_true",
+        help="Store BioProject/BioSample metadata only (no SRA reads as Sequence rows).",
+    )
     p.set_defaults(func=_cmd_paleogenomics)
 
     return parser

@@ -64,6 +64,10 @@ def test_complete_mitogenome_requires_name_and_length() -> None:
         definition="Raphus cucullatus complete mitochondrial genome",
         length=16_500,
     )
+    assert is_complete_mitogenome(
+        definition="Homo sapiens neanderthalensis mitochondrion, complete genome",
+        length=16_565,
+    )
     assert not is_complete_mitogenome(
         definition="Raphus cucullatus complete mitochondrial genome",
         length=800,
@@ -76,12 +80,18 @@ def test_complete_mitogenome_requires_name_and_length() -> None:
 
 
 def test_catalogue_rejects_chromosome_scale_and_sra_runs() -> None:
+    from app.pipeline.paleogenomics.discover import NUCCORE_TERM, score_candidate
+
     assert sequence_length_allowed_for_catalogue(20_000, molecule="dna")
     assert not sequence_length_allowed_for_catalogue(5_000_000, molecule="dna")
     assert not sequence_length_allowed_for_catalogue(12_000, molecule="protein")
     assert sra_run_is_not_a_sequence_accession("SRR12345678")
     assert sra_run_is_not_a_sequence_accession("ERR000001")
     assert not sra_run_is_not_a_sequence_accession("NC_007596")
+    assert "gss[filter]" in NUCCORE_TERM
+    assert score_candidate("complete mitochondrial genome", 16500) > score_candidate(
+        "NE1_segment genomic survey sequence", 50
+    )
 
 
 def test_introgression_is_living_human_not_neanderthal_sequence() -> None:
@@ -138,3 +148,26 @@ def test_normalize_doi() -> None:
     )
     assert normalize_doi("DOI:10.1080/08912960600639400") == "10.1080/08912960600639400"
     assert normalize_doi(None) is None
+
+
+def test_extract_project_accessions_does_not_invent() -> None:
+    from app.pipeline.paleogenomics.semantics import extract_project_accessions, species_search_names
+
+    projects, samples = extract_project_accessions(
+        "Westbury draft genome BioProject PRJNA691254 BioSample SAMN12345678",
+        "no project here",
+    )
+    assert projects == ["PRJNA691254"]
+    assert samples == ["SAMN12345678"]
+    empty_p, empty_s = extract_project_accessions("ancient DNA from a museum skin")
+    assert empty_p == []
+    assert empty_s == []
+    names = species_search_names(
+        "Thylacinus cynocephalus",
+        "Thylacine",
+        ("Tasmanian tiger", "Thylacine"),
+    )
+    assert "Thylacinus cynocephalus" in names
+    assert "Thylacine" in names
+    assert "Tasmanian tiger" in names
+    assert names.count("Thylacine") == 1

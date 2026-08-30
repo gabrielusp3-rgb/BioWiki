@@ -325,6 +325,27 @@ async def tag_existing_sequences(session: AsyncSession, profile: PaleogenomicPro
     return tagged
 
 
+async def retag_complete_mitogenome_flags(session: AsyncSession) -> int:
+    """Recompute complete-mitogenome flags from stored definition + length."""
+    updated = 0
+    rows = (
+        await session.execute(
+            select(PaleogenomicSequenceMembership, Sequence).join(
+                Sequence, Sequence.id == PaleogenomicSequenceMembership.sequence_id
+            )
+        )
+    ).all()
+    for membership, seq in rows:
+        flag = is_complete_mitogenome(
+            definition=seq.name or seq.description, length=seq.length
+        )
+        if membership.is_complete_mitogenome != flag:
+            membership.is_complete_mitogenome = flag
+            updated += 1
+    await session.flush()
+    return updated
+
+
 async def link_publication(
     session: AsyncSession, profile: PaleogenomicProfile, publication: Publication
 ) -> bool:

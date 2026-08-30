@@ -24,14 +24,24 @@ BACKEND_ROOT = Path(__file__).resolve().parents[1]
 
 
 def _migrate_if_hosted() -> None:
+    """Optional startup migrate. Default off on Vercel so cold starts can serve.
+
+    Schema changes are applied by the operator CLI (`alembic upgrade head`).
+    Set BIOWIKI_MIGRATE_ON_START=1 only when a deploy must stamp a new revision
+    and the function timeout can absorb Alembic.
+    """
     if os.environ.get("PYTEST_CURRENT_TEST") or "pytest" in sys.modules:
         return
-    if not os.environ.get("VERCEL"):
+    if os.environ.get("BIOWIKI_MIGRATE_ON_START", "").lower() not in {"1", "true", "yes"}:
         return
-    subprocess.check_call(
-        [sys.executable, "-m", "alembic", "upgrade", "head"],
-        cwd=str(BACKEND_ROOT),
-    )
+    try:
+        subprocess.check_call(
+            [sys.executable, "-m", "alembic", "upgrade", "head"],
+            cwd=str(BACKEND_ROOT),
+            timeout=60,
+        )
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError):
+        return
 
 
 @asynccontextmanager

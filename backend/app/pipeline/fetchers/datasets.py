@@ -32,8 +32,8 @@ _LEVEL_MAP = {
 def _report_to_parsed(report: dict[str, Any]) -> ParsedGenome | None:
     accession = report.get("accession")
     organism_data = report.get("organism") or {}
-    tax_id = organism_data.get("tax_id")
-    organism_name = organism_data.get("organism_name")
+    tax_id = organism_data.get("tax_id") or organism_data.get("taxId")
+    organism_name = organism_data.get("organism_name") or organism_data.get("organismName")
     if not accession or not tax_id or not organism_name:
         return None
 

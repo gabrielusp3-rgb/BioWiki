@@ -28,6 +28,7 @@ Species-oriented, checkpointed, additive:
 python -m app.pipeline.cli paleogenomics --seed-only
 python -m app.pipeline.cli paleogenomics --discover-only
 python -m app.pipeline.cli paleogenomics
+python -m app.pipeline.cli paleogenomics --relink-literature --ingest-projects
 ```
 
 Natural key remains `source + accession + version`. TaxID must match the locked NCBI identifiers in `app/pipeline/paleogenomics/catalogue.py`. Preferred sequence targets are discovery goals, not quotas. Chromosome-scale residues are rejected; assemblies go to `genome_records`. SRA run accessions are not Sequence rows.
@@ -47,10 +48,13 @@ Search (`GET /search`) returns `paleogenomicsProfiles` in addition to sequences 
 
 ## Limitations
 
-- Introgression rows are gene-level published associations. Coordinates are omitted unless a cited paper and genome build are stored.
-- Public nuccore diversity is small for several historic extinctions (for example *Raphus cucullatus*). Validated count may be far below the preferred target.
+- Introgression rows are gene-level published associations. Coordinates are omitted unless a cited paper and genome build are stored. Nine loci are curated (Neanderthal and Denisovan sources). That is not ~200 invented genomic intervals.
+- Public nuccore diversity is small for several historic extinctions. *Raphus cucullatus* has four validated nuccore records (two complete mitogenomes that are GenBank/RefSeq equivalents, plus two partial Oxford voucher fragments). *Equus quagga quagga* has three. *Smilodon populator* has twelve. Counts stop at authentic records.
+- NCBI Datasets/Assembly returned no assembly reports for Neanderthal (TaxID 63221) and woolly mammoth (TaxID 37349). High-coverage genomes exist as BioProjects/SRA; BioWiki stores BioProject metadata, not raw reads and not invented GCA accessions. A few collection organisms do have `genome_records` (thylacine, Steller's sea cow, giant deer).
+- Neanderthal nuccore includes many short genomic survey (GSS) library fragments alongside mitochondrial records. Later discovery excludes GSS/patent filters so additional species are not filled the same way. Existing GSS rows were not bulk-deleted.
+- Complete-mitogenome flags require both an appropriate length and a complete-genome definition. NCBI titles such as “mitochondrion, complete genome” are accepted; partial cytb/12S fragments are not promoted.
 - *Homo floresiensis*, *Homo naledi* and *Homo erectus* are noted as lacking authentic public ancient DNA in this catalogue; no sequence records are invented for them.
-- Company de-extinction statements are classified as organisation-reported progress, not peer-reviewed resurrection.
+- Company de-extinction statements are classified as organisation-reported progress, not peer-reviewed resurrection. A genetically engineered proxy is not the historical organism.
 - Controlled-access genomic datasets are metadata-only.
 
-Catalogue counts belong in the README only after a production ingest, using live numbers.
+Production counts after ingest belong in the README.

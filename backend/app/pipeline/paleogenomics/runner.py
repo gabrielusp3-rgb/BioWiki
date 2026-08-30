@@ -6,13 +6,18 @@ import json
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database.session import get_sessionmaker
-from app.models.paleogenomics import PaleogenomicProfile, PaleogenomicSequenceMembership
+from app.models.paleogenomics import (
+    PaleogenomicProfile,
+    PaleogenomicProject,
+    PaleogenomicSequenceMembership,
+)
 from app.models.publication import Publication
 from app.models.sequence import Sequence
+from app.services.connectors.ncbi import NCBIConnector
 from app.pipeline.expansion.checkpoint import (
     COMPLETED_SUCCESSFULLY,
     TEMPORARY_FAILURE,
@@ -42,10 +47,13 @@ from app.pipeline.paleogenomics.seed import (
     seed_profiles,
     tag_existing_sequences,
     upsert_claims,
+    retag_complete_mitogenome_flags,
 )
 from app.pipeline.paleogenomics.semantics import (
+    extract_project_accessions,
     is_complete_mitogenome,
     sequence_length_allowed_for_catalogue,
+    species_search_names,
     sra_run_is_not_a_sequence_accession,
 )
 
@@ -53,6 +61,7 @@ logger = get_logger("biowiki.pipeline.paleogenomics")
 
 CHECKPOINT_PATH = Path(__file__).resolve().parents[3] / "data" / "paleogenomics_checkpoint.json"
 REPORT_PATH = Path(__file__).resolve().parents[3] / "data" / "paleogenomics_discovery.json"
+BIOPROJECT_LIMIT = 12
 
 
 def pubmed_term(species: PaleogenomicSpecies) -> str:
@@ -220,51 +229,238 @@ async def ingest_genomes_for_species(species: PaleogenomicSpecies) -> dict[str, 
     }
 
 
-async def ingest_literature_for_species(species: PaleogenomicSpecies) -> dict[str, Any]:
-    limit = PUBMED_LIMITS.get(species.slug, DEFAULT_PUBMED_LIMIT)
-    term = pubmed_term(species)
-    search_report = await pubmed.ingest_search(term, limit=limit)
+def _literature_limit(species: PaleogenomicSpecies) -> int:
+    return PUBMED_LIMITS.get(species.slug, DEFAULT_PUBMED_LIMIT)
+
+
+def _narrative_pmids(species: PaleogenomicSpecies) -> set[int]:
     pmids: set[int] = set()
     for payload in NARRATIVES.get(species.slug) or []:
         for pmid in payload.get("pubmed_ids") or []:
             pmids.add(int(pmid))
+    return pmids
+
+
+def _publication_name_filter(species: PaleogenomicSpecies):
+    clauses = []
+    for name in species_search_names(
+        species.scientific_name, species.common_name, species.synonyms
+    ):
+        like = f"%{name}%"
+        clauses.append(Publication.title.ilike(like))
+        clauses.append(Publication.abstract.ilike(like))
+    return or_(*clauses) if clauses else Publication.id.is_(None)
+
+
+async def _publications_for_profile(
+    session: AsyncSession,
+    species: PaleogenomicSpecies,
+    pmids: set[int],
+    *,
+    limit: int,
+) -> list[Publication]:
+    found: dict[object, Publication] = {}
     if pmids:
-        await pubmed.ingest_pmids(sorted(pmids))
-    linked = 0
-    async with get_sessionmaker()() as session:
-        profile = await _profile_for(session, species.slug)
-        pubs = list(
-            (
-                await session.execute(
-                    select(Publication).where(Publication.pubmed_id.in_(sorted(pmids)))
-                )
-            )
-            .scalars()
-            .all()
-        )
-        # Also attach recent search hits matching the scientific name in the title.
+        for pub in (
+            await session.execute(select(Publication).where(Publication.pubmed_id.in_(sorted(pmids))))
+        ).scalars():
+            found[pub.id] = pub
+    remaining = max(0, limit - len(found))
+    if remaining:
         extra = list(
             (
                 await session.execute(
                     select(Publication)
-                    .where(Publication.title.ilike(f"%{species.scientific_name}%"))
-                    .limit(limit)
+                    .where(_publication_name_filter(species))
+                    .order_by(Publication.year.desc().nullslast())
+                    .limit(remaining + len(found))
                 )
             )
             .scalars()
             .all()
         )
-        for pub in pubs + extra:
+        for pub in extra:
+            if pub.id in found:
+                continue
+            found[pub.id] = pub
+            if len(found) >= limit:
+                break
+    return list(found.values())
+
+
+async def ingest_literature_for_species(species: PaleogenomicSpecies) -> dict[str, Any]:
+    limit = _literature_limit(species)
+    term = pubmed_term(species)
+    search_pmids = set(await pubmed.search_pmids(term, limit=limit))
+    pmids = set(search_pmids) | _narrative_pmids(species)
+    search_report = await pubmed.ingest_pmids(sorted(pmids)) if pmids else None
+    linked = 0
+    async with get_sessionmaker()() as session:
+        profile = await _profile_for(session, species.slug)
+        pubs = await _publications_for_profile(session, species, pmids, limit=limit)
+        for pub in pubs:
             if await link_publication(session, profile, pub):
                 linked += 1
         await upsert_claims(session, profile)
         await session.commit()
     return {
-        "search_created": search_report.created,
-        "search_updated": search_report.updated,
+        "search_created": 0 if search_report is None else search_report.created,
+        "search_updated": 0 if search_report is None else search_report.updated,
         "linked": linked,
         "term": term,
         "limit": limit,
+        "search_pmids": len(search_pmids),
+    }
+
+
+async def relink_literature_for_species(species: PaleogenomicSpecies) -> dict[str, Any]:
+    """Attach already-stored publications using names and curated PMIDs. No new NCBI fetch."""
+    limit = _literature_limit(species)
+    linked = 0
+    async with get_sessionmaker()() as session:
+        profile = await _profile_for(session, species.slug)
+        pubs = await _publications_for_profile(
+            session, species, _narrative_pmids(species), limit=limit
+        )
+        for pub in pubs:
+            if await link_publication(session, profile, pub):
+                linked += 1
+        await upsert_claims(session, profile)
+        await session.commit()
+    return {"slug": species.slug, "linked": linked, "limit": limit}
+
+
+async def _upsert_project(
+    session: AsyncSession,
+    profile: PaleogenomicProfile,
+    *,
+    bioproject: str | None,
+    biosample: str | None = None,
+    notes: str | None = None,
+    library_strategy: str | None = None,
+    source_url: str | None = None,
+    controlled_access: bool = False,
+) -> bool:
+    if not bioproject and not biosample:
+        return False
+    stmt = select(PaleogenomicProject).where(PaleogenomicProject.profile_id == profile.id)
+    if bioproject:
+        stmt = stmt.where(PaleogenomicProject.bioproject == bioproject)
+    elif biosample:
+        stmt = stmt.where(PaleogenomicProject.biosample == biosample)
+    existing = (await session.execute(stmt.limit(1))).scalar_one_or_none()
+    if existing is None:
+        session.add(
+            PaleogenomicProject(
+                profile_id=profile.id,
+                bioproject=bioproject,
+                biosample=biosample,
+                notes=notes,
+                library_strategy=library_strategy,
+                source_url=source_url,
+                controlled_access=controlled_access,
+            )
+        )
+        return True
+    if notes and not existing.notes:
+        existing.notes = notes
+    if library_strategy and not existing.library_strategy:
+        existing.library_strategy = library_strategy
+    if source_url and not existing.source_url:
+        existing.source_url = source_url
+    if biosample and not existing.biosample:
+        existing.biosample = biosample
+    return False
+
+
+async def ingest_bioprojects_for_species(species: PaleogenomicSpecies) -> dict[str, Any]:
+    """Store public BioProject metadata. Does not import SRA reads as Sequence rows."""
+    created = 0
+    updated = 0
+    async with NCBIConnector() as conn:
+        page = await conn.esearch(
+            "bioproject",
+            f"txid{species.tax_id}[Organism:noexp]",
+            retmax=BIOPROJECT_LIMIT,
+        )
+        uids = [hit.identifier for hit in page.hits if hit.identifier]
+        payload = await conn.esummary("bioproject", uids) if uids else {"result": {}}
+    result = payload.get("result") or {}
+    rows: list[dict[str, Any]] = []
+    for uid in result.get("uids") or uids:
+        rec = result.get(str(uid))
+        if isinstance(rec, dict):
+            rows.append(rec)
+    async with get_sessionmaker()() as session:
+        profile = await _profile_for(session, species.slug)
+        for rec in rows:
+            acc = str(rec.get("project_acc") or "").strip().upper()
+            if not acc.startswith("PRJ"):
+                continue
+            title = str(rec.get("project_title") or rec.get("project_name") or "").strip()
+            data_type = str(rec.get("project_data_type") or "").strip()
+            note_bits = [part for part in (title, data_type) if part]
+            was_new = await _upsert_project(
+                session,
+                profile,
+                bioproject=acc,
+                notes=" — ".join(note_bits)[:500] or None,
+                library_strategy=data_type or None,
+                source_url=f"https://www.ncbi.nlm.nih.gov/bioproject/{acc}",
+            )
+            if was_new:
+                created += 1
+            else:
+                updated += 1
+        members = list(
+            (
+                await session.execute(
+                    select(Sequence.name, Sequence.description, Sequence.annotations).where(
+                        Sequence.id.in_(
+                            select(PaleogenomicSequenceMembership.sequence_id).where(
+                                PaleogenomicSequenceMembership.profile_id == profile.id
+                            )
+                        )
+                    )
+                )
+            ).all()
+        )
+        for name, description, annotations in members:
+            extra = ""
+            if isinstance(annotations, dict):
+                extra = " ".join(str(v) for v in annotations.values() if isinstance(v, str))
+            projects, samples = extract_project_accessions(name, description, extra)
+            for acc in projects[:4]:
+                if await _upsert_project(
+                    session,
+                    profile,
+                    bioproject=acc,
+                    source_url=f"https://www.ncbi.nlm.nih.gov/bioproject/{acc}",
+                    notes="Accession recorded on a stored GenBank/INSDC sequence record.",
+                ):
+                    created += 1
+                else:
+                    updated += 1
+            for sample in samples[:4]:
+                if await _upsert_project(
+                    session,
+                    profile,
+                    biosample=sample,
+                    source_url=f"https://www.ncbi.nlm.nih.gov/biosample/{sample}",
+                    notes="BioSample recorded on a stored sequence record. Raw reads are not imported.",
+                ):
+                    created += 1
+                else:
+                    updated += 1
+        if created or updated:
+            profile.paleogenomic_data_available = True
+        await session.commit()
+    return {
+        "slug": species.slug,
+        "bioproject_hits": page.total,
+        "created": created,
+        "updated": updated,
+        "stored": created + updated,
     }
 
 
@@ -276,6 +472,8 @@ async def run_paleogenomics(
     skip_sequences: bool = False,
     skip_genomes: bool = False,
     skip_literature: bool = False,
+    relink_literature: bool = False,
+    ingest_projects: bool = False,
     checkpoint_path: Path | None = None,
 ) -> dict[str, Any]:
     path = checkpoint_path or CHECKPOINT_PATH
@@ -308,6 +506,42 @@ async def run_paleogenomics(
 
     if seed_only:
         return {"checkpoint": str(path), "seed_only": True}
+
+    if relink_literature or ingest_projects:
+        out: dict[str, Any] = {"checkpoint": str(path), "species": {}}
+        for species in chosen:
+            slug = species.slug
+            bucket: dict[str, Any] = {}
+            if ingest_projects:
+                job = f"paleo-{slug}-projects"
+                if not job_is_done(checkpoint, job):
+                    set_job_status(checkpoint, job, "RUNNING", category="paleogenomics")
+                    save_checkpoint(path, checkpoint)
+                    try:
+                        bucket["projects"] = await ingest_bioprojects_for_species(species)
+                        set_job_status(
+                            checkpoint,
+                            job,
+                            COMPLETED_SUCCESSFULLY,
+                            category="paleogenomics",
+                            records_created=int(bucket["projects"].get("created") or 0),
+                        )
+                    except Exception as exc:
+                        logger.exception("%s failed", job)
+                        set_job_status(
+                            checkpoint, job, TEMPORARY_FAILURE, reason=str(exc)[:300]
+                        )
+                    save_checkpoint(path, checkpoint)
+                else:
+                    bucket["projects"] = {"skipped": "already_done"}
+            if relink_literature:
+                bucket["relink"] = await relink_literature_for_species(species)
+            out["species"][slug] = bucket
+        async with get_sessionmaker()() as session:
+            out["mitogenome_flags_updated"] = await retag_complete_mitogenome_flags(session)
+            await session.commit()
+        save_checkpoint(path, checkpoint)
+        return out
 
     discovery_out: dict[str, Any] = {}
     for species in chosen:
@@ -420,6 +654,24 @@ async def run_paleogenomics(
             except Exception as exc:
                 logger.exception("%s failed", lit_job)
                 set_job_status(checkpoint, lit_job, TEMPORARY_FAILURE, reason=str(exc)[:300])
+            save_checkpoint(path, checkpoint)
+
+        proj_job = f"paleo-{slug}-projects"
+        if not discover_only and not job_is_done(checkpoint, proj_job):
+            set_job_status(checkpoint, proj_job, "RUNNING", category="paleogenomics")
+            save_checkpoint(path, checkpoint)
+            try:
+                bucket["projects"] = await ingest_bioprojects_for_species(species)
+                set_job_status(
+                    checkpoint,
+                    proj_job,
+                    COMPLETED_SUCCESSFULLY,
+                    category="paleogenomics",
+                    records_created=int((bucket.get("projects") or {}).get("created") or 0),
+                )
+            except Exception as exc:
+                logger.exception("%s failed", proj_job)
+                set_job_status(checkpoint, proj_job, TEMPORARY_FAILURE, reason=str(exc)[:300])
             save_checkpoint(path, checkpoint)
 
         async with get_sessionmaker()() as session:
