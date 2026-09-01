@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import time
 
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.category import Category
@@ -39,6 +39,32 @@ async def get_statistics(session: AsyncSession) -> StatisticsRead:
             )
         ).all()
     }
+    category_key = case(
+        (Sequence.seq_type == SequenceType.DNA, "dna"),
+        (Sequence.seq_type == SequenceType.RNA, "rna"),
+        (Sequence.seq_type.in_([SequenceType.PROTEIN, SequenceType.PEPTIDE]), "protein"),
+        (Sequence.seq_type == SequenceType.CRISPR, "crispr"),
+        (Sequence.seq_type == SequenceType.VIRUS, "virus"),
+        else_="other",
+    )
+    organisms_by_category = {
+        str(row[0]): int(row[1])
+        for row in (
+            await session.execute(
+                select(
+                    category_key,
+                    func.count(func.distinct(Sequence.organism_id)),
+                ).group_by(category_key)
+            )
+        ).all()
+    }
+    genome_organisms = int(
+        (
+            await session.execute(
+                select(func.count(func.distinct(GenomeRecord.organism_id)))
+            )
+        ).scalar_one()
+    )
 
     def _for_types(types: list[SequenceType]) -> tuple[int, int]:
         count = 0
@@ -90,6 +116,9 @@ async def get_statistics(session: AsyncSession) -> StatisticsRead:
                 label=labels.get(key) or sync_service.CATEGORY_LABELS[key],
                 count=count,
                 total_residues=residues,
+                distinct_organisms=(
+                    genome_organisms if key == "genome" else organisms_by_category.get(key, 0)
+                ),
             )
         )
 

@@ -13,6 +13,7 @@ export interface StatCardProps {
   category?: CategoryKey;
   /** Optional index shown as a monospace ordinal (e.g. "01"). */
   index?: number;
+  testId?: string;
   className?: string;
 }
 
@@ -22,6 +23,7 @@ export function StatCard({
   suffix,
   category,
   index,
+  testId,
   className,
 }: StatCardProps) {
   const { ref, value: animated } = useCountUp<HTMLDivElement>({ end: value });
@@ -31,6 +33,7 @@ export function StatCard({
   return (
     <div
       ref={ref}
+      {...(testId ? { "data-testid": testId } : {})}
       aria-label={`${formatStatistic(value, suffix)} ${label}`}
       style={{ ["--glow-color" as string]: `${accent}40` }}
       className={cn(

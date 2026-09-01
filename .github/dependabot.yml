@@ -17,9 +17,7 @@ updates:
           - minor
           - patch
     ignore:
-      - dependency-name: next
-        update-types: ["version-update:semver-major"]
-      - dependency-name: eslint-config-next
+      - dependency-name: "*"
         update-types: ["version-update:semver-major"]
 
   - package-ecosystem: pip
@@ -32,6 +30,9 @@ updates:
         update-types:
           - minor
           - patch
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
@@ -46,8 +47,14 @@ updates:
     directory: /backend
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: python
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: docker
     directory: /frontend
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]

@@ -50,8 +50,10 @@ def test_openapi_documents_optional_api_key() -> None:
     assert "`nextCursor`" not in description
     assert "`cursor`" not in description
     assert "401" in description
-    servers = {item["url"] for item in schema.get("servers") or []}
-    assert "https://biowiki-api.vercel.app" in servers
+    # Exact server URL advertised by this application's OpenAPI document.
+    # This is not sanitization of a user-supplied URL (CodeQL py/incomplete-url-substring-sanitization).
+    servers = [item.get("url") for item in schema.get("servers") or []]
+    assert any(server == "https://biowiki-api.vercel.app" for server in servers)
     scheme = schema["components"]["securitySchemes"]["ApiKeyAuth"]
     assert scheme["name"] == "X-API-Key"
     assert "YOUR_API_KEY" in scheme["description"]

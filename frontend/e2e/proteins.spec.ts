@@ -50,7 +50,7 @@ test("protein preview overlay keeps the residue view scrollable inside the viewp
         genomes: 0,
         publications: 0,
         linkedPublications: 0,
-        categories: [{ key: "protein", label: "Protein", count: 1, totalResidues: SEQUENCE.length }],
+        categories: [{ key: "protein", label: "Protein", count: 1, totalResidues: SEQUENCE.length, distinctOrganisms: 1 }],
         sync: {
           status: "updated",
           activeImports: 0,

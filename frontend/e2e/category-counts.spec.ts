@@ -21,12 +21,12 @@ const STATISTICS = {
   publications: 36190,
   linkedPublications: 1,
   categories: [
-    { key: "dna", label: "DNA", count: 7442, totalResidues: 1 },
-    { key: "rna", label: "RNA", count: 2867, totalResidues: 1 },
-    { key: "protein", label: "Proteins", count: 4352, totalResidues: 1 },
-    { key: "crispr", label: "CRISPR", count: 443, totalResidues: 1 },
-    { key: "virus", label: "Viruses", count: 1329, totalResidues: 1 },
-    { key: "genome", label: "Genomes", count: 107, totalResidues: 0 },
+    { key: "dna", label: "DNA", count: 7442, totalResidues: 1, distinctOrganisms: 412 },
+    { key: "rna", label: "RNA", count: 2867, totalResidues: 1, distinctOrganisms: 210 },
+    { key: "protein", label: "Proteins", count: 4352, totalResidues: 1, distinctOrganisms: 380 },
+    { key: "crispr", label: "CRISPR", count: 443, totalResidues: 1, distinctOrganisms: 40 },
+    { key: "virus", label: "Viruses", count: 1329, totalResidues: 1, distinctOrganisms: 190 },
+    { key: "genome", label: "Genomes", count: 107, totalResidues: 0, distinctOrganisms: 34 },
   ],
   sync: { status: "updated", activeImports: 0, countsInSync: true, lastRun: null },
   lastUpdated: null,
@@ -42,7 +42,7 @@ async function mockStatistics(page: Page) {
   });
 }
 
-test("DNA page shows the live catalogue total above the table", async ({ page }) => {
+test("DNA page shows the live catalogue total in a stat card, not three times", async ({ page }) => {
   await mockStatistics(page);
   await page.route(/\/api\/v1\/sequences/, async (route) => {
     const type = new URL(route.request().url()).searchParams.get("type");
@@ -77,8 +77,23 @@ test("DNA page shows the live catalogue total above the table", async ({ page })
 
   await page.goto("/dna");
   await waitForSplash(page);
-  await expect(page.getByTestId("live-count-dna")).toHaveText(/7,442\s+DNA sequences/i);
-  await expect(page.getByTestId("catalogue-list-total")).toHaveText(/7,442 DNA sequences/);
+  await expect(page.getByTestId("category-stat-cards").locator("[data-testid]")).toHaveCount(3);
+  await expect(page.getByTestId("live-count-dna")).toHaveAttribute(
+    "aria-label",
+    /7,442 DNA sequences stored/i,
+  );
+  await expect(page.getByTestId("live-count-dna-organisms")).toHaveAttribute(
+    "aria-label",
+    /412 Organisms with DNA-level data/i,
+  );
+  await expect(page.getByTestId("live-count-organisms-tracked")).toHaveAttribute(
+    "aria-label",
+    /1,881 Organisms tracked \(database\)/i,
+  );
+  await expect(page.getByText(/public sources/i)).toHaveCount(0);
+  await expect(page.getByText(/export formats/i)).toHaveCount(0);
+  await expect(page.getByText(/nucleotides stored/i)).toHaveCount(0);
+  await expect(page.getByTestId("catalogue-list-total")).toHaveCount(0);
 });
 
 test("RNA, proteins, CRISPR and virus pages show live catalogue totals", async ({ page }) => {
@@ -197,21 +212,33 @@ test("RNA, proteins, CRISPR and virus pages show live catalogue totals", async (
 
   await page.goto("/rna");
   await waitForSplash(page);
-  await expect(page.getByTestId("live-count-rna")).toHaveText(/2,867\s+RNA sequences/i);
-  await expect(page.getByTestId("catalogue-list-total")).toHaveText(/2,867 RNA sequences/);
+  await expect(page.getByTestId("live-count-rna")).toHaveAttribute(
+    "aria-label",
+    /2,867 RNA sequences stored/i,
+  );
+  await expect(page.getByTestId("catalogue-list-total")).toHaveCount(0);
 
   await page.goto("/proteins");
   await waitForSplash(page);
-  await expect(page.getByTestId("live-count-protein")).toHaveText(/4,352\s+Proteins/i);
-  await expect(page.getByTestId("catalogue-list-total")).toHaveText(/4,352 proteins/);
+  await expect(page.getByTestId("live-count-protein")).toHaveAttribute(
+    "aria-label",
+    /4,352 Proteins stored/i,
+  );
+  await expect(page.getByTestId("catalogue-list-total")).toHaveCount(0);
 
   await page.goto("/crispr");
   await waitForSplash(page);
-  await expect(page.getByTestId("live-count-crispr")).toHaveText(/443\s+CRISPR records/i);
-  await expect(page.getByTestId("catalogue-list-total")).toHaveText(/443 CRISPR records/);
+  await expect(page.getByTestId("live-count-crispr")).toHaveAttribute(
+    "aria-label",
+    /443 CRISPR records stored/i,
+  );
+  await expect(page.getByTestId("catalogue-list-total")).toHaveCount(0);
 
   await page.goto("/virus");
   await waitForSplash(page);
-  await expect(page.getByTestId("live-count-virus")).toHaveText(/1,329\s+Viral sequences/i);
-  await expect(page.getByTestId("catalogue-list-total")).toHaveText(/1,329 viral sequences/);
+  await expect(page.getByTestId("live-count-virus")).toHaveAttribute(
+    "aria-label",
+    /1,329 Viral sequences stored/i,
+  );
+  await expect(page.getByTestId("catalogue-list-total")).toHaveCount(0);
 });

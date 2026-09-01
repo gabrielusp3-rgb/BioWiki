@@ -5,6 +5,7 @@ export interface CategoryStat {
   label: string;
   count: number;
   totalResidues: number;
+  distinctOrganisms: number;
 }
 
 export type SyncStatus =

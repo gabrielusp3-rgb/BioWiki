@@ -44,7 +44,7 @@ test("RNA catalogue Next loads the following page", async ({ page }) => {
         genomes: 0,
         publications: 0,
         linkedPublications: 0,
-        categories: [{ key: "rna", label: "RNA", count: 2, totalResidues: 240 }],
+        categories: [{ key: "rna", label: "RNA", count: 2, totalResidues: 240, distinctOrganisms: 1 }],
         sync: { status: "updated", activeImports: 0, countsInSync: true, lastRun: null },
         lastUpdated: null,
       }),

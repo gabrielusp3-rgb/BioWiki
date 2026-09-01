@@ -141,9 +141,14 @@ async def _last_finished_run(session: AsyncSession) -> IngestionRun | None:
         select(IngestionRun)
         .where(IngestionRun.status.in_(["succeeded", "failed"]))
         .order_by(IngestionRun.finished_at.desc().nullslast())
-        .limit(1)
+        .limit(20)
     )
-    return (await session.execute(stmt)).scalars().first()
+    for row in (await session.execute(stmt)).scalars():
+        reason = row.errors.get("reason") if isinstance(row.errors, dict) else None
+        if reason == "operator_closeout_stale_running":
+            continue
+        return row
+    return None
 
 
 async def get_sync_status(

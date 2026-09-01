@@ -30,11 +30,14 @@ The public site is already running (see **Use BioWiki**). Custom domains are opt
 
 Current production:
 
-- Frontend: Vercel (`frontend/` as the project root)
-- API: Vercel FastAPI (`backend/`)
+- Frontend: Vercel project `biowiki`, Root Directory `frontend`, alias https://biowiki-nine.vercel.app
+- API: Vercel project `biowiki-api`, Root Directory `backend`, alias https://biowiki-api.vercel.app
 - Database: Neon PostgreSQL, connected as `DATABASE_URL` / `DATABASE_URL_UNPOOLED`
+- Production branch intended for Git Integration: `main` on [gabrielusp3-rgb/BioWiki](https://github.com/gabrielusp3-rgb/BioWiki)
 
-To reproduce on another account: import the GitHub repository twice on Vercel (frontend root `frontend`, API root `backend`), provision Neon, connect it to the API project, set `BIOWIKI_ENV=production`, `CORS_ORIGINS` to the public site origin only, `NEXT_PUBLIC_API_URL`, and `NEXT_PUBLIC_SITE_URL`, then ingest curated accessions with `python -m scripts.seed_initial --no-search`. Leave `API_KEYS` unset for the public read-only API. Disable Vercel Deployment Protection so visitors are not asked to log in.
+Vercel Root Directory is already `frontend` / `backend`. Connecting Git still requires a **GitHub Login Connection** on the Vercel account ([Login methods and connections](https://vercel.com/docs/accounts/create-an-account#login-methods-and-connections)). Until that dashboard step exists, `vercel git connect` returns HTTP 400 and production updates are `vercel --prod` from each project root — not dummy commits. After the Login Connection is added, connect Git **only** with those roots already set (never while Root Directory is `.` or null).
+
+To reproduce on another account: import the GitHub repository twice on Vercel (frontend root `frontend`, API root `backend`, production branch `main`), provision Neon, connect it to the API project, set `BIOWIKI_ENV=production`, `CORS_ORIGINS` to the public site origin only, `NEXT_PUBLIC_API_URL=https://<api-host>/api/v1`, and `NEXT_PUBLIC_SITE_URL`, then ingest curated accessions with `python -m scripts.seed_initial --no-search`. Leave `API_KEYS` unset for the public read-only API. Do not set `BIOWIKI_MIGRATE_ON_START` on Vercel. Disable Vercel Deployment Protection so visitors are not asked to log in. Keep production database credentials off Preview deployments (this production API currently still lists Neon URLs on Preview/Development targets; Git fork protection is enabled — do not grant untrusted PRs those variables).
 
 `render.yaml` remains a Docker + managed Postgres alternative. Production must not use localhost, `127.0.0.1`, or a private IP.
 
@@ -329,19 +332,21 @@ npm run build
 npx playwright test
 ```
 
-Playwright expects the UI on port 3000 (it will start `npm run dev` unless that server is already running). Reduced motion is enabled so the splash video does not block the suite.
+Playwright starts the UI on port **3100** so it does not attach to some other app on 3000. Reduced motion is enabled so the splash video does not block the suite.
 
 ## CI
 
 GitHub Actions (`.github/workflows/ci.yml`) runs Python 3.13 with Postgres 17 (migrate + `pytest -m "not live"`), Node 24 (`npm ci`, lint, typecheck, Vitest, production build), Playwright against an empty migrated database, and a Compose job that builds the images, starts the stack, and checks API/UI health.
 
+Dependabot watches npm (`/frontend`), pip (`/backend`), GitHub Actions, and Docker. Semver-major version updates are ignored so they are not opened as automatic PRs; security updates remain allowed. Major upgrades (Tailwind 4, TypeScript 7, ESLint 10, Node 26, Python 3.14, and similar) need a dedicated migration, not a bulk merge.
+
 ---
 
 ## Security notes (dependencies)
 
-The UI is pinned to **Next.js 15.5.24** (Maintenance LTS on the 15.5 line). Direct `postcss` is 8.5.26; npm `overrides` force that version so Next’s nested PostCSS copy is not left on 8.4.x ([GHSA-qx2v-qp2m-jg93](https://github.com/advisories/GHSA-qx2v-qp2m-jg93), [GHSA-6g55-p6wh-862q](https://github.com/advisories/GHSA-6g55-p6wh-862q)).
+The UI is pinned to **Next.js 15.5.25** (Maintenance LTS on the 15.5 line) with a `sharp` override of **0.35.4**. Direct `postcss` is 8.5.26; npm `overrides` force that version so Next’s nested PostCSS copy is not left on 8.4.x ([GHSA-qx2v-qp2m-jg93](https://github.com/advisories/GHSA-qx2v-qp2m-jg93), [GHSA-6g55-p6wh-862q](https://github.com/advisories/GHSA-qx2v-qp2m-jg93)). Next 16 was not taken.
 
-`npm audit` may still report **sharp** (optional dependency of Next). BioWiki does not process untrusted user uploads; the lockup uses `next/image` with `unoptimized`. Next 16 was not taken solely to clear remaining sharp advisories.
+`npm audit --omit=dev` is run in CI. BioWiki does not process untrusted user uploads.
 
 ---
 
@@ -357,7 +362,8 @@ Run from `backend/` with the virtualenv active. None of these are HTTP routes.
 | `python -m scripts.backfill_empty_residues` | Fill empty `residues` from official NCBI FASTA when GenBank has CONTIG only |
 | `python -m scripts.backfill_organism_groups` | Dry-run NCBI Taxonomy lineage/group repair (add `--apply` to write) |
 | `python -m scripts.audit_catalogue` | Read-only catalogue matrix against the public API |
-| `python -m scripts.verify_expansion` | Read-only checks against the live database |
+| `python -m scripts.verify_internal_sequences` | Read-only local residue/length/checksum pass |
+| `python -m scripts.verify_external_catalogue` | Checkpointed remote NCBI/UniProt/PubMed verification; output under `.audit/` (not Git) |
 
 Smoke scripts (`smoke_api.ps1`, `smoke_search.ps1`, `smoke_connectors.py`) are optional local checks.
 
@@ -386,8 +392,8 @@ The in-app `/license` page lists public archives for attribution; DDBJ is listed
 
 ## Limitations
 
-- PostgreSQL is required; this repository does not include a data dump. Production uses `BOOTSTRAP_SEED=auto` to import curated real accessions into an empty managed database
-- A public HTTPS URL exists only after Vercel (UI) and Render (API + Postgres) are connected; this workspace cannot complete that without platform credentials
+- PostgreSQL is required; this repository does not include a data dump. Production uses Neon. `BOOTSTRAP_SEED=auto` can import curated real accessions into an empty managed database
+- Production frontend and API are Vercel projects (`frontend/` and `backend/` roots) with aliases https://biowiki-nine.vercel.app and https://biowiki-api.vercel.app. `render.yaml` is an optional Docker alternative, not the live stack
 - Imports need network access to external APIs and are operator-driven
 - The HTTP API does not ingest data
 - Docker Compose is the optional path; local Postgres + uvicorn + Next.js remains valid. Compose is exercised in GitHub Actions when a local Docker daemon is not available

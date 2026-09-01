@@ -10,6 +10,7 @@ class CategoryStat(CamelModel):
     label: str
     count: int
     total_residues: int
+    distinct_organisms: int
 
 
 class LastRun(CamelModel):

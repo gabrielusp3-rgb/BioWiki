@@ -6,7 +6,6 @@ import { cn } from "@/lib/cn";
 import { RNAFilters } from "@/components/rna/RNAFilters";
 import { RNATable } from "@/components/rna/RNATable";
 import { RNAViewer } from "@/components/rna/RNAViewer";
-import { CatalogueTotalLine } from "@/components/stats/CatalogueTotalLine";
 import { SearchIcon } from "@/components/ui/Icons";
 import { useRnaSequences } from "@/hooks/useRnaSequences";
 import { useQueryParamSync } from "@/hooks/useQueryParamSync";
@@ -97,8 +96,6 @@ export function RNAExplorer() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <CatalogueTotalLine status={rna.status} total={rna.total} noun="RNA sequences" />
 
       <RNATable
         results={rna.results}
