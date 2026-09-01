@@ -51,26 +51,26 @@ cd BioWiki
 
 **Stack:** Next.js 15, React 19, TypeScript, FastAPI, SQLAlchemy, PostgreSQL. The UI background uses Three.js. Application code is MIT-licensed; sequence records remain under the terms of their originating databases.
 
-Production catalogue (Neon, 30 August 2026). Live integrity `ok: true`. Duplicate natural keys, TaxIDs, and PMIDs: none.
+Production catalogue (Neon, verified 1 September 2026). Live integrity `ok: true`. Duplicate natural keys, TaxIDs, PMIDs, and normalized DOIs: none.
 
 | Resource | Count |
 | --- | ---: |
-| Sequences | 16421 |
-| — DNA | 7430 |
-| — RNA | 2867 |
-| — Protein | 4352 |
+| Sequences | 16,433 |
+| — DNA | 7,442 |
+| — RNA | 2,867 |
+| — Protein | 4,352 |
 | — CRISPR | 443 |
-| — Virus | 1329 |
-| Publications | 36182 |
-| Unique PMIDs | 34132 |
-| Organisms | 1881 |
+| — Virus | 1,329 |
+| Publications | 36,190 |
+| Unique PMIDs | 34,139 |
+| Organisms | 1,881 |
 | Genome assemblies | 107 |
 
 Genome assemblies live in `genome_records`. They are not `SequenceType.GENOME` rows and do not store chromosome residues.
 
-CRISPR records keep three evidence classes: **natural CRISPR element**, **experimental guide**, and **computational target**. A spacer is not an engineered guide. A Cas protein is not a guide. Computational Cas9 NGG sites (72 in this catalogue) are copied from authentic stored DNA, labeled predicted, and are not experimental edits.
+CRISPR records keep three evidence classes: **natural CRISPR element**, **experimental guide**, and **computational target**. A spacer is not an engineered guide. A Cas protein is not a guide. Computational Cas9 NGG sites are copied from authentic stored DNA, labeled predicted, and are not experimental edits.
 
-**Paleogenomics** (`/paleogenomics`) is a scientific collection inside this catalogue, not a molecule type. After the 30 August 2026 ingest: 16 extinct or archaic profiles, 1005 palaeogenomic sequence memberships (21 of those were already in the catalogue and were tagged, not duplicated), 4 genome assemblies on collection organisms, 87 BioProject metadata rows (no SRA reads as Sequence rows), 729 profile–publication links, and 9 gene-level archaic introgression loci in living *Homo sapiens*. Preferred nuccore targets are discovery goals, not quotas: *Raphus cucullatus* has 4 validated public nuccore records, not 50 invented ones. NCBI Assembly has no entries for most of these TaxIDs; that absence is reported, not filled with fake GCA accessions.
+**Paleogenomics** (`/paleogenomics`) is a scientific collection inside this catalogue, not a molecule type. Live collection: 16 extinct or archaic profiles, 1,017 palaeogenomic sequence memberships, 87 BioProject metadata rows (no SRA reads as Sequence rows), 741 profile–publication links, and 11 gene-level archaic introgression loci in living *Homo sapiens*. Preferred nuccore targets are discovery goals, not quotas: *Raphus cucullatus* has 4 validated public nuccore records, not 50 invented ones. NCBI Assembly has no entries for most of these TaxIDs; that absence is reported, not filled with fake GCA accessions.
 
 Those counts are from the live production database. They change when the CLI imports more records.
 

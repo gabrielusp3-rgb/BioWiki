@@ -11,6 +11,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+RUN useradd --system --uid 10001 --create-home appuser \
+    && chown -R appuser:appuser /app
+USER appuser
+
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app \
     PYTHONDONTWRITEBYTECODE=1

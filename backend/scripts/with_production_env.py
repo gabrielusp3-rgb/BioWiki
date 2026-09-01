@@ -9,9 +9,11 @@ from pathlib import Path
 
 from dotenv import dotenv_values
 
-from app.core.database_url import normalize_database_url
-
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from app.core.database_url import normalize_database_url
 
 
 def main() -> int:

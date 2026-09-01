@@ -11,7 +11,7 @@ from starlette.testclient import TestClient
 
 from app.core.rate_limit import RateLimitMiddleware
 from app.schemas.common import ListResponse
-from app.services.export_service import safe_download_filename
+from app.services.export_service import csv_safe_cell, safe_download_filename
 from app.services.pagination import decode_cursor
 
 
@@ -27,6 +27,15 @@ def test_safe_download_filename_strips_crlf_and_quotes() -> None:
     assert "/" not in name
     assert "\\" not in name
     assert name.endswith(".fasta")
+
+
+def test_csv_safe_cell_neutralises_formula_prefixes() -> None:
+    assert csv_safe_cell("=CMD()") == "'=CMD()"
+    assert csv_safe_cell("+1+1") == "'+1+1"
+    assert csv_safe_cell("-1") == "'-1"
+    assert csv_safe_cell("@SUM(A1)") == "'@SUM(A1)"
+    assert csv_safe_cell("NM_000207") == "NM_000207"
+    assert csv_safe_cell(None) == ""
 
 
 def test_safe_download_filename_keeps_real_accessions() -> None:

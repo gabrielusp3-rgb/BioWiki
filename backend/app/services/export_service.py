@@ -18,6 +18,15 @@ from app.models.source import DataSource
 
 
 _FILENAME_SAFE = re.compile(r"[^A-Za-z0-9._-]+")
+_CSV_FORMULA_PREFIXES = frozenset("=+-@\t\r")
+
+
+def csv_safe_cell(value: object) -> str:
+    """Neutralise spreadsheet formula injection when a field begins with = + - @."""
+    text = "" if value is None else str(value)
+    if text[:1] in _CSV_FORMULA_PREFIXES:
+        return f"'{text}"
+    return text
 
 
 def safe_download_filename(stem: str, suffix: str) -> str:
@@ -53,13 +62,13 @@ def _to_csv(rows: list[Sequence]) -> str:
     for s in rows:
         writer.writerow(
             [
-                s.accession,
-                s.name,
-                s.seq_type.value,
-                _organism(s),
-                s.source.name if s.source else "",
+                csv_safe_cell(s.accession),
+                csv_safe_cell(s.name),
+                csv_safe_cell(s.seq_type.value),
+                csv_safe_cell(_organism(s)),
+                csv_safe_cell(s.source.name if s.source else ""),
                 s.length,
-                s.gene_name or "",
+                csv_safe_cell(s.gene_name or ""),
             ]
         )
     return buf.getvalue()

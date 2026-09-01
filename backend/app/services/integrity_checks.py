@@ -20,6 +20,7 @@ from app.models.paleogenomics import (
     PaleogenomicSequenceMembership,
 )
 from app.models.publication import Publication, SequenceReference
+from app.pipeline.paleogenomics.semantics import normalize_doi
 from app.models.sequence import Sequence
 from app.pipeline.validation import infer_group_from_lineage
 from app.schemas.statistics import IntegrityCheck
@@ -82,6 +83,28 @@ async def sql_integrity_checks(session: AsyncSession) -> list[IntegrityCheck]:
             detail="one PubMed ID maps to one publication row",
             expected=0,
             actual=dup_pmid,
+        )
+    )
+
+    doi_values = (
+        await session.execute(
+            select(Publication.doi).where(Publication.doi.is_not(None))
+        )
+    ).scalars().all()
+    doi_counts: dict[str, int] = {}
+    for raw in doi_values:
+        key = normalize_doi(raw)
+        if not key:
+            continue
+        doi_counts[key] = doi_counts.get(key, 0) + 1
+    dup_doi = sum(1 for n in doi_counts.values() if n > 1)
+    checks.append(
+        IntegrityCheck(
+            name="publications:unique_normalized_doi",
+            ok=dup_doi == 0,
+            detail="normalized DOI values are unique among stored publications",
+            expected=0,
+            actual=dup_doi,
         )
     )
 
