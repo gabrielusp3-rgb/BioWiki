@@ -7,6 +7,7 @@ import { Button } from "@/components/ui";
 import { SearchIcon } from "@/components/ui/Icons";
 import { ProteinFilters } from "@/components/protein/ProteinFilters";
 import { ProteinTable } from "@/components/protein/ProteinTable";
+import { CatalogueTotalLine } from "@/components/stats/CatalogueTotalLine";
 import { ProteinCard } from "@/components/protein/ProteinCard";
 import { ProteinViewer } from "@/components/protein/ProteinViewer";
 import { useProteins } from "@/hooks/useProteins";
@@ -104,6 +105,8 @@ export function ProteinExplorer() {
         )}
       </AnimatePresence>
 
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <CatalogueTotalLine status={proteins.status} total={proteins.total} noun="proteins" />
       {/* View toggle */}
       <div className="flex items-center justify-end gap-2">
         <span className="eyebrow mr-1">View</span>
@@ -123,6 +126,7 @@ export function ProteinExplorer() {
         >
           Cards
         </Button>
+      </div>
       </div>
 
       {showCards ? (

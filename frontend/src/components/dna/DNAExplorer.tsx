@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { DNAFilters } from "@/components/dna/DNAFilters";
 import { DNATable } from "@/components/dna/DNATable";
 import { DNAViewer } from "@/components/dna/DNAViewer";
+import { CatalogueTotalLine } from "@/components/stats/CatalogueTotalLine";
 import { SearchIcon } from "@/components/ui/Icons";
 import { useDnaSequences } from "@/hooks/useDnaSequences";
 import { useQueryParamSync } from "@/hooks/useQueryParamSync";
@@ -98,6 +99,8 @@ export function DNAExplorer() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <CatalogueTotalLine status={dna.status} total={dna.total} noun="DNA sequences" />
 
       {/* Table + pagination */}
       <DNATable

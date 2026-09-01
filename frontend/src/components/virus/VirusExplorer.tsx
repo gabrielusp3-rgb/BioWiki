@@ -7,6 +7,7 @@ import { Button } from "@/components/ui";
 import { SearchIcon } from "@/components/ui/Icons";
 import { VirusFilters } from "@/components/virus/VirusFilters";
 import { VirusTable } from "@/components/virus/VirusTable";
+import { CatalogueTotalLine } from "@/components/stats/CatalogueTotalLine";
 import { VirusCard } from "@/components/virus/VirusCard";
 import { VirusViewer } from "@/components/virus/VirusViewer";
 import { useVirus } from "@/hooks/useVirus";
@@ -100,6 +101,8 @@ export function VirusExplorer() {
         )}
       </AnimatePresence>
 
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <CatalogueTotalLine status={virus.status} total={virus.total} noun="viral sequences" />
       <div className="flex items-center justify-end gap-2">
         <span className="eyebrow mr-1">View</span>
         <Button
@@ -118,6 +121,7 @@ export function VirusExplorer() {
         >
           Cards
         </Button>
+      </div>
       </div>
 
       {showCards ? (

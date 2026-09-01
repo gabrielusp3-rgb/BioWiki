@@ -7,7 +7,7 @@ export function LiveCountsUnavailable({
   detail?: string;
 }) {
   return (
-    <div className="glass hairline p-6">
+    <div className="glass hairline p-6" data-testid="live-counts-unavailable">
       <p className="font-display text-sm font-semibold uppercase tracking-wide text-content-primary">
         Live counts unavailable
       </p>

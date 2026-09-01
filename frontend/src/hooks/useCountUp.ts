@@ -6,8 +6,6 @@ interface UseCountUpOptions {
   end: number;
   start?: number;
   duration?: number;
-  /** Only start once the element scrolls into view. */
-  once?: boolean;
 }
 
 /** easeOutExpo — fast then settling, reads as precise rather than bouncy. */
@@ -16,28 +14,26 @@ function easeOutExpo(t: number): number {
 }
 
 /**
- * Animated numeric count-up that triggers when the target element enters the
- * viewport. Respects `prefers-reduced-motion` by snapping to the final value.
+ * Animated numeric count-up. Respects `prefers-reduced-motion` by snapping
+ * to the final value.
  *
- * If `end` changes after the first trigger (live totals arriving after mount),
- * the displayed value follows the new total instead of staying at the first
- * target — otherwise statistic cards can freeze at 0 while the list below
- * already shows records.
+ * Animation starts as soon as the target is known. Viewport gating previously
+ * left category-page totals stuck at 0 (splash overlay + IntersectionObserver
+ * threshold) while the table below already listed real records.
+ *
+ * If `end` changes after the first run, the displayed value follows the new
+ * total instead of freezing at the first target.
  */
 export function useCountUp<T extends HTMLElement>({
   end,
   start = 0,
   duration = 1800,
-  once = true,
 }: UseCountUpOptions) {
   const ref = useRef<T>(null);
   const [value, setValue] = useState(start);
   const startedRef = useRef(false);
 
   useEffect(() => {
-    const node = ref.current;
-    if (!node) return;
-
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduced) {
       setValue(end);
@@ -51,37 +47,20 @@ export function useCountUp<T extends HTMLElement>({
 
     let raf = 0;
     let startTime = 0;
+    startedRef.current = true;
 
-    const run = (to: number) => {
-      const step = (now: number) => {
-        if (!startTime) startTime = now;
-        const progress = Math.min((now - startTime) / duration, 1);
-        setValue(start + (to - start) * easeOutExpo(progress));
-        if (progress < 1) raf = requestAnimationFrame(step);
-      };
-      raf = requestAnimationFrame(step);
+    const step = (now: number) => {
+      if (!startTime) startTime = now;
+      const progress = Math.min((now - startTime) / duration, 1);
+      setValue(start + (end - start) * easeOutExpo(progress));
+      if (progress < 1) raf = requestAnimationFrame(step);
     };
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !startedRef.current) {
-            startedRef.current = true;
-            run(end);
-            if (once) observer.disconnect();
-          }
-        });
-      },
-      { threshold: 0.3 },
-    );
-
-    observer.observe(node);
+    raf = requestAnimationFrame(step);
 
     return () => {
-      observer.disconnect();
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [end, start, duration, once]);
+  }, [end, start, duration]);
 
   return { ref, value };
 }

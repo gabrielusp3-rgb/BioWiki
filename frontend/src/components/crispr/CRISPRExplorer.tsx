@@ -6,6 +6,7 @@ import { cn } from "@/lib/cn";
 import { CRISPRFilters } from "@/components/crispr/CRISPRFilters";
 import { CRISPRTable } from "@/components/crispr/CRISPRTable";
 import { CRISPRViewer } from "@/components/crispr/CRISPRViewer";
+import { CatalogueTotalLine } from "@/components/stats/CatalogueTotalLine";
 import { SearchIcon } from "@/components/ui/Icons";
 import { useCrispr } from "@/hooks/useCrispr";
 import { useQueryParamSync } from "@/hooks/useQueryParamSync";
@@ -96,6 +97,8 @@ export function CRISPRExplorer() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <CatalogueTotalLine status={crispr.status} total={crispr.total} noun="CRISPR records" />
 
       <CRISPRTable
         results={crispr.results}

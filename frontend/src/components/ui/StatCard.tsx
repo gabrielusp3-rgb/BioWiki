@@ -31,6 +31,7 @@ export function StatCard({
   return (
     <div
       ref={ref}
+      aria-label={`${formatStatistic(value, suffix)} ${label}`}
       style={{ ["--glow-color" as string]: `${accent}40` }}
       className={cn(
         "glass hairline group relative flex flex-col justify-between gap-6 p-6 transition-colors duration-300 hover:border-white/20",
