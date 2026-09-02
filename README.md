@@ -35,9 +35,15 @@ Current production:
 - Database: Neon PostgreSQL, connected as `DATABASE_URL` / `DATABASE_URL_UNPOOLED`
 - Production branch intended for Git Integration: `main` on [gabrielusp3-rgb/BioWiki](https://github.com/gabrielusp3-rgb/BioWiki)
 
-Vercel Root Directory is already `frontend` / `backend`. Connecting Git still requires a **GitHub Login Connection** on the Vercel account ([Login methods and connections](https://vercel.com/docs/accounts/create-an-account#login-methods-and-connections)). Until that dashboard step exists, `vercel git connect` returns HTTP 400 and production updates are `vercel --prod` from each project root — not dummy commits. After the Login Connection is added, connect Git **only** with those roots already set (never while Root Directory is `.` or null).
+Vercel Root Directory is already `frontend` / `backend`. Git Integration is **not** active until a **GitHub Login Connection** exists on this Hobby account. `vercel git connect https://github.com/gabrielusp3-rgb/BioWiki` still returns:
 
-To reproduce on another account: import the GitHub repository twice on Vercel (frontend root `frontend`, API root `backend`, production branch `main`), provision Neon, connect it to the API project, set `BIOWIKI_ENV=production`, `CORS_ORIGINS` to the public site origin only, `NEXT_PUBLIC_API_URL=https://<api-host>/api/v1`, and `NEXT_PUBLIC_SITE_URL`, then ingest curated accessions with `python -m scripts.seed_initial --no-search`. Leave `API_KEYS` unset for the public read-only API. Do not set `BIOWIKI_MIGRATE_ON_START` on Vercel. Disable Vercel Deployment Protection so visitors are not asked to log in. Keep production database credentials off Preview deployments (this production API currently still lists Neon URLs on Preview/Development targets; Git fork protection is enabled — do not grant untrusted PRs those variables).
+`Failed to link gabrielusp3-rgb/BioWiki. You need to add a Login Connection to your GitHub account first. (400)`
+
+Docs: [Login methods and connections](https://vercel.com/docs/accounts/create-an-account#login-methods-and-connections). In the dashboard: avatar → **Settings** → **Authentication** → **Add New** → **GitHub**, then authorize Vercel on GitHub. A Hobby team allows only one GitHub login connection. After that exists, connect Git **only** with those roots already set (never while Root Directory is `.` or null).
+
+Production Neon credentials on `biowiki-api` (`DATABASE_URL`, `DATABASE_URL_UNPOOLED`, and the Neon `POSTGRES_*` / `PG*` / `NEON_PROJECT_ID` aliases) are scoped to **Production** only. Preview and Development do not receive those values. Do not grant untrusted PRs production database access. Git fork protection remains enabled.
+
+To reproduce on another account: import the GitHub repository twice on Vercel (frontend root `frontend`, API root `backend`, production branch `main`), provision Neon, connect it to the API project, set `BIOWIKI_ENV=production`, `CORS_ORIGINS` to the public site origin only, `NEXT_PUBLIC_API_URL=https://<api-host>/api/v1`, and `NEXT_PUBLIC_SITE_URL`, then ingest curated accessions with `python -m scripts.seed_initial --no-search`. Leave `API_KEYS` unset for the public read-only API. Do not set `BIOWIKI_MIGRATE_ON_START` on Vercel. Disable Vercel Deployment Protection so visitors are not asked to log in.
 
 `render.yaml` remains a Docker + managed Postgres alternative. Production must not use localhost, `127.0.0.1`, or a private IP.
 
@@ -77,6 +83,8 @@ CRISPR records keep three evidence classes: **natural CRISPR element**, **experi
 
 Those counts are from the live production database. They change when the CLI imports more records.
 
+External verification (checkpointed; not 100% remote for every row): PDB polymer entities `PDBID_ENTITY` are checked against the RCSB Data API, not NCBI FASTA. PubMed title mismatches are classified from EFetch XML. Residual TaxIDs that NCBI Datasets and Taxonomy ESearch do not currently recognize stay `TEMPORARILY_UNVERIFIED` (not deleted, not marked invalid). Operator scripts: `backend/scripts/verify_external_catalogue.py`, `backend/scripts/resolve_closeout_residuals.py`.
+
 ### Features
 
 - Browse DNA, RNA, proteins, CRISPR guides, viruses, organisms, genome assemblies, publications (`/publications`), and the Paleogenomics collection (`/paleogenomics`)
@@ -98,7 +106,7 @@ Connectors used by the CLI (not by public HTTP routes):
 | Source | Role |
 | --- | --- |
 | [NCBI](https://www.ncbi.nlm.nih.gov/) GenBank / RefSeq | Nucleotide and protein records (E-utilities) |
-| [NCBI Datasets](https://www.ncbi.nlm.nih.gov/datasets/) | Genome assemblies |
+| [NCBI Datasets](https://www.ncbi.nlm.nih.gov/datasets/) | Genome assemblies; taxonomy names/reports |
 | [PubMed](https://pubmed.ncbi.nlm.nih.gov/) | Article metadata and sequence links |
 | [UniProt](https://www.uniprot.org/) | Protein records |
 | [Ensembl](https://www.ensembl.org/) | Annotated sequences |

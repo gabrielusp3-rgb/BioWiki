@@ -38,6 +38,7 @@ from app.services.connectors.errors import (
     ConnectorTimeout,
     ConnectorUnavailable,
 )
+from app.services.connectors.pdb import PDBConnector
 from app.services.connectors.ncbi import NCBIConnector
 from app.services.connectors.uniprot import UniProtConnector
 
@@ -169,6 +170,62 @@ async def _residues_for(ids: list) -> dict:
         return {row[0]: row[1] or "" for row in result.all()}
 
 
+def _split_pdb_accession(accession: str) -> tuple[str, str] | None:
+    raw = (accession or "").strip().upper()
+    if "_" not in raw:
+        return None
+    pdb_id, entity_id = raw.split("_", 1)
+    if not pdb_id or not entity_id:
+        return None
+    return pdb_id, entity_id
+
+
+async def _verify_pdb_polymer(pdb: PDBConnector, seq: Any, stored: str) -> dict[str, Any]:
+    parsed = _split_pdb_accession(seq.accession)
+    base = {
+        "id": str(seq.id),
+        "accession": seq.accession,
+        "version": seq.version,
+        "source": getattr(seq, "source_key", "pdb"),
+        "type": seq.seq_type.value if hasattr(seq.seq_type, "value") else str(seq.seq_type),
+        "provider": "rcsb_pdb",
+        "checked_at": _now(),
+    }
+    if parsed is None:
+        return {**base, "status": "TEMPORARILY_UNVERIFIED", "detail": "accession is not PDB_ID_ENTITY"}
+    pdb_id, entity_id = parsed
+    try:
+        await pdb.get_entry(pdb_id)
+        entity = await pdb.get_polymer_entity(pdb_id, entity_id)
+    except ConnectorNotFound:
+        return {**base, "status": "CONFIRMED_MISMATCH", "detail": "PDB entry or polymer entity not found"}
+    except Exception as exc:
+        status = "TEMPORARILY_UNVERIFIED" if _transient(exc) else "TEMPORARILY_UNVERIFIED"
+        return {**base, "status": status, "detail": type(exc).__name__}
+    poly = entity.get("entity_poly") or {}
+    remote = (poly.get("pdbx_seq_one_letter_code_can") or "").replace("\n", "").strip().upper()
+    if not remote:
+        return {**base, "status": "METADATA_ONLY_VERIFIED", "detail": "polymer entity exists; canonical residues absent"}
+    compared = _compare_residues(stored, remote)
+    if compared == "VERIFIED_EXACT":
+        return {
+            **base,
+            "status": "REMOTE_EXACT",
+            "queried": f"{pdb_id}_{entity_id}",
+            "length_local": len(_norm_nt(stored)),
+            "length_remote": len(_norm_nt(remote)),
+            "checksum_match": _sha(_norm_nt(stored)) == (getattr(seq, "checksum", None) or ""),
+        }
+    return {
+        **base,
+        "status": "CONFIRMED_MISMATCH" if compared in {"RESIDUE_MISMATCH", "LENGTH_MISMATCH"} else compared,
+        "detail": compared,
+        "queried": f"{pdb_id}_{entity_id}",
+        "length_local": len(_norm_nt(stored)),
+        "length_remote": len(_norm_nt(remote)),
+    }
+
+
 async def phase_sequences() -> None:
     out = STATE_DIR / "sequences.jsonl"
     done = _load_done(out)
@@ -219,6 +276,7 @@ async def phase_sequences() -> None:
     pending_ncbi_nuc: list[Meta] = []
     pending_ncbi_prot: list[Meta] = []
     pending_uniprot: list[Meta] = []
+    pending_pdb: list[Meta] = []
     others: list[Meta] = []
     local_accessions = {s.accession for s in rows}
     for seq in rows:
@@ -252,12 +310,14 @@ async def phase_sequences() -> None:
             continue
         if key in _UNIPROT_KEYS:
             pending_uniprot.append(seq)
+        elif key in _PDB_KEYS:
+            pending_pdb.append(seq)
         elif key in _NCBI_KEYS or key in _RFAM_KEYS:
             if seq.seq_type == SequenceType.PROTEIN:
                 pending_ncbi_prot.append(seq)
             else:
                 pending_ncbi_nuc.append(seq)
-        elif key in _ENA_KEYS or key in _PDB_KEYS or key in _ENSEMBL_KEYS:
+        elif key in _ENA_KEYS or key in _ENSEMBL_KEYS:
             others.append(seq)
         else:
             if seq.seq_type == SequenceType.PROTEIN:
@@ -343,6 +403,12 @@ async def phase_sequences() -> None:
                             "checked_at": _now(),
                         },
                     )
+
+    if pending_pdb:
+        async with PDBConnector() as pdb:
+            stored_map = await _residues_for([s.id for s in pending_pdb])
+            for seq in pending_pdb:
+                _append(out, await _verify_pdb_polymer(pdb, seq, stored_map.get(seq.id, "")))
 
     if others:
         async with NCBIConnector() as ncbi:

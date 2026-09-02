@@ -48,6 +48,25 @@ class NCBIDatasetsConnector(BaseConnector):
         next_token = payload.get("next_page_token") if isinstance(payload, dict) else None
         return reports, next_token or None
 
+    async def taxonomy_reports(self, tax_ids: list[int | str]) -> list[dict[str, Any]]:
+        """NCBI Datasets taxonomy metadata for numeric TaxIDs or names."""
+        return await self._taxonomy_payload(tax_ids, suffix="")
+
+    async def taxonomy_name_reports(self, tax_ids: list[int | str]) -> list[dict[str, Any]]:
+        """NCBI Datasets taxonomy names report (accepted name + synonyms)."""
+        return await self._taxonomy_payload(tax_ids, suffix="/name_report")
+
+    async def _taxonomy_payload(self, taxons: list[int | str], *, suffix: str) -> list[dict[str, Any]]:
+        ids = [str(t).strip() for t in taxons if str(t).strip()]
+        if not ids:
+            return []
+        joined = ",".join(ids)
+        payload = await self.get_json(f"taxonomy/taxon/{joined}{suffix}")
+        if not isinstance(payload, dict):
+            raise ConnectorParseError("Unexpected Datasets taxonomy payload.", source=self.source)
+        nodes = payload.get("taxonomy_nodes") or payload.get("reports") or []
+        return [n for n in nodes if isinstance(n, dict)]
+
     def _extract_reports(self, payload: Any) -> list[dict[str, Any]]:
         if not isinstance(payload, dict):
             raise ConnectorParseError("Unexpected Datasets payload.", source=self.source)
