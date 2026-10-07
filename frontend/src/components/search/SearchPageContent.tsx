@@ -7,6 +7,7 @@ import { Badge, Button, Skeleton, Tag } from "@/components/ui";
 import { ExternalIcon, SearchIcon } from "@/components/ui/Icons";
 import { SearchFilters } from "@/components/search/SearchFilters";
 import { useSearch } from "@/hooks/useSearch";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { SEARCH_TYPES } from "@/lib/search-config";
 import { formatStatistic } from "@/lib/statistics";
@@ -110,6 +111,7 @@ export function SearchPageContent() {
     loadMore,
     loadingMore,
   } = useSearch({ initialQuery, minChars: 2 });
+  const { t } = useLocale();
 
   const trimmed = query.trim();
   const hasQuery = trimmed.length >= 2;
@@ -124,7 +126,7 @@ export function SearchPageContent() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search accessions, genes, organisms, tax IDs, publications…"
-            aria-label="Search catalogue"
+            aria-label={t("searchInputLabel")}
             autoFocus
             className="h-16 w-full bg-transparent font-body text-base text-content-primary outline-none placeholder:text-content-muted"
           />

@@ -14,6 +14,8 @@ import {
   doiUrl,
   labelOf,
 } from "@/lib/paleogenomics";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { safeHttpUrl } from "@/lib/safe-url";
 import { formatStatistic } from "@/lib/statistics";
 import {
   getPaleogenomicsSpecies,
@@ -87,6 +89,7 @@ function ClaimBlock({ claim }: { claim: PaleogenomicClaim }) {
 }
 
 export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
+  const { locale, t } = useLocale();
   const [status, setStatus] = useState<Status>("loading");
   const [detail, setDetail] = useState<PaleogenomicSpeciesDetail | null>(null);
   const [sequences, setSequences] = useState<PaleogenomicSequenceRow[]>([]);
@@ -107,7 +110,7 @@ export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
       setStatus("unavailable");
       return;
     }
-    getPaleogenomicsSpecies(slug, controller.signal)
+    getPaleogenomicsSpecies(slug, controller.signal, locale)
       .then(async (record) => {
         if (controller.signal.aborted) return;
         if (record === null) {
@@ -155,7 +158,7 @@ export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
         if (!controller.signal.aborted) setStatus("error");
       });
     return () => controller.abort();
-  }, [slug]);
+  }, [slug, locale]);
 
   if (status === "loading") {
     return (
@@ -204,16 +207,27 @@ export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
             href={ncbiTaxonomyUrl(detail.taxId)}
             target="_blank"
             rel="noopener noreferrer"
+            dir="ltr"
             className="ml-auto flex items-center gap-2 border border-glass-border px-3 py-1.5 font-mono text-xs text-content-secondary hover:text-content-primary"
           >
             taxid:{detail.taxId}
             <ExternalIcon className="h-3.5 w-3.5" />
           </a>
         </div>
-        <h1 className="font-display text-3xl font-bold tracking-tightest text-content-primary">
-          {detail.commonName}
+        <h1 className="font-display text-3xl font-bold tracking-tightest text-content-primary" dir="auto">
+          {detail.localizedCommonName || detail.commonName}
         </h1>
-        <p className="font-body text-base italic text-content-secondary">{detail.scientificName}</p>
+        {detail.vernacularFallback && (
+          <p className="text-sm text-content-secondary">{t("paleoVernacularMissing")}</p>
+        )}
+        {safeHttpUrl(detail.vernacularSourceUrl) && (
+          <p className="text-xs text-content-muted">
+            <a href={safeHttpUrl(detail.vernacularSourceUrl) ?? undefined} target="_blank" rel="noopener noreferrer" className="hover:text-content-primary">
+              {detail.vernacularSource}
+            </a>
+          </p>
+        )}
+        <p dir="ltr" className="font-body text-base italic text-content-secondary">{detail.scientificName}</p>
         <p className="text-sm text-content-secondary">
           {[detail.geologicPeriod, detail.geographicRegion, detail.extinctionDateText]
             .filter(Boolean)
@@ -227,19 +241,19 @@ export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <div>
             <p className="font-display text-xl font-bold tabular-nums">{formatStatistic(detail.sequenceCount)}</p>
-            <p className="text-[10px] uppercase tracking-wider text-content-muted">Sequences</p>
+            <p className="text-[10px] uppercase tracking-wider text-content-muted">{t("paleoSequences")}</p>
           </div>
           <div>
             <p className="font-display text-xl font-bold tabular-nums">{formatStatistic(detail.mitogenomeCount)}</p>
-            <p className="text-[10px] uppercase tracking-wider text-content-muted">Complete mt genomes</p>
+            <p className="text-[10px] uppercase tracking-wider text-content-muted">{t("paleoMtGenomes")}</p>
           </div>
           <div>
             <p className="font-display text-xl font-bold tabular-nums">{formatStatistic(detail.assemblyCount)}</p>
-            <p className="text-[10px] uppercase tracking-wider text-content-muted">Assemblies</p>
+            <p className="text-[10px] uppercase tracking-wider text-content-muted">{t("paleoAssemblies")}</p>
           </div>
           <div>
             <p className="font-display text-xl font-bold tabular-nums">{formatStatistic(detail.publicationCount)}</p>
-            <p className="text-[10px] uppercase tracking-wider text-content-muted">Publications</p>
+            <p className="text-[10px] uppercase tracking-wider text-content-muted">{t("paleoPublications")}</p>
           </div>
         </div>
         <p className="text-xs text-content-muted">
@@ -253,13 +267,13 @@ export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
             href={`/organisms/${detail.organism.slug}`}
             className="border border-glass-border px-3 py-2 text-xs uppercase tracking-wide text-content-secondary hover:text-content-primary"
           >
-            Organism record
+            {t("paleoOrganismRecord")}
           </Link>
           <Link
             href={`/search?q=${encodeURIComponent(detail.scientificName)}`}
             className="border border-glass-border px-3 py-2 text-xs uppercase tracking-wide text-content-secondary hover:text-content-primary"
           >
-            Search catalogue
+            {t("paleoSearchCatalogue")}
           </Link>
         </div>
       </header>

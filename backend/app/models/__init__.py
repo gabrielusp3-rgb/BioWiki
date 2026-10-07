@@ -30,6 +30,7 @@ from app.models.publication import Publication, SequenceReference
 from app.models.sequence import Sequence
 from app.models.source import DataSource
 from app.models.taxonomy import Taxonomy
+from app.models.vernacular import OrganismVernacularName
 
 __all__ = [
     "Base",
@@ -59,4 +60,5 @@ __all__ = [
     "Sequence",
     "DataSource",
     "Taxonomy",
+    "OrganismVernacularName",
 ]

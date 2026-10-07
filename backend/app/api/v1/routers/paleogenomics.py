@@ -91,8 +91,16 @@ async def list_introgression(
     response_model=PaleogenomicSpeciesDetail,
     summary="Paleogenomics species profile",
 )
-async def get_paleogenomics_species(slug: PaleogenomicSlugPath, session: AsyncSession = Depends(get_session)):
-    detail = await paleogenomics_service.get_species(session, slug)
+async def get_paleogenomics_species(
+    slug: PaleogenomicSlugPath,
+    locale: str | None = Query(None, max_length=16),
+    session: AsyncSession = Depends(get_session),
+):
+    from app.pipeline.paleogenomics.vernacular import locale_or_none
+
+    if locale is not None and locale_or_none(locale) is None:
+        raise HTTPException(status_code=400, detail="Unsupported locale")
+    detail = await paleogenomics_service.get_species(session, slug, locale=locale)
     if detail is None:
         raise HTTPException(status_code=404, detail="Paleogenomics species not found")
     return detail

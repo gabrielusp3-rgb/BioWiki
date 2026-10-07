@@ -7,5 +7,5 @@ def test_every_ui_category_has_a_label() -> None:
     assert set(CATEGORY_TYPES) == {"dna", "rna", "protein", "crispr", "virus", "genome"}
 
 
-def test_alembic_head_is_paleogenomics() -> None:
-    assert repo_alembic_head() == "0007_paleogenomics"
+def test_alembic_head_keeps_paleogenomics_and_adds_vernacular_names() -> None:
+    assert repo_alembic_head() == "0008_organism_vernacular"

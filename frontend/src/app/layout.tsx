@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import { Inter, Space_Grotesk } from "next/font/google";
 import { BackgroundDNAMount } from "@/components/BackgroundDNAMount";
 import { SplashScreen } from "@/components/SplashScreen";
+import { LocaleProvider } from "@/lib/i18n/LocaleProvider";
+import { LOCALE_COOKIE, directionOf, parseLocale } from "@/lib/i18n/locales";
 import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
@@ -114,12 +117,15 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const jar = await cookies();
+  const locale = parseLocale(jar.get(LOCALE_COOKIE)?.value);
   return (
     <html
-      lang="en"
+      lang={locale}
+      dir={directionOf(locale)}
       className={`${spaceGrotesk.variable} ${inter.variable}`}
       suppressHydrationWarning
     >
@@ -128,9 +134,11 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <BackgroundDNAMount />
-        {children}
-        <SplashScreen />
+        <LocaleProvider initialLocale={locale}>
+          <BackgroundDNAMount />
+          {children}
+          <SplashScreen />
+        </LocaleProvider>
       </body>
     </html>
   );

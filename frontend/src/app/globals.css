@@ -21,7 +21,7 @@
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
-    font-family: var(--font-body);
+    font-family: var(--font-body), "Segoe UI", "Noto Sans Arabic", "Noto Sans Devanagari", "Yu Gothic", "PingFang SC", "Nirmala UI", sans-serif;
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;

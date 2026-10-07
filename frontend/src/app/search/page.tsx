@@ -4,6 +4,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Container, Section } from "@/components/ui";
 import { SearchPageContent } from "@/components/search/SearchPageContent";
+import { SearchHeading } from "@/components/search/SearchHeading";
 
 export const metadata: Metadata = {
   title: "Search",
@@ -18,11 +19,8 @@ export default function SearchPage() {
       <SiteHeader activeHref="/search" />
       <main id="main" className="pt-16">
         <Container width="wide">
-          <Section
-            eyebrow="Global search"
-            title="Search the database"
-            description="Query accessions, gene names, organisms, taxonomy IDs and publications. Results come from stored records only."
-          >
+          <Section>
+            <SearchHeading />
             <Suspense fallback={null}>
               <SearchPageContent />
             </Suspense>

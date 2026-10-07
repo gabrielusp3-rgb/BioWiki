@@ -52,12 +52,13 @@ export async function listPaleogenomicsSpecies(
 export async function getPaleogenomicsSpecies(
   slug: string,
   signal?: AbortSignal,
+  locale?: string,
 ): Promise<PaleogenomicSpeciesDetail | null> {
   if (!isApiConfigured) return null;
   try {
     return await apiGet<PaleogenomicSpeciesDetail>(
       `/paleogenomics/species/${encodeURIComponent(slug)}`,
-      { signal },
+      { signal, params: { locale } },
     );
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null;

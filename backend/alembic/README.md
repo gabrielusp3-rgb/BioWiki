@@ -21,4 +21,6 @@ computational) plus optional target provenance columns.
 `0007_paleogenomics` adds optional organism extinction fields and collection
 tables for extinct-species profiles, ancient-DNA membership, introgression
 in living *Homo sapiens*, and publication membership. Paleogenomics is not a
-molecule type. Never dump the live corpus into git.
+molecule type. `0008_organism_vernacular` adds locale-specific common names
+for an existing organism. It does not copy species rows. Never dump the live
+corpus into git.

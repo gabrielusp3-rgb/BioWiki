@@ -70,6 +70,7 @@ export async function listOrganisms(
 export async function getOrganism(
   identifier: string,
   signal?: AbortSignal,
+  locale?: string,
 ): Promise<Organism | null> {
   if (!isApiConfigured) {
     return (
@@ -81,7 +82,7 @@ export async function getOrganism(
   try {
     const raw = await apiGet<Organism>(
       `/organisms/${encodeURIComponent(identifier)}`,
-      { signal },
+      { signal, params: { locale } },
     );
     return normalizeOrganism(raw);
   } catch (error) {

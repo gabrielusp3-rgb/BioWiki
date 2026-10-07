@@ -1,0 +1,1113 @@
+{
+  "retrieved_on": "2026-10-07",
+  "note": "English names are the curated BioWiki paleogenomics vernacular, cited to the NCBI Taxonomy record. Other locales come from Wikidata P1843 or rdfs:label after rejection of scientific names and known mis-associations. Missing languages are omitted on purpose.",
+  "records": [
+    {
+      "slug": "bos-primigenius",
+      "locale": "ar-SA",
+      "name": "الأُرْخُص",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q168903",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "bos-primigenius",
+      "locale": "de-DE",
+      "name": "Ur",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q168903",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "bos-primigenius",
+      "locale": "en-GB",
+      "name": "Aurochs",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=9909",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "bos-primigenius",
+      "locale": "es-ES",
+      "name": "Uro",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q168903",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "bos-primigenius",
+      "locale": "fr-FR",
+      "name": "Auroch",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q168903",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "bos-primigenius",
+      "locale": "hi-IN",
+      "name": "औरोक्स",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q168903",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "bos-primigenius",
+      "locale": "ja-JP",
+      "name": "オーロックス",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q168903",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "bos-primigenius",
+      "locale": "pt-BR",
+      "name": "Auroque",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q168903",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "bos-primigenius",
+      "locale": "ru-RU",
+      "name": "тур",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q168903",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "bos-primigenius",
+      "locale": "zh-CN",
+      "name": "原牛",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q168903",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "coelodonta-antiquitatis",
+      "locale": "ar-SA",
+      "name": "وحيد القرن الصوفي",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188949",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "coelodonta-antiquitatis",
+      "locale": "de-DE",
+      "name": "Wollnashorn",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188949",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "coelodonta-antiquitatis",
+      "locale": "en-GB",
+      "name": "Woolly rhinoceros",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=222863",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "coelodonta-antiquitatis",
+      "locale": "hi-IN",
+      "name": "बालदार गैंडा",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188949",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "coelodonta-antiquitatis",
+      "locale": "ja-JP",
+      "name": "ケブカサイ",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188949",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "coelodonta-antiquitatis",
+      "locale": "pt-BR",
+      "name": "Rinoceronte-lanudo",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188949",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "coelodonta-antiquitatis",
+      "locale": "ru-RU",
+      "name": "шерстистый носорог",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188949",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "coelodonta-antiquitatis",
+      "locale": "zh-CN",
+      "name": "披毛犀",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188949",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "dinornis-robustus",
+      "locale": "en-GB",
+      "name": "South Island giant moa",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=314500",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "dinornis-robustus",
+      "locale": "fr-FR",
+      "name": "Moa géant de l'île du Sud",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q3501588",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "dinornis-robustus",
+      "locale": "zh-CN",
+      "name": "南方巨恐鳥",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q3501588",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ectopistes-migratorius",
+      "locale": "ar-SA",
+      "name": "حمام مهاجر",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q191968",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ectopistes-migratorius",
+      "locale": "de-DE",
+      "name": "Wandertaube",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q191968",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ectopistes-migratorius",
+      "locale": "en-GB",
+      "name": "Passenger pigeon",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=187118",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ectopistes-migratorius",
+      "locale": "es-ES",
+      "name": "Paloma migratoria",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q191968",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ectopistes-migratorius",
+      "locale": "fr-FR",
+      "name": "Tourte voyageuse",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q191968",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ectopistes-migratorius",
+      "locale": "it-IT",
+      "name": "Piccione migratore",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q191968",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ectopistes-migratorius",
+      "locale": "ja-JP",
+      "name": "リョコウバト",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q191968",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ectopistes-migratorius",
+      "locale": "pt-BR",
+      "name": "pombo-viajante",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q191968",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ectopistes-migratorius",
+      "locale": "ru-RU",
+      "name": "Странствующий голубь",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q191968",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ectopistes-migratorius",
+      "locale": "zh-CN",
+      "name": "旅鸽",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q191968",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "equus-quagga-quagga",
+      "locale": "ar-SA",
+      "name": "كواغة",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q45969",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "equus-quagga-quagga",
+      "locale": "de-DE",
+      "name": "Quagga",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q45969",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "equus-quagga-quagga",
+      "locale": "en-GB",
+      "name": "Quagga",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=555873",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "equus-quagga-quagga",
+      "locale": "fr-FR",
+      "name": "quagga",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q45969",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "equus-quagga-quagga",
+      "locale": "hi-IN",
+      "name": "क्वागा",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q45969",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "equus-quagga-quagga",
+      "locale": "ja-JP",
+      "name": "クアッガ",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q45969",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "equus-quagga-quagga",
+      "locale": "pt-BR",
+      "name": "Quaga",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q45969",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "equus-quagga-quagga",
+      "locale": "ru-RU",
+      "name": "Квагга",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q45969",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "equus-quagga-quagga",
+      "locale": "zh-CN",
+      "name": "斑驢",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q45969",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "homo-denisova",
+      "locale": "en-GB",
+      "name": "Denisovan",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=741158",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "homo-neanderthalensis",
+      "locale": "ar-SA",
+      "name": "نياندرتال",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q40171",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "homo-neanderthalensis",
+      "locale": "de-DE",
+      "name": "Neandertaler",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q40171",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "homo-neanderthalensis",
+      "locale": "en-GB",
+      "name": "Neanderthal",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=63221",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "homo-neanderthalensis",
+      "locale": "fr-FR",
+      "name": "Néanderthalien",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q40171",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "homo-neanderthalensis",
+      "locale": "hi-IN",
+      "name": "निअंडरथल मानव",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q40171",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "homo-neanderthalensis",
+      "locale": "ja-JP",
+      "name": "ネアンデルタール人",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q40171",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "homo-neanderthalensis",
+      "locale": "pt-BR",
+      "name": "Homem-de-neandertal",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q40171",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "homo-neanderthalensis",
+      "locale": "ru-RU",
+      "name": "неандерталец",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q40171",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "homo-neanderthalensis",
+      "locale": "zh-CN",
+      "name": "尼安德特人",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q40171",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "hydrodamalis-gigas",
+      "locale": "ar-SA",
+      "name": "بقرة البحر ستيلر",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q187484",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "hydrodamalis-gigas",
+      "locale": "de-DE",
+      "name": "Stellers Seekuh",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q187484",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "hydrodamalis-gigas",
+      "locale": "en-GB",
+      "name": "Steller's sea cow",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=63631",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "hydrodamalis-gigas",
+      "locale": "fr-FR",
+      "name": "Rhytine de Steller",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q187484",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "hydrodamalis-gigas",
+      "locale": "ja-JP",
+      "name": "ステラーカイギュウ",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q187484",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "hydrodamalis-gigas",
+      "locale": "pt-BR",
+      "name": "Dugongo-de-steller",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q187484",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "hydrodamalis-gigas",
+      "locale": "ru-RU",
+      "name": "стеллерова корова",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q187484",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "hydrodamalis-gigas",
+      "locale": "zh-CN",
+      "name": "大海牛",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q187484",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammut-americanum",
+      "locale": "de-DE",
+      "name": "Amerikanisches Mastodon",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q378771",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammut-americanum",
+      "locale": "en-GB",
+      "name": "American mastodon",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=39053",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammut-americanum",
+      "locale": "es-ES",
+      "name": "Mastodon americano",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q378771",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammut-americanum",
+      "locale": "fr-FR",
+      "name": "Mastodonte américain",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q378771",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammut-americanum",
+      "locale": "it-IT",
+      "name": "Mastodonte americano",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q378771",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammut-americanum",
+      "locale": "ja-JP",
+      "name": "アメリカン・マストドン",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q378771",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammut-americanum",
+      "locale": "pt-BR",
+      "name": "Mastodonte americano",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q378771",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammut-americanum",
+      "locale": "ru-RU",
+      "name": "Американский мастодонт",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q378771",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammut-americanum",
+      "locale": "zh-CN",
+      "name": "美洲乳齿象",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q378771",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammuthus-primigenius",
+      "locale": "ar-SA",
+      "name": "ماموث صوفي",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q3699044",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammuthus-primigenius",
+      "locale": "de-DE",
+      "name": "Wollhaarmammut",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q3699044",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammuthus-primigenius",
+      "locale": "en-GB",
+      "name": "Woolly mammoth",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=37349",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammuthus-primigenius",
+      "locale": "fr-FR",
+      "name": "mammouth laineux",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q3699044",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammuthus-primigenius",
+      "locale": "ja-JP",
+      "name": "ケナガマンモス",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q3699044",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammuthus-primigenius",
+      "locale": "pt-BR",
+      "name": "Mamute-lanoso",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q3699044",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammuthus-primigenius",
+      "locale": "ru-RU",
+      "name": "Шерстистый мамонт",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q3699044",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "mammuthus-primigenius",
+      "locale": "zh-CN",
+      "name": "真猛犸象",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q3699044",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "megaloceros-giganteus",
+      "locale": "ar-SA",
+      "name": "أيل أيرلندي",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q312054",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "megaloceros-giganteus",
+      "locale": "en-GB",
+      "name": "Irish elk",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=227166",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "megaloceros-giganteus",
+      "locale": "ja-JP",
+      "name": "オオツノシカ",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q312054",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "megaloceros-giganteus",
+      "locale": "pt-BR",
+      "name": "Alce-gigante",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q312054",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "megaloceros-giganteus",
+      "locale": "ru-RU",
+      "name": "Большерогий олень",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q312054",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "megaloceros-giganteus",
+      "locale": "zh-CN",
+      "name": "大角鹿",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q312054",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "pinguinus-impennis",
+      "locale": "ar-SA",
+      "name": "أوك عظيم",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q189193",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "pinguinus-impennis",
+      "locale": "de-DE",
+      "name": "Riesenalk",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q189193",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "pinguinus-impennis",
+      "locale": "en-GB",
+      "name": "Great auk",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=94623",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "pinguinus-impennis",
+      "locale": "es-ES",
+      "name": "Alca gigante",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q189193",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "pinguinus-impennis",
+      "locale": "fr-FR",
+      "name": "Grand Pingouin",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q189193",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "pinguinus-impennis",
+      "locale": "it-IT",
+      "name": "Alca impenne",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q189193",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "pinguinus-impennis",
+      "locale": "ja-JP",
+      "name": "オオウミガラス",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q189193",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "pinguinus-impennis",
+      "locale": "pt-BR",
+      "name": "torda-gigante",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q189193",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "pinguinus-impennis",
+      "locale": "ru-RU",
+      "name": "Бескрылая гагарка",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q189193",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "pinguinus-impennis",
+      "locale": "zh-CN",
+      "name": "大海雀",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q189193",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "raphus-cucullatus",
+      "locale": "ar-SA",
+      "name": "دودو",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q43502",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "raphus-cucullatus",
+      "locale": "de-DE",
+      "name": "Dodo",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q43502",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "raphus-cucullatus",
+      "locale": "en-GB",
+      "name": "Dodo",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=187135",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "raphus-cucullatus",
+      "locale": "es-ES",
+      "name": "Dodo",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q43502",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "raphus-cucullatus",
+      "locale": "fr-FR",
+      "name": "Dronte de Maurice",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q43502",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "raphus-cucullatus",
+      "locale": "hi-IN",
+      "name": "डोडो",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q43502",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "raphus-cucullatus",
+      "locale": "it-IT",
+      "name": "Dodo",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q43502",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "raphus-cucullatus",
+      "locale": "ja-JP",
+      "name": "ドードー",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q43502",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "raphus-cucullatus",
+      "locale": "pt-BR",
+      "name": "dodó",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q43502",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "raphus-cucullatus",
+      "locale": "ru-RU",
+      "name": "додо",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q43502",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "raphus-cucullatus",
+      "locale": "zh-CN",
+      "name": "渡渡鸟",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q43502",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "smilodon-populator",
+      "locale": "en-GB",
+      "name": "Smilodon",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=339609",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "smilodon-populator",
+      "locale": "zh-CN",
+      "name": "一般剑齿虎",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q1294271",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "thylacinus-cynocephalus",
+      "locale": "ar-SA",
+      "name": "ببر تسماني",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q123102",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "thylacinus-cynocephalus",
+      "locale": "de-DE",
+      "name": "Beutelwolf",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q123102",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "thylacinus-cynocephalus",
+      "locale": "en-GB",
+      "name": "Thylacine",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=9275",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "thylacinus-cynocephalus",
+      "locale": "es-ES",
+      "name": "Lobo de Tasamania",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q123102",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "thylacinus-cynocephalus",
+      "locale": "fr-FR",
+      "name": "Loup marsupial",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q123102",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "thylacinus-cynocephalus",
+      "locale": "hi-IN",
+      "name": "थायलेसीन",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q123102",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "thylacinus-cynocephalus",
+      "locale": "it-IT",
+      "name": "Tilacino",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q123102",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "thylacinus-cynocephalus",
+      "locale": "ja-JP",
+      "name": "フクロオオカミ",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q123102",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "thylacinus-cynocephalus",
+      "locale": "pt-BR",
+      "name": "Tigre da Tasmânia",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q123102",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "thylacinus-cynocephalus",
+      "locale": "ru-RU",
+      "name": "Сумчатый волк",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q123102",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "thylacinus-cynocephalus",
+      "locale": "zh-CN",
+      "name": "袋狼",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q123102",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ursus-spelaeus",
+      "locale": "ar-SA",
+      "name": "دب الكهوف",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188851",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ursus-spelaeus",
+      "locale": "de-DE",
+      "name": "Höhlenbär",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188851",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ursus-spelaeus",
+      "locale": "en-GB",
+      "name": "Cave bear",
+      "source": "biowiki_paleogenomics_catalogue",
+      "source_property": "curated_english_vernacular",
+      "source_url": "https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi?id=39097",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ursus-spelaeus",
+      "locale": "fr-FR",
+      "name": "ours des cavernes",
+      "source": "wikidata",
+      "source_property": "P1843",
+      "source_url": "https://www.wikidata.org/wiki/Q188851",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ursus-spelaeus",
+      "locale": "ja-JP",
+      "name": "ホラアナグマ",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188851",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ursus-spelaeus",
+      "locale": "pt-BR",
+      "name": "Urso-das-cavernas",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188851",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ursus-spelaeus",
+      "locale": "ru-RU",
+      "name": "Пещерный медведь",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188851",
+      "verification_status": "VERIFIED"
+    },
+    {
+      "slug": "ursus-spelaeus",
+      "locale": "zh-CN",
+      "name": "洞熊",
+      "source": "wikidata",
+      "source_property": "rdfs:label",
+      "source_url": "https://www.wikidata.org/wiki/Q188851",
+      "verification_status": "VERIFIED"
+    }
+  ]
+}

@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { LanguageSelector } from "@/components/i18n/LanguageSelector";
 import { Button } from "@/components/ui/Button";
 import { MenuIcon, SearchIcon } from "@/components/ui/Icons";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export interface NavItem {
   label: string;
@@ -33,6 +35,7 @@ export function Navbar({
   onMenuClick,
 }: NavbarProps) {
   const [scrolled, setScrolled] = useState(false);
+  const { t } = useLocale();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -80,24 +83,25 @@ export function Navbar({
         </ul>
 
         <div className="flex items-center gap-2">
+          <LanguageSelector />
           <Link href="/search" className="hidden sm:inline-flex">
             <Button
               variant="ghost"
               size="sm"
               leadingIcon={<SearchIcon className="h-4 w-4" />}
             >
-              Search
+              {t("actionSearch")}
             </Button>
           </Link>
-          <Link href="/dna" className="hidden sm:inline-flex">
+          <Link href="/dna" className="hidden md:inline-flex">
             <Button variant="primary" size="sm">
-              Explore
+              {t("actionExplore")}
             </Button>
           </Link>
           <button
             type="button"
             onClick={onMenuClick}
-            aria-label="Open menu"
+            aria-label={t("actionOpenMenu")}
             className="grid h-10 w-10 place-items-center border border-glass-border bg-glass-surface text-content-primary lg:hidden"
           >
             <MenuIcon className="h-5 w-5" />

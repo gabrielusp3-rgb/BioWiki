@@ -155,6 +155,11 @@ export interface PaleogenomicSpeciesDetail {
   slug: string;
   commonName: string;
   scientificName: string;
+  localizedCommonName?: string | null;
+  localizedCommonNameLocale?: string | null;
+  vernacularSource?: string | null;
+  vernacularSourceUrl?: string | null;
+  vernacularFallback?: boolean;
   taxId: number;
   subsection: string;
   organism: {

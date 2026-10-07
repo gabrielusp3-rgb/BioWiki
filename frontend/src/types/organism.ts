@@ -20,6 +20,11 @@ export interface Organism {
   slug: string;
   scientificName: string;
   commonName?: string;
+  localizedCommonName?: string | null;
+  localizedCommonNameLocale?: string | null;
+  vernacularSource?: string | null;
+  vernacularSourceUrl?: string | null;
+  vernacularFallback?: boolean;
   /** NCBI Taxonomy ID — the canonical, verifiable identifier. */
   taxId: number;
   rank: string;

@@ -21,6 +21,11 @@ class OrganismRead(CamelModel):
     extinction_date_text: str | None = None
     geologic_period: str | None = None
     paleogenomic_slug: str | None = None
+    localized_common_name: str | None = None
+    localized_common_name_locale: str | None = None
+    vernacular_source: str | None = None
+    vernacular_source_url: str | None = None
+    vernacular_fallback: bool = False
 
 
 class OrganismListResponse(CamelModel):

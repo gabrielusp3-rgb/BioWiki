@@ -8,6 +8,17 @@ describe("deriveGenomeOverviewStats", () => {
     { organism: "Fixture organism B" },
   ];
 
+  it("prefers the statistics category distinct-organism count over the current page", () => {
+    const stats = deriveGenomeOverviewStats(listed, 107, {
+      genomes: 107,
+      organisms: 1881,
+      genomeDistinctOrganisms: 34,
+    });
+    expect(stats.stored).toBe(107);
+    expect(stats.distinctOrganisms).toBe(34);
+    expect(stats.trackedOrganisms).toBe(1881);
+  });
+
   it("uses the live statistics total when assemblies exist", () => {
     const stats = deriveGenomeOverviewStats(listed, listed.length, {
       genomes: listed.length,
@@ -23,6 +34,6 @@ describe("deriveGenomeOverviewStats", () => {
     const stats = deriveGenomeOverviewStats(listed, 3, null);
     expect(stats.stored).toBe(3);
     expect(stats.distinctOrganisms).toBe(2);
-    expect(stats.trackedOrganisms).toBe(0);
+    expect(stats.trackedOrganisms).toBeNull();
   });
 });

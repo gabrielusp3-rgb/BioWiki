@@ -7,6 +7,7 @@ import { LiveCountsUnavailable } from "@/components/stats/LiveCountsUnavailable"
 import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { isApiConfigured } from "@/lib/api";
 import type { CategoryKey } from "@/lib/design-tokens";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { getStatistics } from "@/services/statisticsService";
 
 export interface PageMetaStat {
@@ -33,6 +34,7 @@ export function CategoryLiveStats({
 }) {
   const [items, setItems] = useState<PageMetaStat[] | null>(null);
   const [unavailable, setUnavailable] = useState(!isApiConfigured);
+  const { t } = useLocale();
 
   useEffect(() => {
     if (!isApiConfigured) return;
@@ -69,7 +71,7 @@ export function CategoryLiveStats({
           {
             id: "organisms-tracked",
             value: stats.organisms,
-            label: "Organisms tracked (database)",
+            label: t("statsOrganismsTracked"),
             testId: "live-count-organisms-tracked",
           },
         ]);
@@ -80,7 +82,7 @@ export function CategoryLiveStats({
         setUnavailable(true);
       });
     return () => controller.abort();
-  }, [organismLabel, primaryId, primaryKey, primaryLabel]);
+  }, [organismLabel, primaryId, primaryKey, primaryLabel, t]);
 
   if (unavailable) {
     return <LiveCountsUnavailable />;

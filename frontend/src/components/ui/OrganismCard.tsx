@@ -84,12 +84,20 @@ export function OrganismCard({ organism, className }: OrganismCardProps) {
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-col">
-            <h3 className="truncate font-display text-lg font-bold tracking-tightest text-content-primary">
-              {organism.commonName ?? organism.scientificName}
-            </h3>
-            <span className="truncate font-body text-sm italic text-content-secondary">
-              {organism.scientificName}
-            </span>
+            {organism.commonName && organism.commonName !== organism.scientificName ? (
+              <>
+                <h3 className="truncate font-display text-lg font-bold tracking-tightest text-content-primary">
+                  {organism.commonName}
+                </h3>
+                <span dir="ltr" className="truncate font-body text-sm italic text-content-secondary">
+                  {organism.scientificName}
+                </span>
+              </>
+            ) : (
+              <h3 dir="ltr" className="truncate font-body text-lg font-bold italic tracking-tightest text-content-primary">
+                {organism.scientificName}
+              </h3>
+            )}
           </div>
           <Badge
             tone="neutral"

@@ -19,6 +19,7 @@ from app.models.paleogenomics import (
 )
 from app.models.publication import Publication
 from app.models.sequence import Sequence
+from app.services.vernacular_service import vernacular_fields
 from app.schemas.paleogenomics import (
     PaleogenomicClaimRead,
     PaleogenomicClaimSourceRead,
@@ -280,7 +281,9 @@ async def list_species(
     }
 
 
-async def get_species(session: AsyncSession, slug: str) -> dict[str, Any] | None:
+async def get_species(
+    session: AsyncSession, slug: str, *, locale: str | None = None
+) -> dict[str, Any] | None:
     profile = (
         await session.execute(select(PaleogenomicProfile).where(PaleogenomicProfile.slug == slug))
     ).scalar_one_or_none()
@@ -352,6 +355,13 @@ async def get_species(session: AsyncSession, slug: str) -> dict[str, Any] | None
         "claims": claims,
         "introgression_count": intro_count,
         "introgression_note": intro_note,
+        **await vernacular_fields(
+            session,
+            org.id if org else None,
+            locale=locale,
+            english_name=profile.common_name,
+            scientific_name=org.scientific_name if org else profile.common_name,
+        ),
     }
 
 

@@ -135,6 +135,11 @@ class PaleogenomicSpeciesDetail(CamelModel):
     slug: str
     common_name: str
     scientific_name: str
+    localized_common_name: str | None = None
+    localized_common_name_locale: str | None = None
+    vernacular_source: str | None = None
+    vernacular_source_url: str | None = None
+    vernacular_fallback: bool = False
     tax_id: int
     subsection: str
     organism: OrganismRead

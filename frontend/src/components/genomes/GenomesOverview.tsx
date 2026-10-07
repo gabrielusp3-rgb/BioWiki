@@ -6,6 +6,8 @@ import { Button, Skeleton, StatCard } from "@/components/ui";
 import { ChevronRightIcon, ExternalIcon } from "@/components/ui/Icons";
 import { isApiConfigured } from "@/lib/api";
 import { deriveGenomeOverviewStats } from "@/lib/genome-stats";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import { LiveCountsUnavailable } from "@/components/stats/LiveCountsUnavailable";
 import { listGenomes } from "@/services/sequenceService";
 import { getStatistics } from "@/services/statisticsService";
 import type { GenomeAssembly } from "@/types/sequence";
@@ -21,7 +23,9 @@ export function GenomesOverview() {
   const [genomes, setGenomes] = useState<GenomeAssembly[] | null>(null);
   const [total, setTotal] = useState<number | null>(null);
   const [organisms, setOrganisms] = useState<number | null>(null);
+  const [distinctOrganisms, setDistinctOrganisms] = useState<number | null>(null);
   const [error, setError] = useState(false);
+  const { t } = useLocale();
 
   useEffect(() => {
     if (!isApiConfigured) return;
@@ -33,10 +37,16 @@ export function GenomesOverview() {
       .then(([page, stats]) => {
         if (controller.signal.aborted) return;
         const listed = page.results ?? [];
-        const derived = deriveGenomeOverviewStats(listed, page.total, stats);
+        const genomeCategory = stats?.categories?.find((category) => category.key === "genome");
+        const derived = deriveGenomeOverviewStats(listed, page.total, {
+          genomes: stats?.genomes,
+          organisms: stats?.organisms,
+          genomeDistinctOrganisms: genomeCategory?.distinctOrganisms,
+        });
         setGenomes(listed);
         setTotal(derived.stored);
         setOrganisms(derived.trackedOrganisms);
+        setDistinctOrganisms(derived.distinctOrganisms);
       })
       .catch(() => {
         if (!controller.signal.aborted) setError(true);
@@ -44,10 +54,8 @@ export function GenomesOverview() {
     return () => controller.abort();
   }, []);
 
-  const distinctOrganisms = genomes
-    ? deriveGenomeOverviewStats(genomes, total ?? 0, null).distinctOrganisms
-    : 0;
   const awaitingLive = isApiConfigured && !error && genomes === null;
+  const countsUnavailable = !isApiConfigured || error || distinctOrganisms === null || organisms === null || total === null;
 
   return (
     <div className="flex flex-col gap-10">
@@ -58,23 +66,27 @@ export function GenomesOverview() {
             <Skeleton height={140} />
             <Skeleton height={140} />
           </>
+        ) : countsUnavailable ? (
+          <div className="sm:col-span-3">
+            <LiveCountsUnavailable />
+          </div>
         ) : (
           <>
             <StatCard
-              value={total ?? 0}
-              label="Complete assemblies stored"
+              value={total}
+              label={t("statsAssembliesStored")}
               category="genome"
               index={1}
             />
             <StatCard
               value={distinctOrganisms}
-              label="Organisms with genome-level data"
+              label={t("statsGenomeOrganisms")}
               category="genome"
               index={2}
             />
             <StatCard
-              value={organisms ?? 0}
-              label="Organisms tracked (database)"
+              value={organisms}
+              label={t("statsOrganismsTracked")}
               category="genome"
               index={3}
             />

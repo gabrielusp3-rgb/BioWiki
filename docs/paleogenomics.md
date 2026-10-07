@@ -6,7 +6,7 @@ Ancient specimen DNA remains `dna` (or `rna` / `protein` when that is the authen
 
 ## Schema
 
-Alembic revision `0007_paleogenomics` adds:
+Alembic revision `0007_paleogenomics` adds the collection tables. Revision `0008_organism_vernacular` adds `organism_vernacular_names` (one organism, many verified locale names). `0007_paleogenomics` adds:
 
 - optional `organisms.extinction_status`, `extinction_date_text`, `geologic_period` (living taxa keep these NULL)
 - `paleogenomic_profiles` (1:1 with `organisms`)

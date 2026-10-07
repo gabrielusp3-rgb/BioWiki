@@ -7,6 +7,7 @@ import { ExternalIcon } from "@/components/ui/Icons";
 import { isApiConfigured } from "@/lib/api";
 import type { CategoryKey } from "@/lib/design-tokens";
 import { GROUP_COLOR, GROUP_LABEL, ncbiTaxonomyUrl } from "@/lib/organisms";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { formatStatistic } from "@/lib/statistics";
 import { getOrganism } from "@/services/organismService";
 import { listByOrganism, listGenomes } from "@/services/sequenceService";
@@ -64,6 +65,7 @@ function initials(name: string): string {
 }
 
 export function OrganismDetailContent({ identifier }: { identifier: string }) {
+  const { locale, t } = useLocale();
   const [status, setStatus] = useState<Status>("loading");
   const [organism, setOrganism] = useState<Organism | null>(null);
   const [sections, setSections] = useState<Partial<Record<string, CategoryData>>>({});
@@ -73,7 +75,7 @@ export function OrganismDetailContent({ identifier }: { identifier: string }) {
   useEffect(() => {
     const controller = new AbortController();
     setStatus("loading");
-    getOrganism(identifier, controller.signal)
+    getOrganism(identifier, controller.signal, locale)
       .then(async (record) => {
         if (controller.signal.aborted) return;
         if (record === null) {
@@ -115,7 +117,7 @@ export function OrganismDetailContent({ identifier }: { identifier: string }) {
         if (!controller.signal.aborted) setStatus("error");
       });
     return () => controller.abort();
-  }, [identifier]);
+  }, [identifier, locale]);
 
   if (status === "loading") {
     return (
@@ -211,10 +213,15 @@ export function OrganismDetailContent({ identifier }: { identifier: string }) {
               <ExternalIcon className="h-3.5 w-3.5" />
             </a>
           </div>
-          <h1 className="font-display text-3xl font-bold tracking-tightest text-content-primary">
-            {organism.commonName ?? organism.scientificName}
-          </h1>
-          <p className="font-body text-base italic text-content-secondary">
+          {organism.localizedCommonName || (organism.commonName && organism.commonName !== organism.scientificName) ? (
+            <h1 className="font-display text-3xl font-bold tracking-tightest text-content-primary" dir="auto">
+              {organism.localizedCommonName || organism.commonName}
+            </h1>
+          ) : null}
+          {organism.vernacularFallback && (
+            <p className="text-sm text-content-secondary">{t("paleoVernacularMissing")}</p>
+          )}
+          <p dir="ltr" className="font-body text-base italic text-content-secondary">
             {organism.scientificName}
           </p>
           {(organism.lineage ?? []).length > 0 && (

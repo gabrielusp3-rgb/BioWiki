@@ -7,22 +7,26 @@ import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button, Navbar } from "@/components/ui";
 import { CloseIcon } from "@/components/ui/Icons";
 import { drawerVariants, overlayVariants } from "@/lib/animations";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import type { MessageKey } from "@/lib/i18n/messages";
 
-const NAV_ITEMS = [
-  { label: "DNA", href: "/dna" },
-  { label: "RNA", href: "/rna" },
-  { label: "Proteins", href: "/proteins" },
-  { label: "CRISPR", href: "/crispr" },
-  { label: "Genomes", href: "/genomes" },
-  { label: "Virus", href: "/virus" },
-  { label: "Organisms", href: "/organisms" },
-  { label: "Paleogenomics", href: "/paleogenomics" },
-  { label: "Publications", href: "/publications" },
-  { label: "Downloads", href: "/downloads" },
+const NAV_ITEMS: { href: string; labelKey: MessageKey }[] = [
+  { labelKey: "navDna", href: "/dna" },
+  { labelKey: "navRna", href: "/rna" },
+  { labelKey: "navProteins", href: "/proteins" },
+  { labelKey: "navCrispr", href: "/crispr" },
+  { labelKey: "navGenomes", href: "/genomes" },
+  { labelKey: "navVirus", href: "/virus" },
+  { labelKey: "navOrganisms", href: "/organisms" },
+  { labelKey: "navPaleogenomics", href: "/paleogenomics" },
+  { labelKey: "navPublications", href: "/publications" },
+  { labelKey: "navDownloads", href: "/downloads" },
 ];
 
 export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {
   const [open, setOpen] = useState(false);
+  const { t } = useLocale();
+  const items = NAV_ITEMS.map((item) => ({ href: item.href, label: t(item.labelKey) }));
 
   useEffect(() => {
     if (!open) return;
@@ -38,7 +42,7 @@ export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {
 
   return (
     <>
-      <Navbar items={NAV_ITEMS} activeHref={activeHref} onMenuClick={() => setOpen(true)} />
+      <Navbar items={items} activeHref={activeHref} onMenuClick={() => setOpen(true)} />
 
       <AnimatePresence>
         {open && (
@@ -65,7 +69,7 @@ export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  aria-label="Close menu"
+                  aria-label={t("actionCloseMenu")}
                   className="grid h-9 w-9 place-items-center border border-glass-border text-content-secondary hover:text-content-primary"
                 >
                   <CloseIcon className="h-5 w-5" />
@@ -73,7 +77,7 @@ export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {
               </div>
 
               <div className="flex flex-1 flex-col gap-0.5 overflow-y-auto p-4">
-                {NAV_ITEMS.map((item) => (
+                {items.map((item) => (
                   <Link
                     key={item.href}
                     href={item.href}
@@ -88,12 +92,12 @@ export function SiteHeader({ activeHref = "/" }: { activeHref?: string }) {
               <div className="flex flex-col gap-3 border-t border-glass-divider p-4">
                 <Link href="/search" onClick={() => setOpen(false)}>
                   <Button variant="outline" fullWidth>
-                    Search
+                    {t("actionSearch")}
                   </Button>
                 </Link>
                 <Link href="/dna" onClick={() => setOpen(false)}>
                   <Button variant="primary" fullWidth>
-                    Explore Database
+                    {t("actionExploreDatabase")}
                   </Button>
                 </Link>
               </div>

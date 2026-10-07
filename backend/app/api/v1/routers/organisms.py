@@ -42,8 +42,15 @@ async def list_organisms(
     summary="Get an organism by slug, NCBI tax ID or internal ID",
 )
 async def get_organism(
-    identifier: OrganismIdPath, session: AsyncSession = Depends(get_session)
+    identifier: OrganismIdPath,
+    locale: str | None = Query(None, max_length=16),
+    session: AsyncSession = Depends(get_session),
 ):
+    from app.pipeline.paleogenomics.vernacular import locale_or_none
+    from app.services.vernacular_service import vernacular_fields
+
+    if locale is not None and locale_or_none(locale) is None:
+        raise HTTPException(status_code=400, detail="Unsupported locale")
     org = await organism_service.get_by_identifier(session, identifier)
     if org is None:
         raise HTTPException(status_code=404, detail="Organism not found")
@@ -53,4 +60,12 @@ async def get_organism(
         slugs = await paleogenomics_service.slugs_by_organism_ids(session, [org.id])
     except Exception:
         slugs = {}
-    return mappers.to_organism(org, paleogenomic_slug=slugs.get(org.id))
+    payload = mappers.to_organism(org, paleogenomic_slug=slugs.get(org.id))
+    names = await vernacular_fields(
+        session,
+        org.id,
+        locale=locale,
+        english_name=org.common_name,
+        scientific_name=org.scientific_name,
+    )
+    return payload.model_copy(update=names)
