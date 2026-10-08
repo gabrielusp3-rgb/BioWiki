@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CHROME } from "@/lib/i18n/chrome";
 import { LOCALES } from "@/lib/i18n/locales";
+import { lookup } from "@/lib/i18n/lookup";
 
 const MUST_LOCALIZE = [
   "aboutTitle",
@@ -20,6 +21,13 @@ describe("chrome translations", () => {
         expect(CHROME[locale.code][key], `${locale.code} ${key}`).not.toBe(CHROME["en-GB"][key]);
       }
     }
+  });
+
+  it("resolves chrome copy that is not a navigation message", () => {
+    expect(lookup("en-GB", "introTitle")).toBe("Archaic introgression in living humans");
+    expect(lookup("es-ES", "aboutEyebrow")).toBe("Acerca de");
+    expect(lookup("pt-BR", "introTitle").length).toBeGreaterThan(0);
+    expect(lookup("en-GB", "languageMenu")).toBe("Language");
   });
 
   it("keeps Homo sapiens as an identifier inside the example placeholder", () => {

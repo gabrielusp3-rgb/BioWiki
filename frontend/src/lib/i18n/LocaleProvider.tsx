@@ -2,9 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { MESSAGES, type MessageKey } from "@/lib/i18n/messages";
-import { chromeText, type ChromeKey } from "@/lib/i18n/chrome";
-import { surfaceText, type SurfaceKey } from "@/lib/i18n/surface";
+import { type ChromeKey } from "@/lib/i18n/chrome";
+import { lookup } from "@/lib/i18n/lookup";
+import { type MessageKey } from "@/lib/i18n/messages";
+import { type SurfaceKey } from "@/lib/i18n/surface";
 import {
   DEFAULT_LOCALE,
   LOCALE_COOKIE,
@@ -30,61 +31,6 @@ function applyDocumentLocale(locale: LocaleCode) {
   document.documentElement.lang = locale;
   document.documentElement.dir = directionOf(locale);
 }
-
-function lookup(locale: LocaleCode, key: MessageKey | SurfaceKey | ChromeKey): string {
-  if (key in MESSAGES[locale]) return MESSAGES[locale][key as MessageKey];
-  if (key in CHROME_KEYS) return chromeText(locale, key as ChromeKey);
-  return surfaceText(locale, key as SurfaceKey);
-}
-
-const CHROME_KEYS = new Set<string>([
-  "aboutEyebrow",
-  "aboutTitle",
-  "aboutLead",
-  "aboutP1",
-  "aboutP2",
-  "aboutP3",
-  "licenseEyebrow",
-  "licenseTitle",
-  "licenseLead",
-  "licenseConnectors",
-  "licenseRelated",
-  "srcNcbi",
-  "srcUniprot",
-  "srcEnsembl",
-  "srcPdb",
-  "srcEna",
-  "srcRfam",
-  "srcDdbj",
-  "docsEyebrow",
-  "docsTitle",
-  "docsLead",
-  "docsBrowse",
-  "docsBrowseBody",
-  "docsApi",
-  "docsApiBody",
-  "docsIntegrity",
-  "docsIntegrityBody",
-  "docsExport",
-  "docsExportBody",
-  "introEyebrow",
-  "introTitle",
-  "introDescription",
-  "globalEyebrow",
-  "globalTitle",
-  "phExample",
-  "phProteins",
-  "phRna",
-  "phPublications",
-  "phOrganisms",
-  "phSearchBar",
-  "close",
-  "fullscreen",
-  "closeDialog",
-  "profileSections",
-  "sourceNarrative",
-  "sourceNarrativeNote",
-]);
 
 export function LocaleProvider({
   initialLocale,

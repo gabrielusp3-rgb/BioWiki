@@ -28,5 +28,5 @@ test("language menu lists eleven locales and Arabic switches direction", async (
   await menu.getByTestId("locale-ar-SA").click();
   await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   await expect(page.locator("html")).toHaveAttribute("lang", "ar-SA");
-  await expect(selector).toContainText("العربية");
+  await expect(selector).toHaveAttribute("aria-label", /العربية/);
 });
