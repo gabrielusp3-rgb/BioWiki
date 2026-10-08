@@ -6,6 +6,12 @@ BioWiki is a catalogue of real molecular sequences: DNA, RNA, proteins, CRISPR g
 
 **Repository:** [github.com/gabrielusp3-rgb/BioWiki](https://github.com/gabrielusp3-rgb/BioWiki)
 
+## Related project
+
+HelixScope is a separate scientific analysis workstation for sequence and structure analysis. BioWiki does not call it, and the two applications do not share a database.
+
+https://github.com/gabrielusp3-rgb/helixscope
+
 ---
 
 ## Use BioWiki
