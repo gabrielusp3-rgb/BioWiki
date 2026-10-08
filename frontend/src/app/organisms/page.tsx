@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Container, Section } from "@/components/ui";
 import { OrganismsExplorer } from "@/components/organisms/OrganismsExplorer";
+import { PageIntro } from "@/components/i18n/PageIntro";
 
 export const metadata: Metadata = {
   title: "Organisms",
@@ -17,11 +18,8 @@ export default function OrganismsPage() {
       <SiteHeader activeHref="/organisms" />
       <main id="main" className="pt-16">
         <Container width="wide">
-          <Section
-            eyebrow="Taxonomy · NCBI"
-            title="Organism catalogue"
-            description="Every organism is identified by a real NCBI Taxonomy ID. Sequence counts are live aggregates from stored records — never estimates."
-          >
+          <Section>
+            <PageIntro eyebrow="orgEyebrow" title="orgTitle" description="orgDescription" />
             <OrganismsExplorer />
           </Section>
         </Container>

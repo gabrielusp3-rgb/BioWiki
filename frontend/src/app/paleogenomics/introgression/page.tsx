@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Container, Section } from "@/components/ui";
 import { IntrogressionExplorer } from "@/components/paleogenomics/IntrogressionExplorer";
+import { PageIntro } from "@/components/i18n/PageIntro";
 
 export const metadata: Metadata = {
   title: "Archaic introgression · Paleogenomics",
@@ -17,11 +18,8 @@ export default function PaleogenomicsIntrogressionPage() {
       <SiteHeader activeHref="/paleogenomics" />
       <main id="main" className="pt-16">
         <Container width="wide">
-          <Section
-            eyebrow="Paleogenomics · Living Homo sapiens"
-            title="Archaic introgression in living humans"
-            description="These loci are genomic segments in present-day humans with published evidence of Neanderthal or Denisovan ancestry. They are not samples taken from an archaic bone."
-          >
+          <Section>
+            <PageIntro eyebrow="introEyebrow" title="introTitle" description="introDescription" />
             <IntrogressionExplorer />
           </Section>
         </Container>

@@ -15,7 +15,7 @@ import type { Organism, OrganismGroup } from "@/types/organism";
 const GROUPS: OrganismGroup[] = ["animal", "plant", "fungus", "bacteria", "archaea", "virus", "protozoan"];
 
 export function OrganismsExplorer() {
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
   const [organisms, setOrganisms] = useState<Organism[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -63,7 +63,7 @@ export function OrganismsExplorer() {
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search organisms by scientific name, common name or NCBI tax id…"
+          placeholder={t("phOrganisms")}
           className="h-14 w-full bg-transparent font-body text-base text-content-primary outline-none placeholder:text-content-muted"
         />
         {query && (

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import sys
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
@@ -27,14 +28,14 @@ LANGS = ("pt", "pt-br", "en", "es", "de", "it", "zh", "zh-hans", "ja", "ar", "fr
 CHUNK = 40
 
 
-def _wikidata(tax_ids: list[int]) -> list[dict[str, str]]:
+def _wikidata(tax_ids: list[int], *, labels: bool) -> list[dict[str, str]]:
     values = " ".join(f'"{tax_id}"' for tax_id in tax_ids)
     lang_filter = ", ".join(f'"{lang}"' for lang in LANGS)
     sparql = f"""
 SELECT ?tax ?item ?name ?lang WHERE {{
   VALUES ?tax {{ {values} }}
   ?item wdt:P685 ?tax .
-  ?item wdt:P1843 ?name .
+  {"?item rdfs:label ?name ." if labels else "?item wdt:P1843 ?name ."}
   BIND(LANG(?name) AS ?lang)
   FILTER(?lang IN ({lang_filter}))
 }}
@@ -115,7 +116,7 @@ async def main() -> int:
         chunk = tax_ids[start : start + CHUNK]
         print(f"wikidata {start + 1}-{start + len(chunk)} / {len(tax_ids)}", flush=True)
         try:
-            hits = _wikidata(chunk)
+            hits = _wikidata(chunk, labels="--labels" in sys.argv)
         except Exception as exc:
             print(f"wikidata chunk failed: {type(exc).__name__}", flush=True)
             continue

@@ -3,6 +3,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Container, Section } from "@/components/ui";
 import { DownloadsSection } from "@/components/sections/DownloadsSection";
+import { PageIntro } from "@/components/i18n/PageIntro";
 
 export const metadata: Metadata = {
   title: "Downloads",
@@ -17,11 +18,8 @@ export default function DownloadsPage() {
       <SiteHeader activeHref="/downloads" />
       <main id="main" className="pt-16">
         <Container width="wide">
-          <Section
-            eyebrow="Bulk data"
-            title="Downloads"
-            description="Export real records in standard formats. Files are generated on demand from the live database."
-          >
+          <Section>
+            <PageIntro eyebrow="dlEyebrow" title="dlTitle" description="dlDescription" />
             <DownloadsSection />
           </Section>
         </Container>

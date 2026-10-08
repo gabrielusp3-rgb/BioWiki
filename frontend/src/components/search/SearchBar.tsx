@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/cn";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { Badge, Skeleton, Tag } from "@/components/ui";
 import { SearchIcon, ChevronRightIcon } from "@/components/ui/Icons";
 import { SearchFilters } from "@/components/search/SearchFilters";
@@ -97,6 +98,7 @@ export interface SearchBarProps {
 }
 
 export function SearchBar({ initialQuery = "" }: SearchBarProps = {}) {
+  const { t } = useLocale();
   const {
     query,
     setQuery,
@@ -172,7 +174,7 @@ export function SearchBar({ initialQuery = "" }: SearchBarProps = {}) {
           aria-expanded={showDropdown}
           aria-controls={listId}
           aria-autocomplete="list"
-          placeholder="Search genes, proteins, accessions, organisms, taxonomy…"
+          placeholder={t("phSearchBar")}
           className="h-16 w-full bg-transparent font-body text-base text-content-primary outline-none placeholder:text-content-muted"
         />
         {query && (

@@ -47,9 +47,10 @@ function ClaimBlock({ claim }: { claim: PaleogenomicClaim }) {
           {labelOf(evidenceLabels, claim.evidenceLevel)}
         </span>
       </div>
-      <p className="whitespace-pre-wrap text-sm leading-relaxed text-content-secondary">
+      <p className="whitespace-pre-wrap text-sm leading-relaxed text-content-secondary" dir="auto">
         {claim.body}
       </p>
+      <p className="text-xs text-content-muted">{t("sourceNarrativeNote")}</p>
       {claim.sources.length > 0 && (
         <ul className="flex flex-col gap-2 border-t border-glass-divider pt-3 text-xs">
           {claim.sources.map((source, index) => {
@@ -301,7 +302,7 @@ export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
         </div>
       </header>
 
-      <nav aria-label="Profile sections" className="flex flex-wrap gap-2">
+      <nav aria-label={t("profileSections")} className="flex flex-wrap gap-2">
         {detail.claims.map((claim) => (
           <a
             key={claim.sectionKey}

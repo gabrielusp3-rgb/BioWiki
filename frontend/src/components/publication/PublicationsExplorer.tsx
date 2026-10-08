@@ -6,6 +6,7 @@ import { SearchIcon } from "@/components/ui/Icons";
 import { cn } from "@/lib/cn";
 import { formatStatistic } from "@/lib/statistics";
 import { usePublications } from "@/hooks/usePublications";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Publication } from "@/types/publication";
 
 function authorsLine(publication: Publication): string {
@@ -62,6 +63,7 @@ function PublicationRow({ publication }: { publication: Publication }) {
 }
 
 export function PublicationsExplorer() {
+  const { t } = useLocale();
   const pubs = usePublications();
   const from = pubs.pageIndex * pubs.pageSize + 1;
   const to = pubs.pageIndex * pubs.pageSize + pubs.results.length;
@@ -78,8 +80,8 @@ export function PublicationsExplorer() {
         <input
           value={pubs.query}
           onChange={(e) => pubs.setQuery(e.target.value)}
-          placeholder="Search publications by title, abstract or PMID…"
-          aria-label="Search publications"
+          placeholder={t("phPublications")}
+          aria-label={t("phPublications")}
           className="h-14 w-full bg-transparent font-body text-base text-content-primary outline-none placeholder:text-content-muted"
         />
         {pubs.query && (

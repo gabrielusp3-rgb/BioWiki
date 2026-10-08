@@ -28,6 +28,11 @@ export function LanguageSelector() {
     };
   }, [open]);
 
+  function move(from: number, delta: number) {
+    const next = (from + delta + LOCALES.length) % LOCALES.length;
+    setLocale(LOCALES[next].code);
+  }
+
   return (
     <div ref={rootRef} className="relative">
       <button
@@ -38,12 +43,17 @@ export function LanguageSelector() {
         aria-controls={listId}
         aria-label={`${t("languageMenu")}: ${current.name}`}
         onClick={() => setOpen((value) => !value)}
-        className="flex h-10 items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-2 pe-3 text-content-primary shadow-[0_8px_24px_rgba(0,0,0,0.25)] backdrop-blur-md transition-colors hover:border-white/30 hover:bg-white/[0.1]"
+        onKeyDown={(event) => {
+          if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            setOpen(true);
+            const index = LOCALES.findIndex((item) => item.code === locale);
+            move(index, event.key === "ArrowDown" ? 1 : -1);
+          }
+        }}
+        className="grid h-11 w-11 place-items-center rounded-xl border border-white/18 bg-white/[0.06] text-content-primary shadow-[inset_0_1px_0_rgba(255,255,255,0.35),0_10px_24px_rgba(0,0,0,0.35)] backdrop-blur-md transition duration-200 hover:-translate-y-px hover:border-cyan-200/35 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_0_18px_rgba(0,242,255,0.16)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 motion-reduce:transform-none motion-reduce:transition-none"
       >
-        <FlagMark code={current.code} size={28} />
-        <span className="max-w-[5.5rem] truncate font-display text-[11px] font-medium tracking-wide sm:max-w-none">
-          {current.name}
-        </span>
+        <FlagMark code={current.code} size={26} />
       </button>
       {open && (
         <ul
@@ -51,7 +61,7 @@ export function LanguageSelector() {
           role="listbox"
           aria-label={t("languageMenu")}
           data-testid="language-menu"
-          className="absolute end-0 z-[260] mt-2 max-h-[min(70dvh,32rem)] w-[17.5rem] overflow-auto rounded-2xl border border-white/20 bg-black/70 p-2 shadow-[0_18px_48px_rgba(0,0,0,0.5)] backdrop-blur-xl"
+          className="absolute end-0 z-[260] mt-2 max-h-[min(70dvh,26rem)] w-56 origin-top overflow-auto rounded-xl border border-white/15 bg-black/55 p-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.16),0_18px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl"
         >
           {LOCALES.map((item) => {
             const selected = item.code === locale;
@@ -66,13 +76,13 @@ export function LanguageSelector() {
                     setLocale(item.code);
                     setOpen(false);
                   }}
-                  className={`flex w-full items-center gap-2 rounded-full px-1.5 py-1.5 text-start text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 ${
+                  className={`flex w-full items-center gap-3 rounded-lg px-2 py-1.5 text-start text-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 motion-reduce:transition-none ${
                     selected
-                      ? "bg-white/10 text-content-primary"
+                      ? "bg-white/12 text-content-primary shadow-[inset_0_0_0_1px_rgba(0,242,255,0.28)]"
                       : "text-content-secondary hover:bg-white/[0.06] hover:text-content-primary"
                   }`}
                 >
-                  <FlagMark code={item.code} size={32} />
+                  <FlagMark code={item.code} size={28} />
                   <span className="truncate">{item.name}</span>
                 </button>
               </li>

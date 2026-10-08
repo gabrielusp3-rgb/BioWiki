@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale } from "@/lib/i18n/LocaleProvider";
+import type { ChromeKey } from "@/lib/i18n/chrome";
 import type { SurfaceKey } from "@/lib/i18n/surface";
 
 export function PageIntro({
@@ -8,9 +9,9 @@ export function PageIntro({
   title,
   description,
 }: {
-  eyebrow: SurfaceKey;
-  title: SurfaceKey;
-  description?: SurfaceKey;
+  eyebrow: SurfaceKey | ChromeKey;
+  title: SurfaceKey | ChromeKey;
+  description?: SurfaceKey | ChromeKey;
 }) {
   const { t } = useLocale();
   return (

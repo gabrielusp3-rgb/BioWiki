@@ -8,6 +8,7 @@ import {
   STRAND_OPTIONS,
 } from "@/lib/dna";
 import type { DnaFilters as Filters, DnaMoleculeType, Strand } from "@/types/dna";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 interface DNAFiltersProps {
   filters: Filters;
@@ -28,6 +29,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 }
 
 export function DNAFilters({ filters, onChange, onReset }: DNAFiltersProps) {
+  const { t } = useLocale();
   const handleNumber =
     (key: "minLength" | "maxLength") => (event: ChangeEvent<HTMLInputElement>) => {
       const raw = event.target.value;
@@ -40,7 +42,7 @@ export function DNAFilters({ filters, onChange, onReset }: DNAFiltersProps) {
         <input
           value={filters.organism}
           onChange={(e) => onChange({ ...filters, organism: e.target.value })}
-          placeholder="e.g. Homo sapiens"
+          placeholder={t("phExample")}
           className={fieldClass}
         />
       </Field>
