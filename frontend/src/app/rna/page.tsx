@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Container, Section } from "@/components/ui";
 import { RNAStats } from "@/components/rna/RNAStats";
 import { RNAExplorer } from "@/components/rna/RNAExplorer";
+import { PageIntro } from "@/components/i18n/PageIntro";
 
 export const metadata: Metadata = {
   title: "RNA Sequences",
@@ -19,11 +20,8 @@ export default function RnaPage() {
       <SiteHeader activeHref="/rna" />
       <main id="main" className="pt-16">
         <Container width="wide">
-          <Section
-            eyebrow="RNA · Ribonucleic acid"
-            title="RNA sequence database"
-            description="Transcripts spanning mRNA, tRNA, rRNA and regulatory RNA classes from internationally recognised public databases — searchable, filterable and downloadable in FASTA, JSON and CSV."
-          >
+          <Section>
+            <PageIntro eyebrow="rnaEyebrow" title="rnaTitle" description="rnaDescription" />
             <div className="flex flex-col gap-10">
               <RNAStats />
               <Suspense fallback={null}>

@@ -25,7 +25,12 @@ async def _with_paleo_slugs(session: AsyncSession, rows: list[Organism]) -> list
 
 
 async def list_organisms(
-    session: AsyncSession, *, group: str | None, limit: int, cursor: str | None
+    session: AsyncSession,
+    *,
+    group: str | None,
+    limit: int,
+    cursor: str | None,
+    locale: str | None = None,
 ) -> dict[str, Any]:
     stmt = select(Organism)
     if group:
@@ -41,14 +46,17 @@ async def list_organisms(
     rows = list((await session.execute(stmt)).scalars().all())
     has_more = len(rows) > limit
     rows = rows[:limit]
+    from app.services.vernacular_service import attach_localized_names
+
+    listed = await _with_paleo_slugs(session, rows)
     return {
-        "organisms": await _with_paleo_slugs(session, rows),
+        "organisms": await attach_localized_names(session, listed, locale),
         "total": total,
         "next_cursor": encode_cursor(offset + limit) if has_more else None,
     }
 
 
-async def featured(session: AsyncSession, *, limit: int) -> dict[str, Any]:
+async def featured(session: AsyncSession, *, limit: int, locale: str | None = None) -> dict[str, Any]:
     stmt = (
         select(Organism)
         .where(Organism.sequence_count.isnot(None), Organism.sequence_count > 0)
@@ -56,8 +64,11 @@ async def featured(session: AsyncSession, *, limit: int) -> dict[str, Any]:
         .limit(limit)
     )
     rows = list((await session.execute(stmt)).scalars().all())
+    from app.services.vernacular_service import attach_localized_names
+
+    listed = await _with_paleo_slugs(session, rows)
     return {
-        "organisms": await _with_paleo_slugs(session, rows),
+        "organisms": await attach_localized_names(session, listed, locale),
         "total": len(rows),
         "next_cursor": None,
     }

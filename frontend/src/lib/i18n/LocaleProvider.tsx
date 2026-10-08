@@ -1,7 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { MESSAGES, type MessageKey } from "@/lib/i18n/messages";
+import { surfaceText, type SurfaceKey } from "@/lib/i18n/surface";
 import {
   DEFAULT_LOCALE,
   LOCALE_COOKIE,
@@ -13,7 +15,7 @@ import {
 interface LocaleContextValue {
   locale: LocaleCode;
   setLocale: (locale: LocaleCode) => void;
-  t: (key: MessageKey) => string;
+  t: (key: MessageKey | SurfaceKey) => string;
   dir: "ltr" | "rtl";
 }
 
@@ -35,6 +37,7 @@ export function LocaleProvider({
   initialLocale?: string | null;
   children: React.ReactNode;
 }) {
+  const router = useRouter();
   const [locale, setLocaleState] = useState<LocaleCode>(parseLocale(initialLocale));
 
   useEffect(() => {
@@ -45,15 +48,19 @@ export function LocaleProvider({
     return {
       locale,
       dir: directionOf(locale),
-      t: (key) => MESSAGES[locale][key],
+      t: (key) =>
+        key in MESSAGES[locale]
+          ? MESSAGES[locale][key as MessageKey]
+          : surfaceText(locale, key as SurfaceKey),
       setLocale: (next) => {
         const parsed = parseLocale(next);
         setLocaleState(parsed);
         writeLocaleCookie(parsed);
         applyDocumentLocale(parsed);
+        router.refresh();
       },
     };
-  }, [locale]);
+  }, [locale, router]);
 
   return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
@@ -64,7 +71,10 @@ export function useLocale(): LocaleContextValue {
   return {
     locale: DEFAULT_LOCALE,
     dir: "ltr",
-    t: (key) => MESSAGES[DEFAULT_LOCALE][key],
+    t: (key) =>
+      key in MESSAGES[DEFAULT_LOCALE]
+        ? MESSAGES[DEFAULT_LOCALE][key as MessageKey]
+        : surfaceText(DEFAULT_LOCALE, key as SurfaceKey),
     setLocale: () => undefined,
   };
 }

@@ -5,6 +5,7 @@ import { SiteFooter } from "@/components/layout/SiteFooter";
 import { Container, Section } from "@/components/ui";
 import { DNAStats } from "@/components/dna/DNAStats";
 import { DNAExplorer } from "@/components/dna/DNAExplorer";
+import { PageIntro } from "@/components/i18n/PageIntro";
 
 export const metadata: Metadata = {
   title: "DNA Sequences",
@@ -19,11 +20,8 @@ export default function DnaPage() {
       <SiteHeader activeHref="/dna" />
       <main id="main" className="pt-16">
         <Container width="wide">
-          <Section
-            eyebrow="DNA · Deoxyribonucleic acid"
-            title="DNA sequence database"
-            description="Genomic, coding and regulatory nucleotide sequences from internationally recognised public databases — searchable, filterable and downloadable in FASTA, JSON and CSV."
-          >
+          <Section>
+            <PageIntro eyebrow="dnaEyebrow" title="dnaTitle" description="dnaDescription" />
             <div className="flex flex-col gap-10">
               <DNAStats />
               <Suspense fallback={null}>

@@ -32,13 +32,14 @@ function normalizeOrganism(raw: Organism): Organism {
 export async function getFeaturedOrganisms(
   limit = 12,
   signal?: AbortSignal,
+  locale?: string,
 ): Promise<Organism[]> {
   if (!isApiConfigured) {
     return REFERENCE_ORGANISMS.slice(0, limit);
   }
 
   const response = await apiGet<OrganismListResponse>("/organisms/featured", {
-    params: { limit },
+    params: { limit, locale },
     signal,
   });
   const organisms = response.organisms.map(normalizeOrganism);
@@ -49,14 +50,14 @@ export async function getFeaturedOrganisms(
 
 /** Paginated organism listing — prepared for hundreds of organisms. */
 export async function listOrganisms(
-  options: { limit?: number; cursor?: string; group?: string; signal?: AbortSignal } = {},
+  options: { limit?: number; cursor?: string; group?: string; locale?: string; signal?: AbortSignal } = {},
 ): Promise<OrganismListResponse> {
-  const { limit = 60, cursor, group, signal } = options;
+  const { limit = 60, cursor, group, locale, signal } = options;
   if (!isApiConfigured) {
     return { organisms: REFERENCE_ORGANISMS, total: REFERENCE_ORGANISMS.length };
   }
   const response = await apiGet<OrganismListResponse>("/organisms", {
-    params: { limit, cursor, group },
+    params: { limit, cursor, group, locale },
     signal,
   });
   return { ...response, organisms: response.organisms.map(normalizeOrganism) };

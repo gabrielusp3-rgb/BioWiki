@@ -1,21 +1,9 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { FlagMark } from "@/components/i18n/FlagMark";
 import { LOCALES, localeMeta } from "@/lib/i18n/locales";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
-
-function FlagDisc({ flag }: { flag: string }) {
-  return (
-    <span
-      aria-hidden
-      className="grid h-7 w-7 shrink-0 place-items-center rounded-full border border-white/25 bg-white/[0.04] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
-    >
-      <span className="grid h-5 w-5 place-items-center overflow-hidden rounded-full text-[15px] leading-none">
-        {flag}
-      </span>
-    </span>
-  );
-}
 
 export function LanguageSelector() {
   const { locale, setLocale, t } = useLocale();
@@ -52,7 +40,7 @@ export function LanguageSelector() {
         onClick={() => setOpen((value) => !value)}
         className="flex h-10 items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-2 pe-3 text-content-primary shadow-[0_8px_24px_rgba(0,0,0,0.25)] backdrop-blur-md transition-colors hover:border-white/30 hover:bg-white/[0.1]"
       >
-        <FlagDisc flag={current.flag} />
+        <FlagMark code={current.code} size={28} />
         <span className="max-w-[5.5rem] truncate font-display text-[11px] font-medium tracking-wide sm:max-w-none">
           {current.name}
         </span>
@@ -63,7 +51,7 @@ export function LanguageSelector() {
           role="listbox"
           aria-label={t("languageMenu")}
           data-testid="language-menu"
-          className="absolute end-0 z-[260] mt-2 max-h-[min(70vh,28rem)] w-56 overflow-auto rounded-2xl border border-white/15 bg-black/55 p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.45)] backdrop-blur-xl"
+          className="absolute end-0 z-[260] mt-2 max-h-[min(70dvh,32rem)] w-[17.5rem] overflow-auto rounded-2xl border border-white/20 bg-black/70 p-2 shadow-[0_18px_48px_rgba(0,0,0,0.5)] backdrop-blur-xl"
         >
           {LOCALES.map((item) => {
             const selected = item.code === locale;
@@ -84,7 +72,7 @@ export function LanguageSelector() {
                       : "text-content-secondary hover:bg-white/[0.06] hover:text-content-primary"
                   }`}
                 >
-                  <FlagDisc flag={item.flag} />
+                  <FlagMark code={item.code} size={32} />
                   <span className="truncate">{item.name}</span>
                 </button>
               </li>

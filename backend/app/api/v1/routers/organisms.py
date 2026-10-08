@@ -17,9 +17,14 @@ router = APIRouter(tags=["organisms"], dependencies=[Depends(api_key_guard)])
 )
 async def featured_organisms(
     limit: int = Query(12, ge=1, le=100),
+    locale: str | None = Query(None, max_length=16),
     session: AsyncSession = Depends(get_session),
 ):
-    return await organism_service.featured(session, limit=limit)
+    from app.pipeline.paleogenomics.vernacular import locale_or_none
+
+    if locale is not None and locale_or_none(locale) is None:
+        raise HTTPException(status_code=400, detail="Unsupported locale")
+    return await organism_service.featured(session, limit=limit, locale=locale)
 
 
 @router.get(
@@ -29,10 +34,15 @@ async def list_organisms(
     group: str | None = Query(None, max_length=64, description="Filter by organism group."),
     limit: int = Query(20, ge=1, le=100),
     cursor: str | None = Query(None, max_length=64),
+    locale: str | None = Query(None, max_length=16),
     session: AsyncSession = Depends(get_session),
 ):
+    from app.pipeline.paleogenomics.vernacular import locale_or_none
+
+    if locale is not None and locale_or_none(locale) is None:
+        raise HTTPException(status_code=400, detail="Unsupported locale")
     return await organism_service.list_organisms(
-        session, group=group, limit=limit, cursor=cursor
+        session, group=group, limit=limit, cursor=cursor, locale=locale
     )
 
 

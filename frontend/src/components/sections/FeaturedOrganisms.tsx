@@ -10,6 +10,7 @@ import { getFeaturedOrganisms } from "@/services/organismService";
 import { isApiConfigured } from "@/lib/api";
 import { REFERENCE_ORGANISMS } from "@/lib/organisms";
 import type { Organism } from "@/types/organism";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export interface FeaturedOrganismsProps {
   limit?: number;
@@ -22,24 +23,25 @@ export function FeaturedOrganisms({ limit = 8, organisms }: FeaturedOrganismsPro
     organisms ?? (isApiConfigured ? [] : REFERENCE_ORGANISMS.slice(0, limit)),
   );
   const [loading, setLoading] = useState(organisms ? false : isApiConfigured);
+  const { locale, t } = useLocale();
 
   useEffect(() => {
     if (organisms || !isApiConfigured) return;
     const controller = new AbortController();
     setLoading(true);
-    getFeaturedOrganisms(limit, controller.signal)
+    getFeaturedOrganisms(limit, controller.signal, locale)
       .then((data) => setItems(data))
       .catch(() => setItems(REFERENCE_ORGANISMS.slice(0, limit)))
       .finally(() => setLoading(false));
     return () => controller.abort();
-  }, [limit, organisms]);
+  }, [limit, locale, organisms]);
 
   return (
     <Container width="wide">
       <Section
-        eyebrow="Featured Organisms"
-        title="Life across the tree of biology"
-        description="Model organisms and reference species with canonical NCBI taxonomy. Sequence totals are served directly from the database."
+        eyebrow={t("featEyebrow")}
+        title={t("featTitle")}
+        description={t("featDescription")}
       >
         <div className="mb-8 flex justify-end">
           <Link href="/organisms">

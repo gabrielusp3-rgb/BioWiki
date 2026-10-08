@@ -22,6 +22,17 @@ import { CATEGORY_META } from "@/lib/categories";
 import { formatStatistic } from "@/lib/statistics";
 import { getStatistics } from "@/services/statisticsService";
 import { getPaleogenomicsStatistics } from "@/services/paleogenomicsService";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
+import type { SurfaceKey } from "@/lib/i18n/surface";
+
+const CARD_TEXT: Record<string, SurfaceKey> = {
+  dna: "cardDna",
+  rna: "cardRna",
+  protein: "cardProtein",
+  crispr: "cardCrispr",
+  genome: "cardGenome",
+  virus: "cardVirus",
+};
 
 function CategoryCard({
   data,
@@ -34,6 +45,7 @@ function CategoryCard({
   awaitingLive?: boolean;
   unavailable?: boolean;
 }) {
+  const { t } = useLocale();
   const meta = CATEGORY_META[data.key];
   const { Icon } = data;
 
@@ -59,7 +71,7 @@ function CategoryCard({
           <CardTitle className="mb-3" style={{ color: meta.color }}>
             {data.label}
           </CardTitle>
-          <CardDescription>{data.description}</CardDescription>
+          <CardDescription>{t(CARD_TEXT[data.key] ?? "cardDna")}</CardDescription>
 
           <CardFooter>
             <span className="flex flex-col">
@@ -137,6 +149,7 @@ function PaleogenomicsHomeLink() {
 }
 
 export function Categories() {
+  const { t } = useLocale();
   const [liveCounts, setLiveCounts] = useState<Record<string, number> | null>(null);
   const [unavailable, setUnavailable] = useState(!isApiConfigured);
 
@@ -160,9 +173,9 @@ export function Categories() {
   return (
     <Container width="wide">
       <Section
-        eyebrow="Categories"
-        title="Explore by biological category"
-        description="Six curated domains, each backed by real sequences from internationally recognised public databases."
+        eyebrow={t("catEyebrow")}
+        title={t("catTitle")}
+        description={t("heroBody")}
       >
         <motion.div
           variants={staggerContainer(0.08, 0.05)}

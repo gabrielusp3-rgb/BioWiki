@@ -8,12 +8,14 @@ import { SearchIcon } from "@/components/ui/Icons";
 import { Tag } from "@/components/ui/Tag";
 import { staggerContainer, fadeInUp } from "@/lib/animations";
 import { listOrganisms } from "@/services/organismService";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { GROUP_LABEL } from "@/lib/organisms";
 import type { Organism, OrganismGroup } from "@/types/organism";
 
 const GROUPS: OrganismGroup[] = ["animal", "plant", "fungus", "bacteria", "archaea", "virus", "protozoan"];
 
 export function OrganismsExplorer() {
+  const { locale } = useLocale();
   const [organisms, setOrganisms] = useState<Organism[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -23,7 +25,7 @@ export function OrganismsExplorer() {
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
-    listOrganisms({ signal: controller.signal })
+    listOrganisms({ signal: controller.signal, locale, limit: 60 })
       .then((response) => {
         setOrganisms(response.organisms);
         setTotal(response.total);
@@ -34,7 +36,7 @@ export function OrganismsExplorer() {
       })
       .finally(() => setLoading(false));
     return () => controller.abort();
-  }, []);
+  }, [locale]);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

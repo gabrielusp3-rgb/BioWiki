@@ -8,6 +8,7 @@ import { ExternalIcon, HelixIcon } from "@/components/ui/Icons";
 import { hoverLift } from "@/lib/animations";
 import { formatStatistic } from "@/lib/statistics";
 import { GROUP_COLOR, GROUP_LABEL } from "@/lib/organisms";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { Organism } from "@/types/organism";
 
 function initials(name: string): string {
@@ -63,7 +64,13 @@ export interface OrganismCardProps {
 }
 
 export function OrganismCard({ organism, className }: OrganismCardProps) {
+  const { t } = useLocale();
   const color = GROUP_COLOR[organism.group] ?? "#00F2FF";
+  const common =
+    organism.localizedCommonName ||
+    (organism.commonName && organism.commonName !== organism.scientificName
+      ? organism.commonName
+      : null);
   const links = organism.links ?? [];
   const detailLink = links.find((l) => !l.external);
   const externalLinks = links.filter((l) => l.external);
@@ -84,10 +91,10 @@ export function OrganismCard({ organism, className }: OrganismCardProps) {
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-col">
-            {organism.commonName && organism.commonName !== organism.scientificName ? (
+            {common ? (
               <>
                 <h3 className="truncate font-display text-lg font-bold tracking-tightest text-content-primary">
-                  {organism.commonName}
+                  {common}
                 </h3>
                 <span dir="ltr" className="truncate font-body text-sm italic text-content-secondary">
                   {organism.scientificName}
@@ -132,7 +139,7 @@ export function OrganismCard({ organism, className }: OrganismCardProps) {
               <span className="font-display text-xl font-bold text-content-muted">—</span>
             )}
             <span className="text-[10px] uppercase tracking-wider text-content-muted">
-              {organism.sequenceCount !== null ? "Sequences" : "Awaiting database"}
+              {organism.sequenceCount !== null ? t("sequencesWord") : t("awaitingDb")}
             </span>
           </div>
 

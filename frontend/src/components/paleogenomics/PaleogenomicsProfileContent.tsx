@@ -6,14 +6,7 @@ import { Badge, Button, Skeleton } from "@/components/ui";
 import { ExternalIcon } from "@/components/ui/Icons";
 import { isApiConfigured } from "@/lib/api";
 import { ncbiTaxonomyUrl } from "@/lib/organisms";
-import {
-  DEEXTINCTION_LABEL,
-  EVIDENCE_LABEL,
-  EXTINCTION_LABEL,
-  SUBSECTION_LABEL,
-  doiUrl,
-  labelOf,
-} from "@/lib/paleogenomics";
+import { doiUrl, labelOf } from "@/lib/paleogenomics";
 import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { safeHttpUrl } from "@/lib/safe-url";
 import { formatStatistic } from "@/lib/statistics";
@@ -38,12 +31,20 @@ import type { GenomeAssembly } from "@/types/sequence";
 type Status = "loading" | "ready" | "notfound" | "unavailable" | "error";
 
 function ClaimBlock({ claim }: { claim: PaleogenomicClaim }) {
+  const { t } = useLocale();
+  const evidenceLabels = {
+    consensus: t("evConsensus"),
+    strong_evidence: t("evStrong"),
+    supported_hypothesis: t("evHypothesis"),
+    debated: t("evDebated"),
+    unknown: t("evUnknown"),
+  };
   return (
     <section id={claim.sectionKey} className="glass hairline flex flex-col gap-4 p-6">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <h2 className="font-display text-xl font-semibold text-content-primary">{claim.title}</h2>
         <span className="font-mono text-[11px] uppercase tracking-wider text-content-muted">
-          {labelOf(EVIDENCE_LABEL, claim.evidenceLevel)}
+          {labelOf(evidenceLabels, claim.evidenceLevel)}
         </span>
       </div>
       <p className="whitespace-pre-wrap text-sm leading-relaxed text-content-secondary">
@@ -90,6 +91,28 @@ function ClaimBlock({ claim }: { claim: PaleogenomicClaim }) {
 
 export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
   const { locale, t } = useLocale();
+  const subsectionLabels = {
+    extinct_species: t("paleoExtinct"),
+    archaic_hominin: t("paleoArchaic"),
+    ancient_dna: t("paleoAncient"),
+    archaic_introgression: t("paleoIntrogression"),
+  };
+  const extinctionLabels = {
+    extinct: t("extinct"),
+    extinct_prehistoric: t("extinctPre"),
+    extinct_historic: t("extinctHist"),
+    archaic_hominin: t("paleoArchaic"),
+  };
+  const deextinctionLabels = {
+    no_active_program: t("deNone"),
+    research_discussion: t("deDiscussion"),
+    active_research_program: t("deActive"),
+    genome_engineering_research: t("deGenome"),
+    reproductive_technology_research: t("deGenome"),
+    proxy_trait_engineering: t("deProxy"),
+    reintroduction_planning: t("deDiscussion"),
+    unknown: t("deUnknown"),
+  };
   const [status, setStatus] = useState<Status>("loading");
   const [detail, setDetail] = useState<PaleogenomicSpeciesDetail | null>(null);
   const [sequences, setSequences] = useState<PaleogenomicSequenceRow[]>([]);
@@ -199,9 +222,9 @@ export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
     <div className="flex flex-col gap-10">
       <header className="flex flex-col gap-4">
         <div className="flex flex-wrap items-center gap-3">
-          <Badge tone="neutral">{labelOf(SUBSECTION_LABEL, detail.subsection)}</Badge>
+          <Badge tone="neutral">{labelOf(subsectionLabels, detail.subsection)}</Badge>
           {detail.extinctionStatus && (
-            <Badge tone="neutral">{labelOf(EXTINCTION_LABEL, detail.extinctionStatus)}</Badge>
+            <Badge tone="neutral">{labelOf(extinctionLabels, detail.extinctionStatus)}</Badge>
           )}
           <a
             href={ncbiTaxonomyUrl(detail.taxId)}
@@ -259,7 +282,7 @@ export function PaleogenomicsProfileContent({ slug }: { slug: string }) {
         <p className="text-xs text-content-muted">
           Preferred discovery target {detail.preferredSequenceTarget} is a curation goal, not a quota.
           Stored count is {detail.sequenceCount}. De-extinction:{" "}
-          {labelOf(DEEXTINCTION_LABEL, detail.deextinctionStatus)}. Last reviewed{" "}
+          {labelOf(deextinctionLabels, detail.deextinctionStatus)}. Last reviewed{" "}
           {detail.lastReviewedOn ?? "—"}.
         </p>
         <div className="flex flex-wrap gap-3">

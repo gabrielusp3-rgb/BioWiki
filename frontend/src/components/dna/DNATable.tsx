@@ -3,6 +3,7 @@
 import { Badge, Button, Skeleton, Table, type Column } from "@/components/ui";
 import { DownloadIcon } from "@/components/ui/Icons";
 import { formatBp, formatGc, MOLECULE_TYPE_LABEL } from "@/lib/dna";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import type { DnaStatus } from "@/hooks/useDnaSequences";
 import type { DnaSequence } from "@/types/dna";
 
@@ -44,6 +45,7 @@ export function DNATable({
   onView,
   onDownload,
 }: DNATableProps) {
+  const { t } = useLocale();
   const columns: Column<DnaSequence>[] = [
     {
       key: "accession",
@@ -130,8 +132,8 @@ export function DNATable({
   if (status === "unavailable") {
     return (
       <StateMessage
-        title="Database not connected"
-        detail="Live DNA records appear once the sequence database is connected. No sample or placeholder data is shown."
+        title={t("stateDbOff")}
+        detail={t("stateDbOffDetail")}
       />
     );
   }
@@ -139,8 +141,8 @@ export function DNATable({
   if (status === "error") {
     return (
       <StateMessage
-        title="Unable to load sequences"
-        detail="The service is temporarily unavailable. Please try again shortly."
+        title={t("stateLoadFail")}
+        detail={t("stateLoadFailDetail")}
       />
     );
   }
@@ -148,8 +150,8 @@ export function DNATable({
   if (status === "success" && results.length === 0) {
     return (
       <StateMessage
-        title="No sequences found"
-        detail="No DNA records match the current search and filters."
+        title={t("stateEmpty")}
+        detail={t("stateEmptyDetail")}
       />
     );
   }

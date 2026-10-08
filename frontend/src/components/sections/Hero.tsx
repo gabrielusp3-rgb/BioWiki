@@ -7,8 +7,10 @@ import { DownloadIcon, ChevronRightIcon } from "@/components/ui/Icons";
 import { fadeInUp, staggerContainer, transitions } from "@/lib/animations";
 import { categories } from "@/lib/design-tokens";
 import { CATEGORY_META } from "@/lib/categories";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export function Hero() {
+  const { t } = useLocale();
   return (
     <section className="relative flex min-h-[100dvh] items-center overflow-hidden pt-16">
       {/* Scientific grid + corner framing float above the BackgroundDNA */}
@@ -27,7 +29,7 @@ export function Hero() {
           {/* Eyebrow */}
           <motion.div variants={fadeInUp} className="flex items-center gap-3">
             <span className="h-1.5 w-1.5 bg-category-dna shadow-glow-dna" />
-            <span className="eyebrow">Universal Biological Sequence Database</span>
+            <span className="eyebrow">{t("heroEyebrow")}</span>
           </motion.div>
 
           {/* Wordmark */}
@@ -53,8 +55,7 @@ export function Hero() {
             variants={fadeInUp}
             className="max-w-2xl text-balance font-display text-lg font-medium uppercase tracking-wide text-content-secondary sm:text-xl"
           >
-            Explore the biological diversity of life through real
-            molecular sequences.
+            {t("heroSubtitle")}
           </motion.p>
 
           {/* Supporting description */}
@@ -62,8 +63,7 @@ export function Hero() {
             variants={fadeInUp}
             className="max-w-xl text-balance text-base leading-relaxed text-content-secondary"
           >
-            DNA, RNA, proteins, CRISPR guides, genomes and viral sequences from
-            public archives, stored locally and served as they were imported.
+            {t("heroBody")}
           </motion.p>
 
           {/* Actions */}
@@ -75,7 +75,7 @@ export function Hero() {
                   size="lg"
                   trailingIcon={<ChevronRightIcon className="h-4 w-4" />}
                 >
-                  Explore Database
+                  {t("actionExploreDatabase")}
                 </Button>
               </Link>
               <Link href="/downloads">
@@ -84,7 +84,7 @@ export function Hero() {
                   size="lg"
                   leadingIcon={<DownloadIcon className="h-4 w-4" />}
                 >
-                  Download Datasets
+                  {t("heroDownload")}
                 </Button>
               </Link>
             </div>
@@ -109,7 +109,7 @@ export function Hero() {
         className="pointer-events-none absolute inset-x-0 bottom-8 z-10 flex justify-center"
       >
         <div className="flex flex-col items-center gap-2 text-content-muted">
-          <span className="text-[10px] uppercase tracking-wider">Scroll</span>
+          <span className="text-[10px] uppercase tracking-wider">{t("heroScroll")}</span>
           <span className="h-10 w-px bg-gradient-to-b from-category-dna/60 to-transparent" />
         </div>
       </motion.div>

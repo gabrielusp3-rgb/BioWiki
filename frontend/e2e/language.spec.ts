@@ -16,9 +16,12 @@ test("language menu lists eleven locales and Arabic switches direction", async (
   await page.goto("/");
   await waitForSplash(page);
   const selector = page.getByTestId("language-selector").first();
-  await selector.click();
+  await expect(selector).toBeVisible();
   const menu = page.getByTestId("language-menu").first();
-  await expect(menu.getByRole("option")).toHaveCount(11);
+  await expect(async () => {
+    await selector.click();
+    await expect(menu.getByRole("option")).toHaveCount(11);
+  }).toPass();
   await expect(menu.getByTestId("locale-en-GB")).toBeVisible();
   await expect(menu.getByTestId("locale-pt-BR")).toBeVisible();
   await expect(menu.getByTestId("locale-hi-IN")).toBeVisible();

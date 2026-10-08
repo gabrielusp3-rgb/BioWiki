@@ -9,6 +9,7 @@ import { fadeInUp, staggerContainer } from "@/lib/animations";
 import { isApiConfigured } from "@/lib/api";
 import type { Statistic } from "@/lib/statistics";
 import { getStatistics, type SyncInfo } from "@/services/statisticsService";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 
 export interface LiveStatisticsProps {
   /** Optional preloaded live aggregates. Never pass fabricated scale figures. */
@@ -20,6 +21,7 @@ export interface LiveStatisticsProps {
  * states that counts are unavailable instead of inventing catalogue scale.
  */
 export function LiveStatistics({ statistics }: LiveStatisticsProps) {
+  const { t } = useLocale();
   const [live, setLive] = useState<Statistic[] | null>(statistics ?? null);
   const [sync, setSync] = useState<SyncInfo | null>(null);
   const [unavailable, setUnavailable] = useState(!statistics && !isApiConfigured);
@@ -53,13 +55,11 @@ export function LiveStatistics({ statistics }: LiveStatisticsProps) {
     return () => controller.abort();
   }, [statistics]);
 
-  const isLive = !statistics && live !== null && !unavailable;
-
   return (
     <Container width="wide">
       <Section
-        eyebrow={isLive ? "Live Statistics · real-time aggregates" : "Live Statistics"}
-        title="Scale of the Database"
+        eyebrow={t("statsEyebrow")}
+        title={t("statsTitle")}
         action={isApiConfigured && !statistics ? <SyncStatusBadge sync={sync} /> : undefined}
       >
         {unavailable ? (

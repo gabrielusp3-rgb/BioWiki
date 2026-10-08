@@ -1,71 +1,46 @@
+"use client";
+
 import Link from "next/link";
+import { useLocale } from "@/lib/i18n/LocaleProvider";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Container } from "@/components/ui";
 
-interface FooterLink {
-  label: string;
-  href: string;
-  external?: boolean;
-}
-
-interface FooterColumn {
-  title: string;
-  links: FooterLink[];
-}
-
-const COLUMNS: FooterColumn[] = [
-  {
-    title: "Database",
-    links: [
-      { label: "DNA", href: "/dna" },
-      { label: "RNA", href: "/rna" },
-      { label: "Proteins", href: "/proteins" },
-      { label: "CRISPR", href: "/crispr" },
-      { label: "Genomes", href: "/genomes" },
-      { label: "Viruses", href: "/virus" },
-      { label: "Paleogenomics", href: "/paleogenomics" },
-      { label: "Publications", href: "/publications" },
-    ],
-  },
-  {
-    title: "Platform",
-    links: [
-      { label: "Search", href: "/search" },
-      { label: "Organisms", href: "/organisms" },
-      { label: "Downloads", href: "/downloads" },
-    ],
-  },
-  {
-    title: "Resources",
-    links: [
-      { label: "Documentation", href: "/docs" },
-      { label: "GitHub", href: "https://github.com/gabrielusp3-rgb/BioWiki", external: true },
-      { label: "License", href: "/license" },
-    ],
-  },
-];
-
 const DATA_SOURCES = ["NCBI", "UniProt", "Ensembl", "PDB", "ENA", "PubMed"];
-
-function FooterAnchor({ link }: { link: FooterLink }) {
-  const className =
-    "text-sm text-content-secondary transition-colors hover:text-content-primary";
-  if (link.external) {
-    return (
-      <a href={link.href} target="_blank" rel="noopener noreferrer" className={className}>
-        {link.label}
-      </a>
-    );
-  }
-  return (
-    <Link href={link.href} className={className}>
-      {link.label}
-    </Link>
-  );
-}
 
 export function SiteFooter() {
   const year = new Date().getFullYear();
+  const { t } = useLocale();
+  const columns = [
+    {
+      title: t("footerDatabase"),
+      links: [
+        { label: t("navDna"), href: "/dna" },
+        { label: t("navRna"), href: "/rna" },
+        { label: t("navProteins"), href: "/proteins" },
+        { label: t("navCrispr"), href: "/crispr" },
+        { label: t("navGenomes"), href: "/genomes" },
+        { label: t("navVirus"), href: "/virus" },
+        { label: t("navPaleogenomics"), href: "/paleogenomics" },
+        { label: t("navPublications"), href: "/publications" },
+      ],
+    },
+    {
+      title: t("footerPlatform"),
+      links: [
+        { label: t("actionSearch"), href: "/search" },
+        { label: t("navOrganisms"), href: "/organisms" },
+        { label: t("navDownloads"), href: "/downloads" },
+      ],
+    },
+    {
+      title: t("footerResources"),
+      links: [
+        { label: t("footerDocs"), href: "/docs" },
+        { label: "GitHub", href: "https://github.com/gabrielusp3-rgb/BioWiki", external: true },
+        { label: t("footerLicense"), href: "/license" },
+      ],
+    },
+  ];
 
   return (
     <footer className="relative mt-24 border-t border-glass-divider bg-bg-secondary/60 backdrop-blur-glass">
@@ -76,12 +51,9 @@ export function SiteFooter() {
             <Link href="/" className="inline-flex items-center">
               <BrandLogo />
             </Link>
-            <p className="max-w-sm text-sm leading-relaxed text-content-secondary">
-              A local catalogue of real molecular sequences aggregated from
-              public sequence archives.
-            </p>
+            <p className="max-w-sm text-sm leading-relaxed text-content-secondary">{t("footerBlurb")}</p>
             <div className="mt-2 flex flex-col gap-2">
-              <span className="eyebrow">Data sources</span>
+              <span className="eyebrow">{t("footerSources")}</span>
               <div className="flex flex-wrap gap-2">
                 {DATA_SOURCES.map((source) => (
                   <span
@@ -96,13 +68,21 @@ export function SiteFooter() {
           </div>
 
           {/* Link columns */}
-          {COLUMNS.map((column) => (
+          {columns.map((column) => (
             <div key={column.title} className="flex flex-col gap-4">
               <span className="eyebrow">{column.title}</span>
               <nav className="flex flex-col gap-3">
-                {column.links.map((link) => (
-                  <FooterAnchor key={link.label} link={link} />
-                ))}
+                {column.links.map((link) =>
+                  link.external ? (
+                    <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer" className="text-sm text-content-secondary transition-colors hover:text-content-primary">
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link key={link.href} href={link.href} className="text-sm text-content-secondary transition-colors hover:text-content-primary">
+                      {link.label}
+                    </Link>
+                  ),
+                )}
               </nav>
             </div>
           ))}
@@ -111,15 +91,14 @@ export function SiteFooter() {
         {/* Bottom bar */}
         <div className="flex flex-col items-start justify-between gap-4 border-t border-glass-divider py-6 sm:flex-row sm:items-center">
           <p className="text-xs text-content-muted">
-            © {year} BIOWIKI. Sequence data remains subject to the licenses of its
-            respective source databases.
+            © {year} BIOWIKI. {t("footerRights")}
           </p>
           <div className="flex items-center gap-5">
             <Link href="/license" className="text-xs text-content-muted transition-colors hover:text-content-primary">
-              License
+              {t("footerLicense")}
             </Link>
             <Link href="/docs" className="text-xs text-content-muted transition-colors hover:text-content-primary">
-              Documentation
+              {t("footerDocs")}
             </Link>
             <a
               href="https://github.com/gabrielusp3-rgb/BioWiki"

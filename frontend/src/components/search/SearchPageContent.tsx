@@ -125,7 +125,7 @@ export function SearchPageContent() {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search accessions, genes, organisms, tax IDs, publications…"
+            placeholder={t("searchPlaceholder")}
             aria-label={t("searchInputLabel")}
             autoFocus
             className="h-16 w-full bg-transparent font-body text-base text-content-primary outline-none placeholder:text-content-muted"
@@ -251,7 +251,7 @@ export function SearchPageContent() {
           {nextCursor && (
             <div className="mt-4 flex justify-center">
               <Button variant="glass" size="md" onClick={loadMore} disabled={loadingMore}>
-                {loadingMore ? "Loading…" : "Load more results"}
+                {loadingMore ? t("loading") : t("loadMore")}
               </Button>
             </div>
           )}
