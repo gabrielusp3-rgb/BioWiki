@@ -1,6 +1,6 @@
 # Python 3.13 is the version used in Docker and CI.
 # The API also runs on 3.14 in local development.
-fastapi>=0.115
+fastapi>=0.141.1
 uvicorn[standard]>=0.30
 sqlalchemy[asyncio]>=2.0.30
 asyncpg>=0.29
